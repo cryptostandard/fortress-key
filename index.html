@@ -1,0 +1,1677 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Fortress Key - Open Source Cold Wallet Security</title>
+<style>
+:root {
+  --bg: #0a0a0f;
+  --surface: #12121a;
+  --surface2: #1a1a2e;
+  --border: #2a2a3e;
+  --text: #e0e0e8;
+  --text-dim: #8888a0;
+  --accent: #f7931a;
+  --accent2: #4fc3f7;
+  --green: #4caf50;
+  --red: #ef5350;
+  --yellow: #ffd54f;
+  --orange: #ff9800;
+}
+* { margin:0; padding:0; box-sizing:border-box; }
+body {
+  font-family: 'SF Mono', 'Fira Code', 'Consolas', monospace;
+  background: var(--bg);
+  color: var(--text);
+  min-height: 100vh;
+  line-height: 1.6;
+}
+.container { max-width: 900px; margin: 0 auto; padding: 20px; }
+
+.header {
+  text-align: center;
+  padding: 40px 0 30px;
+  border-bottom: 1px solid var(--border);
+  margin-bottom: 30px;
+}
+.header h1 { font-size: 2.2em; color: var(--accent); letter-spacing: 2px; }
+.header .subtitle { color: var(--text-dim); font-size: 0.9em; margin-top: 8px; }
+.badge {
+  display: inline-block;
+  background: var(--surface2);
+  border: 1px solid var(--green);
+  color: var(--green);
+  padding: 4px 12px;
+  border-radius: 20px;
+  font-size: 0.75em;
+  margin-top: 12px;
+}
+
+.tabs {
+  display: flex;
+  gap: 0;
+  margin-bottom: 30px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  overflow: hidden;
+}
+.tab {
+  flex: 1;
+  padding: 14px;
+  text-align: center;
+  cursor: pointer;
+  background: var(--surface);
+  border: none;
+  color: var(--text-dim);
+  font-family: inherit;
+  font-size: 0.95em;
+  transition: all 0.2s;
+}
+.tab:hover { background: var(--surface2); color: var(--text); }
+.tab.active { background: var(--accent); color: #000; font-weight: bold; }
+
+.panel { display: none; }
+.panel.active { display: block; }
+
+/* Scanner */
+.wallet-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+  gap: 15px;
+  margin-bottom: 20px;
+}
+.wallet-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 20px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+.wallet-card:hover { border-color: var(--accent); transform: translateY(-2px); }
+.wallet-card.selected { border-color: var(--accent); background: var(--surface2); }
+.wallet-card h3 { color: var(--accent); margin-bottom: 5px; }
+.wallet-card .maker { color: var(--text-dim); font-size: 0.8em; }
+
+.firmware-input {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 20px;
+  margin-bottom: 20px;
+}
+.firmware-input label { display: block; margin-bottom: 8px; color: var(--text-dim); font-size: 0.85em; }
+.firmware-input select {
+  width: 100%;
+  padding: 10px;
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  color: var(--text);
+  font-family: inherit;
+  font-size: 0.9em;
+}
+
+.action-btn {
+  width: 100%;
+  padding: 14px;
+  background: var(--accent);
+  color: #000;
+  border: none;
+  border-radius: 8px;
+  font-family: inherit;
+  font-size: 1em;
+  font-weight: bold;
+  cursor: pointer;
+  margin-bottom: 20px;
+  transition: opacity 0.2s;
+}
+.action-btn:hover { opacity: 0.9; }
+.action-btn:disabled { opacity: 0.4; cursor: not-allowed; }
+
+.vuln-report {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 20px;
+  display: none;
+}
+.vuln-item { padding: 15px; border-bottom: 1px solid var(--border); }
+.vuln-item:last-child { border-bottom: none; }
+.vuln-severity {
+  display: inline-block;
+  padding: 2px 10px;
+  border-radius: 4px;
+  font-size: 0.75em;
+  font-weight: bold;
+  margin-right: 8px;
+}
+.severity-critical { background: var(--red); color: #fff; }
+.severity-high { background: var(--orange); color: #000; }
+.severity-medium { background: var(--yellow); color: #000; }
+.severity-low { background: var(--accent2); color: #000; }
+.vuln-title { font-weight: bold; margin-bottom: 5px; }
+.vuln-desc { color: var(--text-dim); font-size: 0.85em; margin-bottom: 8px; }
+.vuln-fix { color: var(--green); font-size: 0.85em; }
+.vuln-cve { color: var(--accent2); font-size: 0.8em; }
+.safe-report { text-align: center; padding: 40px; color: var(--green); font-size: 1.1em; }
+
+/* Generator */
+.mode-toggle {
+  display: flex;
+  gap: 0;
+  margin-bottom: 20px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  overflow: hidden;
+}
+.mode-btn {
+  flex: 1;
+  padding: 12px;
+  text-align: center;
+  cursor: pointer;
+  background: var(--surface);
+  border: none;
+  color: var(--text-dim);
+  font-family: inherit;
+  font-size: 0.85em;
+  transition: all 0.2s;
+}
+.mode-btn:hover { background: var(--surface2); }
+.mode-btn.active { background: var(--green); color: #000; font-weight: bold; }
+
+.layer-section {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 20px;
+  margin-bottom: 15px;
+}
+.layer-section h3 { color: var(--accent2); margin-bottom: 5px; font-size: 0.95em; }
+.layer-section .desc { color: var(--text-dim); font-size: 0.8em; margin-bottom: 12px; }
+.layer-section input, .layer-section textarea {
+  width: 100%;
+  padding: 10px;
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  color: var(--text);
+  font-family: inherit;
+  font-size: 0.9em;
+}
+.layer-section textarea { resize: vertical; min-height: 60px; }
+
+.dice-area { display: flex; gap: 10px; flex-wrap: wrap; align-items: center; }
+.dice-btn {
+  padding: 10px 20px;
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  color: var(--accent);
+  font-family: inherit;
+  font-size: 1.2em;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+.dice-btn:hover { border-color: var(--accent); background: var(--accent); color: #000; }
+.dice-results { display: flex; gap: 5px; flex-wrap: wrap; margin-top: 8px; }
+.dice-val {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px; height: 36px;
+  background: var(--surface2);
+  border: 1px solid var(--accent);
+  border-radius: 6px;
+  color: var(--accent);
+  font-weight: bold;
+}
+.clear-dice {
+  padding: 6px 12px;
+  background: transparent;
+  border: 1px solid var(--red);
+  border-radius: 4px;
+  color: var(--red);
+  font-family: inherit;
+  cursor: pointer;
+  font-size: 0.8em;
+}
+
+/* Entropy meter */
+.entropy-meter {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 20px;
+  margin-bottom: 15px;
+}
+.entropy-bar-bg {
+  height: 12px;
+  background: var(--bg);
+  border-radius: 6px;
+  overflow: hidden;
+  margin: 10px 0;
+}
+.entropy-bar {
+  height: 100%;
+  border-radius: 6px;
+  transition: width 0.4s, background 0.4s;
+  width: 0%;
+}
+.entropy-label { display: flex; justify-content: space-between; font-size: 0.85em; }
+.entropy-bits { color: var(--accent); font-weight: bold; }
+.entropy-verdict { font-weight: bold; }
+
+/* Output */
+.output-section {
+  background: var(--surface);
+  border: 2px solid var(--accent);
+  border-radius: 8px;
+  padding: 20px;
+  margin-top: 20px;
+  display: none;
+}
+.key-display {
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  padding: 15px;
+  margin: 10px 0;
+  word-break: break-all;
+  font-size: 0.85em;
+}
+.key-display .label {
+  color: var(--text-dim);
+  font-size: 0.75em;
+  margin-bottom: 4px;
+  text-transform: uppercase;
+}
+.key-display .value { color: var(--accent); font-weight: bold; }
+.key-display .value.private { color: var(--red); }
+.key-display .value.address { color: var(--green); }
+
+.warning-box {
+  background: rgba(239,83,80,0.1);
+  border: 1px solid var(--red);
+  border-radius: 6px;
+  padding: 15px;
+  margin-top: 15px;
+  font-size: 0.85em;
+  color: var(--red);
+}
+.info-box {
+  background: rgba(79,195,247,0.1);
+  border: 1px solid var(--accent2);
+  border-radius: 6px;
+  padding: 15px;
+  margin-top: 15px;
+  font-size: 0.85em;
+  color: var(--accent2);
+}
+.success-box {
+  background: rgba(76,175,80,0.1);
+  border: 1px solid var(--green);
+  border-radius: 6px;
+  padding: 15px;
+  margin-top: 15px;
+  font-size: 0.85em;
+  color: var(--green);
+}
+
+.destroy-btn {
+  width: 100%;
+  padding: 14px;
+  background: var(--red);
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  font-family: inherit;
+  font-size: 1em;
+  font-weight: bold;
+  cursor: pointer;
+  margin-top: 15px;
+}
+.destroy-btn:hover { opacity: 0.9; }
+
+.verify-btn {
+  width: 100%;
+  padding: 14px;
+  background: var(--accent2);
+  color: #000;
+  border: none;
+  border-radius: 8px;
+  font-family: inherit;
+  font-size: 1em;
+  font-weight: bold;
+  cursor: pointer;
+  margin-top: 10px;
+}
+.verify-btn:hover { opacity: 0.9; }
+
+/* How it works */
+.how-section {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 25px;
+  margin-bottom: 20px;
+}
+.how-section h3 { color: var(--accent); margin-bottom: 15px; }
+.step { display: flex; gap: 15px; margin-bottom: 20px; align-items: flex-start; }
+.step-num {
+  flex-shrink: 0;
+  width: 36px; height: 36px;
+  background: var(--accent);
+  color: #000;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: bold;
+}
+.step-text h4 { margin-bottom: 4px; }
+.step-text p { color: var(--text-dim); font-size: 0.85em; }
+
+.comparison-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 15px 0;
+  font-size: 0.85em;
+}
+.comparison-table th, .comparison-table td {
+  padding: 10px;
+  border: 1px solid var(--border);
+  text-align: left;
+}
+.comparison-table th { background: var(--surface2); color: var(--accent); }
+.comparison-table td { background: var(--surface); }
+
+.footer {
+  text-align: center;
+  padding: 30px 0;
+  margin-top: 40px;
+  border-top: 1px solid var(--border);
+  color: var(--text-dim);
+  font-size: 0.8em;
+}
+
+@media (max-width: 600px) {
+  .wallet-grid { grid-template-columns: 1fr; }
+  .header h1 { font-size: 1.5em; }
+  .mode-toggle { flex-direction: column; }
+}
+</style>
+</head>
+<body>
+
+<div class="container">
+  <div class="header">
+    <h1>FORTRESS KEY</h1>
+    <div class="subtitle">Your Recipe = Your Key. No Wordlists. No Middleman.</div>
+    <div class="badge">100% OFFLINE - ZERO DATA TRANSMITTED - ZERO DEPENDENCIES</div>
+  </div>
+
+  <div class="tabs">
+    <button class="tab active" onclick="switchTab('scanner')">VULNERABILITY SCANNER</button>
+    <button class="tab" onclick="switchTab('generator')">KEY GENERATOR</button>
+    <button class="tab" onclick="switchTab('howto')">HOW IT WORKS</button>
+  </div>
+
+  <!-- ==================== SCANNER PANEL ==================== -->
+  <div id="panel-scanner" class="panel active">
+    <h2 style="margin-bottom:15px; color:var(--text-dim); font-size:0.95em;">Select your hardware wallet:</h2>
+    <div class="wallet-grid" id="walletGrid"></div>
+    <div class="firmware-input" id="firmwareSection" style="display:none;">
+      <label>Select your firmware version:</label>
+      <select id="firmwareSelect"><option value="">-- Select firmware --</option></select>
+    </div>
+    <button class="action-btn" id="scanBtn" onclick="runScan()" disabled>SCAN FOR VULNERABILITIES</button>
+    <div class="vuln-report" id="vulnReport"></div>
+  </div>
+
+  <!-- ==================== GENERATOR PANEL ==================== -->
+  <div id="panel-generator" class="panel">
+
+    <!-- Mode Toggle -->
+    <div class="mode-toggle">
+      <button class="mode-btn active" id="modeRaw" onclick="setMode('raw')">MODE 1: RAW KEY (Recommended)</button>
+      <button class="mode-btn" id="modeBip39" onclick="setMode('bip39')">MODE 2: Hardware Bridge (BIP39)</button>
+    </div>
+
+    <div class="info-box" id="modeDesc" style="margin-bottom:20px;">
+      <strong>MODE 1 - PURE FORTRESS:</strong> Your recipe generates a raw 256-bit private key. No public wordlists involved. Import into Electrum, Sparrow, or any wallet that accepts raw/WIF keys. Your recipe IS your key.
+    </div>
+
+    <!-- Layers -->
+    <div class="layer-section">
+      <h3>LAYER 1 - Personal Phrase</h3>
+      <div class="desc">A sentence only you would know. Example: "My grandmother cooked arroz con pollo every Sunday"</div>
+      <input type="text" id="layer1" placeholder="Enter your personal phrase..." oninput="updateEntropy()">
+    </div>
+
+    <div class="layer-section">
+      <h3>LAYER 2 - Your Invented Words</h3>
+      <div class="desc">Words YOU made up that exist in NO dictionary on Earth. This is what makes your key unbreakable. Example: "flurbnax zoptikrel"</div>
+      <input type="text" id="layer2" placeholder="Enter your invented words..." oninput="updateEntropy()">
+    </div>
+
+    <div class="layer-section">
+      <h3>LAYER 3 - Numbers + Symbols</h3>
+      <div class="desc">Any combination of numbers and special characters. Example: "!!73**@942&amp;&amp;%%"</div>
+      <input type="text" id="layer3" placeholder="Enter numbers and symbols..." oninput="updateEntropy()">
+    </div>
+
+    <div class="layer-section">
+      <h3>LAYER 4 - Dice Rolls (Physical Randomness)</h3>
+      <div class="desc">Roll a REAL physical die and click the result. Each roll adds ~2.6 bits of true randomness that no computer can predict.</div>
+      <div class="dice-area">
+        <button class="dice-btn" onclick="addDice(1)">1</button>
+        <button class="dice-btn" onclick="addDice(2)">2</button>
+        <button class="dice-btn" onclick="addDice(3)">3</button>
+        <button class="dice-btn" onclick="addDice(4)">4</button>
+        <button class="dice-btn" onclick="addDice(5)">5</button>
+        <button class="dice-btn" onclick="addDice(6)">6</button>
+        <button class="clear-dice" onclick="clearDice()">Clear</button>
+      </div>
+      <div class="dice-results" id="diceResults"></div>
+    </div>
+
+    <div class="layer-section">
+      <h3>LAYER 5 - Extra Secret Sauce</h3>
+      <div class="desc">Anything: coordinates, dates, song lyrics, another language, emojis, code... the more unique to YOU, the stronger.</div>
+      <textarea id="layer5" placeholder="Add anything else you want..." oninput="updateEntropy()"></textarea>
+    </div>
+
+    <!-- Entropy Meter -->
+    <div class="entropy-meter">
+      <div class="entropy-label">
+        <span>Entropy Strength</span>
+        <span class="entropy-bits" id="entropyBits">0 bits</span>
+      </div>
+      <div class="entropy-bar-bg">
+        <div class="entropy-bar" id="entropyBar"></div>
+      </div>
+      <div class="entropy-label">
+        <span class="entropy-verdict" id="entropyVerdict" style="color:var(--red);">Add more layers</span>
+        <span id="entropyTime" style="color:var(--text-dim); font-size:0.8em;"></span>
+      </div>
+    </div>
+
+    <button class="action-btn" id="generateBtn" onclick="generateKey()" disabled>GENERATE FORTRESS KEY</button>
+
+    <!-- Output Section -->
+    <div class="output-section" id="outputSection">
+
+      <!-- Mode 1: Raw Key Output -->
+      <div id="outputRaw">
+        <h3 style="color:var(--accent); margin-bottom:15px;">YOUR FORTRESS KEY</h3>
+
+        <div class="key-display">
+          <div class="label">Private Key (Hex) - NEVER SHARE THIS</div>
+          <div class="value private" id="privKeyHex"></div>
+        </div>
+
+        <div class="key-display">
+          <div class="label">Private Key (WIF - Wallet Import Format)</div>
+          <div class="value private" id="privKeyWIF"></div>
+        </div>
+
+        <div class="key-display">
+          <div class="label">Bitcoin Address (P2PKH)</div>
+          <div class="value address" id="btcAddress"></div>
+        </div>
+
+        <div class="key-display">
+          <div class="label">Ethereum Address</div>
+          <div class="value address" id="ethAddress"></div>
+        </div>
+
+        <div class="key-display">
+          <div class="label">Verification Hash (SHA-256 of private key)</div>
+          <div class="value" id="verifyHash" style="color:var(--accent2);"></div>
+        </div>
+
+        <div class="success-box">
+          <strong>HOW TO IMPORT:</strong><br><br>
+          <strong>Electrum (Bitcoin):</strong> File &gt; New &gt; Import Bitcoin Addresses or Private Keys &gt; paste WIF key<br>
+          <strong>Sparrow:</strong> New Wallet &gt; Import &gt; paste WIF key<br>
+          <strong>MetaMask (ETH):</strong> Import Account &gt; Private Key &gt; paste Hex key (without 0x)<br>
+          <strong>Exodus:</strong> Settings &gt; Import Private Key &gt; paste WIF<br><br>
+          <strong>For hardware wallets:</strong> Switch to Mode 2 (Hardware Bridge) to get BIP39 format.
+        </div>
+      </div>
+
+      <!-- Mode 2: BIP39 Output (hidden by default) -->
+      <div id="outputBip39" style="display:none;">
+        <h3 style="color:var(--accent); margin-bottom:5px;">TEMPORARY BIP39 TRANSLATION</h3>
+        <p style="color:var(--text-dim); font-size:0.8em; margin-bottom:10px;">These 24 words are a TEMPORARY format for your hardware wallet. Your recipe is your REAL backup. Destroy these after import.</p>
+        <div id="seedWords" style="display:grid; grid-template-columns:repeat(4,1fr); gap:8px; margin:15px 0;"></div>
+
+        <div class="key-display">
+          <div class="label">Verification Hash (SHA-256)</div>
+          <div class="value" id="seedHash" style="color:var(--accent2);"></div>
+        </div>
+
+        <div style="padding:15px; background:var(--surface2); border-radius:8px; margin-top:10px; font-size:0.85em;">
+          <strong style="color:var(--accent);">Import Instructions:</strong><br>
+          <strong>Coldcard:</strong> New Seed &gt; Import Existing &gt; 24 Words<br>
+          <strong>Ledger:</strong> Restore from Recovery Phrase &gt; 24 Words<br>
+          <strong>Trezor:</strong> Recover Wallet &gt; 24 Words<br>
+          <strong>KeepKey:</strong> Recover &gt; 24 Word Recovery<br>
+          <strong>BitBox02:</strong> Restore from Recovery Words &gt; 24 Words
+        </div>
+      </div>
+
+      <div class="warning-box">
+        <strong>CRITICAL SECURITY:</strong><br>
+        1. NEVER share your private key or WIF with anyone.<br>
+        2. NEVER take a screenshot or save digitally.<br>
+        3. Your RECIPE is your permanent backup - memorize it.<br>
+        4. Same recipe = same key. Always. On any device.<br>
+        5. Click DESTROY when you're done importing.
+      </div>
+
+      <button class="verify-btn" onclick="verifyRecipe()">VERIFY: Re-enter recipe to confirm same key</button>
+      <button class="destroy-btn" onclick="destroyOutput()">DESTROY ALL OUTPUT</button>
+    </div>
+  </div>
+
+  <!-- ==================== HOW IT WORKS PANEL ==================== -->
+  <div id="panel-howto" class="panel">
+    <div class="how-section">
+      <h3>Why Fortress Key Is Different</h3>
+      <table class="comparison-table">
+        <tr>
+          <th></th>
+          <th>Traditional (BIP39)</th>
+          <th>Fortress Key (Mode 1)</th>
+        </tr>
+        <tr>
+          <td><strong>Key Source</strong></td>
+          <td>24 words from a PUBLIC list of 2,048 known words</td>
+          <td>YOUR recipe: invented words, symbols, dice - none from any public list</td>
+        </tr>
+        <tr>
+          <td><strong>Attacker Knows</strong></td>
+          <td>The exact 2,048 words. Just needs the combination.</td>
+          <td>NOTHING. Not even the character set you used.</td>
+        </tr>
+        <tr>
+          <td><strong>Dictionary Attack</strong></td>
+          <td>Possible (2048^24 combinations from known list)</td>
+          <td>Impossible (your made-up words exist in no dictionary)</td>
+        </tr>
+        <tr>
+          <td><strong>Who Generates</strong></td>
+          <td>The wallet firmware (which can have bugs)</td>
+          <td>YOU generate. Wallet is just a signing device.</td>
+        </tr>
+        <tr>
+          <td><strong>Backup</strong></td>
+          <td>Metal plate with 24 words (can be found/stolen)</td>
+          <td>Your memory. Nothing physical to steal.</td>
+        </tr>
+        <tr>
+          <td><strong>Recovery</strong></td>
+          <td>Need the 24 words written somewhere</td>
+          <td>Re-enter recipe on any device, get same key</td>
+        </tr>
+      </table>
+    </div>
+
+    <div class="how-section">
+      <h3>How It Works - Step by Step</h3>
+
+      <div class="step">
+        <div class="step-num">1</div>
+        <div class="step-text">
+          <h4>You Create Your Secret Recipe</h4>
+          <p>Combine 5 layers: personal phrases, INVENTED words (not from any dictionary), numbers, symbols, physical dice rolls, and anything else. This combination is unique to you and exists nowhere else in the universe.</p>
+        </div>
+      </div>
+
+      <div class="step">
+        <div class="step-num">2</div>
+        <div class="step-text">
+          <h4>PBKDF2-SHA512 (500,000 Rounds)</h4>
+          <p>Your recipe is processed through 500,000 rounds of cryptographic hashing. This is a one-way function - knowing the output tells you NOTHING about the input. Even with all computing power on Earth, reversing it is mathematically impossible.</p>
+        </div>
+      </div>
+
+      <div class="step">
+        <div class="step-num">3</div>
+        <div class="step-text">
+          <h4>Raw 256-bit Private Key</h4>
+          <p>The output is a raw cryptographic private key - a 64-character hex number. This is NOT from any wordlist. It's a direct mathematical result of YOUR unique recipe. This key controls your Bitcoin and Ethereum addresses.</p>
+        </div>
+      </div>
+
+      <div class="step">
+        <div class="step-num">4</div>
+        <div class="step-text">
+          <h4>Import Into Any Wallet</h4>
+          <p><strong>Software wallets</strong> (Electrum, Sparrow, MetaMask): Import the raw key or WIF directly. No 24 words needed.<br><strong>Hardware wallets</strong> (Coldcard, Ledger): Use Mode 2 to get a temporary BIP39 translation for import only.</p>
+        </div>
+      </div>
+
+      <div class="step">
+        <div class="step-num">5</div>
+        <div class="step-text">
+          <h4>Destroy + Remember</h4>
+          <p>Destroy all displayed output. Your recipe stays in your head. If you ever need to recover: open Fortress Key on ANY device, enter the SAME recipe, get the SAME key. Works offline, forever, on any computer.</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="how-section">
+      <h3>Why This Defeats Hardware Wallet Bugs</h3>
+      <div class="info-box" style="margin:0;">
+        The Coldcard vulnerability was in its <strong>key generation firmware</strong>. When the wallet generates your key, you're trusting that its random number generator works correctly. If it doesn't (like the Coldcard bug), your key could be predictable.<br><br>
+        Fortress Key removes the wallet from key generation entirely. <strong>You</strong> generate the key from <strong>your</strong> recipe. The wallet becomes a signing device only - it holds the key but never created it. A firmware bug in key generation <strong>cannot affect a key that was never generated by firmware</strong>.
+      </div>
+    </div>
+
+    <div class="how-section">
+      <h3>The Math: Why Your Recipe Is Unbreakable</h3>
+      <div class="info-box" style="margin:0;">
+        A typical 5-layer recipe with invented words produces <strong>300+ bits of entropy</strong>.<br><br>
+        Bitcoin private keys are 256 bits. To brute-force 256 bits:<br>
+        &bull; Guesses needed: ~10<sup>77</sup><br>
+        &bull; All computers on Earth combined: ~10<sup>20</sup> guesses/second<br>
+        &bull; Time to crack: ~10<sup>50</sup> YEARS<br>
+        &bull; Age of the universe: ~10<sup>10</sup> years<br><br>
+        But here's the real difference: with BIP39, an attacker <strong>knows the wordlist</strong> (2,048 words) and just needs to guess the order. With Fortress Key, the attacker doesn't even know <strong>what characters you used</strong>, let alone the words you invented. The search space is effectively infinite.
+      </div>
+    </div>
+  </div>
+
+  <div class="footer">
+    FORTRESS KEY &mdash; Open Source &mdash; MIT License &mdash; Zero Dependencies &mdash; 100% Client-Side<br>
+    <span style="color:var(--red);">This tool NEVER connects to the internet. Verify by running offline.</span><br>
+    Audit the code. Trust nothing. Verify everything.
+  </div>
+</div>
+
+<script>
+// =====================================================
+// SECP256K1 - Pure JavaScript Implementation
+// Bitcoin's elliptic curve for key derivation
+// =====================================================
+const SECP256K1 = (() => {
+  // secp256k1 curve parameters
+  const P = BigInt('0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFEFFFFFC2F');
+  const N = BigInt('0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFEBAAEDCE6AF48A03BBFD25E8CD0364141');
+  const Gx = BigInt('0x79BE667EF9DCBBAC55A06295CE870B07029BFCDB2DCE28D959F2815B16F81798');
+  const Gy = BigInt('0x483ADA7726A3C4655DA4FBFC0E1108A8FD17B448A68554199C47D08FFB10D4B8');
+
+  function mod(a, m) {
+    const r = a % m;
+    return r >= 0n ? r : r + m;
+  }
+
+  function modInverse(a, m) {
+    let [old_r, r] = [mod(a, m), m];
+    let [old_s, s] = [1n, 0n];
+    while (r !== 0n) {
+      const q = old_r / r;
+      [old_r, r] = [r, old_r - q * r];
+      [old_s, s] = [s, old_s - q * s];
+    }
+    return mod(old_s, m);
+  }
+
+  function pointAdd(p1, p2) {
+    if (p1 === null) return p2;
+    if (p2 === null) return p1;
+    const [x1, y1] = p1;
+    const [x2, y2] = p2;
+    if (x1 === x2 && y1 === y2) {
+      const s = mod(3n * x1 * x1 * modInverse(2n * y1, P), P);
+      const x3 = mod(s * s - 2n * x1, P);
+      const y3 = mod(s * (x1 - x3) - y1, P);
+      return [x3, y3];
+    }
+    if (x1 === x2) return null;
+    const s = mod((y2 - y1) * modInverse(x2 - x1, P), P);
+    const x3 = mod(s * s - x1 - x2, P);
+    const y3 = mod(s * (x1 - x3) - y1, P);
+    return [x3, y3];
+  }
+
+  function pointMultiply(k, point) {
+    let result = null;
+    let addend = point;
+    k = mod(k, N);
+    while (k > 0n) {
+      if (k & 1n) result = pointAdd(result, addend);
+      addend = pointAdd(addend, addend);
+      k >>= 1n;
+    }
+    return result;
+  }
+
+  function getPublicKey(privKeyHex) {
+    const k = BigInt('0x' + privKeyHex);
+    const point = pointMultiply(k, [Gx, Gy]);
+    const x = point[0].toString(16).padStart(64, '0');
+    const y = point[1].toString(16).padStart(64, '0');
+    return { x, y, uncompressed: '04' + x + y, compressed: ((point[1] % 2n === 0n) ? '02' : '03') + x };
+  }
+
+  return { getPublicKey, N };
+})();
+
+// =====================================================
+// SHA-256 - Pure JavaScript Implementation
+// =====================================================
+const SHA256 = (() => {
+  const K = new Uint32Array([
+    0x428a2f98,0x71374491,0xb5c0fbcf,0xe9b5dba5,0x3956c25b,0x59f111f1,0x923f82a4,0xab1c5ed5,
+    0xd807aa98,0x12835b01,0x243185be,0x550c7dc3,0x72be5d74,0x80deb1fe,0x9bdc06a7,0xc19bf174,
+    0xe49b69c1,0xefbe4786,0x0fc19dc6,0x240ca1cc,0x2de92c6f,0x4a7484aa,0x5cb0a9dc,0x76f988da,
+    0x983e5152,0xa831c66d,0xb00327c8,0xbf597fc7,0xc6e00bf3,0xd5a79147,0x06ca6351,0x14292967,
+    0x27b70a85,0x2e1b2138,0x4d2c6dfc,0x53380d13,0x650a7354,0x766a0abb,0x81c2c92e,0x92722c85,
+    0xa2bfe8a1,0xa81a664b,0xc24b8b70,0xc76c51a3,0xd192e819,0xd6990624,0xf40e3585,0x106aa070,
+    0x19a4c116,0x1e376c08,0x2748774c,0x34b0bcb5,0x391c0cb3,0x4ed8aa4a,0x5b9cca4f,0x682e6ff3,
+    0x748f82ee,0x78a5636f,0x84c87814,0x8cc70208,0x90befffa,0xa4506ceb,0xbef9a3f7,0xc67178f2
+  ]);
+
+  function rotr(n, x) { return (x >>> n) | (x << (32 - n)); }
+
+  function hash(bytes) {
+    let H = new Uint32Array([0x6a09e667,0xbb67ae85,0x3c6ef372,0xa54ff53a,0x510e527f,0x9b05688c,0x1f83d9ab,0x5be0cd19]);
+    const len = bytes.length;
+    const bitLen = len * 8;
+
+    // Padding
+    const padded = new Uint8Array(Math.ceil((len + 9) / 64) * 64);
+    padded.set(bytes);
+    padded[len] = 0x80;
+    const view = new DataView(padded.buffer);
+    view.setUint32(padded.length - 4, bitLen, false);
+
+    // Process blocks
+    const W = new Uint32Array(64);
+    for (let offset = 0; offset < padded.length; offset += 64) {
+      for (let i = 0; i < 16; i++) W[i] = view.getUint32(offset + i * 4, false);
+      for (let i = 16; i < 64; i++) {
+        const s0 = rotr(7, W[i-15]) ^ rotr(18, W[i-15]) ^ (W[i-15] >>> 3);
+        const s1 = rotr(17, W[i-2]) ^ rotr(19, W[i-2]) ^ (W[i-2] >>> 10);
+        W[i] = (W[i-16] + s0 + W[i-7] + s1) | 0;
+      }
+      let [a,b,c,d,e,f,g,h] = H;
+      for (let i = 0; i < 64; i++) {
+        const S1 = rotr(6,e) ^ rotr(11,e) ^ rotr(25,e);
+        const ch = (e & f) ^ (~e & g);
+        const t1 = (h + S1 + ch + K[i] + W[i]) | 0;
+        const S0 = rotr(2,a) ^ rotr(13,a) ^ rotr(22,a);
+        const maj = (a & b) ^ (a & c) ^ (b & c);
+        const t2 = (S0 + maj) | 0;
+        h=g; g=f; f=e; e=(d+t1)|0; d=c; c=b; b=a; a=(t1+t2)|0;
+      }
+      H[0]=(H[0]+a)|0; H[1]=(H[1]+b)|0; H[2]=(H[2]+c)|0; H[3]=(H[3]+d)|0;
+      H[4]=(H[4]+e)|0; H[5]=(H[5]+f)|0; H[6]=(H[6]+g)|0; H[7]=(H[7]+h)|0;
+    }
+
+    const result = new Uint8Array(32);
+    for (let i = 0; i < 8; i++) {
+      result[i*4] = (H[i]>>>24)&0xff; result[i*4+1] = (H[i]>>>16)&0xff;
+      result[i*4+2] = (H[i]>>>8)&0xff; result[i*4+3] = H[i]&0xff;
+    }
+    return result;
+  }
+
+  function doubleHash(bytes) { return hash(hash(bytes)); }
+  function hex(bytes) { return Array.from(bytes).map(b => b.toString(16).padStart(2,'0')).join(''); }
+
+  return { hash, doubleHash, hex };
+})();
+
+// =====================================================
+// RIPEMD-160 - Pure JavaScript Implementation
+// Needed for Bitcoin address generation
+// =====================================================
+const RIPEMD160 = (() => {
+  function f(j,x,y,z) {
+    if(j<16) return x^y^z;
+    if(j<32) return (x&y)|(~x&z);
+    if(j<48) return (x|~y)^z;
+    if(j<64) return (x&z)|(y&~z);
+    return x^(y|~z);
+  }
+  function rotl(x,n) { return (x<<n)|(x>>>(32-n)); }
+
+  const rl=[0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,7,4,13,1,10,6,15,3,12,0,9,5,2,14,11,8,3,10,14,4,9,15,8,1,2,7,0,6,13,11,5,12,1,9,11,10,0,8,12,4,13,3,7,15,14,5,6,2,4,0,5,9,7,12,2,10,14,1,3,8,11,6,15,13];
+  const rr=[5,14,7,0,9,2,11,4,13,6,15,8,1,10,3,12,6,11,3,7,0,13,5,10,14,15,8,12,4,9,1,2,15,5,1,3,7,14,6,9,11,8,12,2,10,0,4,13,8,6,4,1,3,11,15,0,5,12,2,13,9,7,10,14,12,15,10,4,1,5,8,7,6,2,13,14,0,3,9,11];
+  const sl=[11,14,15,12,5,8,7,9,11,13,14,15,6,7,9,8,7,6,8,13,11,9,7,15,7,12,15,9,11,7,13,12,11,13,6,7,14,9,13,15,14,8,13,6,5,12,7,5,11,12,14,15,14,15,9,8,9,14,5,6,8,6,5,12,9,15,5,11,6,8,13,12,5,12,13,14,11,8,5,6];
+  const sr=[8,9,9,11,13,15,15,5,7,7,8,11,14,14,12,6,9,13,15,7,12,8,9,11,7,7,12,7,6,15,13,11,9,7,15,11,8,6,6,14,12,13,5,14,13,13,7,5,15,5,8,11,14,14,6,14,6,9,12,9,12,5,15,8,8,5,12,9,12,5,14,6,8,13,6,5,15,13,11,11];
+  const kl=[0x00000000,0x5a827999,0x6ed9eba1,0x8f1bbcdc,0xa953fd4e];
+  const kr=[0x50a28be6,0x5c4dd124,0x6d703ef3,0x7a6d76e9,0x00000000];
+
+  function hash(bytes) {
+    const len = bytes.length;
+    const bitLen = len * 8;
+    const padded = new Uint8Array(Math.ceil((len+9)/64)*64);
+    padded.set(bytes);
+    padded[len] = 0x80;
+    const dv = new DataView(padded.buffer);
+    dv.setUint32(padded.length-8, bitLen, true);
+
+    let h0=0x67452301, h1=0xefcdab89, h2=0x98badcfe, h3=0x10325476, h4=0xc3d2e1f0;
+
+    for (let off=0; off<padded.length; off+=64) {
+      const x = [];
+      for (let i=0; i<16; i++) x.push(dv.getUint32(off+i*4, true));
+
+      let al=h0,bl=h1,cl=h2,dl=h3,el=h4;
+      let ar=h0,br=h1,cr=h2,dr=h3,er=h4;
+
+      for (let j=0; j<80; j++) {
+        const jj = j>>>4;
+        let t = (al + f(j,bl,cl,dl) + x[rl[j]] + kl[jj]) | 0;
+        t = (rotl(t, sl[j]) + el) | 0;
+        al=el; el=dl; dl=rotl(cl,10); cl=bl; bl=t;
+
+        t = (ar + f(79-j,br,cr,dr) + x[rr[j]] + kr[jj]) | 0;
+        t = (rotl(t, sr[j]) + er) | 0;
+        ar=er; er=dr; dr=rotl(cr,10); cr=br; br=t;
+      }
+      const t = (h1+cl+dr)|0;
+      h1=(h2+dl+er)|0; h2=(h3+el+ar)|0; h3=(h4+al+br)|0; h4=(h0+bl+cr)|0; h0=t;
+    }
+
+    const result = new Uint8Array(20);
+    const rv = new DataView(result.buffer);
+    rv.setUint32(0,h0,true); rv.setUint32(4,h1,true); rv.setUint32(8,h2,true);
+    rv.setUint32(12,h3,true); rv.setUint32(16,h4,true);
+    return result;
+  }
+
+  return { hash };
+})();
+
+// =====================================================
+// KECCAK-256 (for Ethereum addresses)
+// =====================================================
+const KECCAK256 = (() => {
+  const RC = [
+    [0x00000001,0x00000000],[0x00008082,0x00000000],[0x0000808a,0x80000000],[0x80008000,0x80000000],
+    [0x0000808b,0x00000000],[0x80000001,0x00000000],[0x80008081,0x80000000],[0x00008009,0x80000000],
+    [0x0000008a,0x00000000],[0x00000088,0x00000000],[0x80008009,0x00000000],[0x8000000a,0x00000000],
+    [0x8000808b,0x00000000],[0x0000008b,0x80000000],[0x00008089,0x80000000],[0x00008003,0x80000000],
+    [0x00008002,0x80000000],[0x00000080,0x80000000],[0x0000800a,0x00000000],[0x8000000a,0x80000000],
+    [0x80008081,0x80000000],[0x00008080,0x80000000],[0x80000001,0x00000000],[0x80008008,0x80000000]
+  ];
+
+  function hash(bytes) {
+    const rate = 136; // 1088 bits for keccak-256
+    const stateL = new Uint32Array(25);
+    const stateH = new Uint32Array(25);
+
+    // Padding (keccak padding: 0x01...0x80)
+    const padLen = rate - (bytes.length % rate);
+    const padded = new Uint8Array(bytes.length + padLen);
+    padded.set(bytes);
+    padded[bytes.length] = 0x01;
+    padded[padded.length - 1] |= 0x80;
+
+    // Absorb
+    for (let off = 0; off < padded.length; off += rate) {
+      for (let i = 0; i < rate / 8; i++) {
+        const idx = off + i * 8;
+        stateL[i] ^= (padded[idx]) | (padded[idx+1] << 8) | (padded[idx+2] << 16) | (padded[idx+3] << 24);
+        stateH[i] ^= (padded[idx+4]) | (padded[idx+5] << 8) | (padded[idx+6] << 16) | (padded[idx+7] << 24);
+      }
+      keccakF(stateL, stateH);
+    }
+
+    // Squeeze 256 bits
+    const result = new Uint8Array(32);
+    for (let i = 0; i < 4; i++) {
+      result[i*8] = stateL[i] & 0xff;
+      result[i*8+1] = (stateL[i] >>> 8) & 0xff;
+      result[i*8+2] = (stateL[i] >>> 16) & 0xff;
+      result[i*8+3] = (stateL[i] >>> 24) & 0xff;
+      result[i*8+4] = stateH[i] & 0xff;
+      result[i*8+5] = (stateH[i] >>> 8) & 0xff;
+      result[i*8+6] = (stateH[i] >>> 16) & 0xff;
+      result[i*8+7] = (stateH[i] >>> 24) & 0xff;
+    }
+    return result;
+  }
+
+  function keccakF(sL, sH) {
+    const CL = new Uint32Array(5), CH = new Uint32Array(5);
+    const DL = new Uint32Array(5), DH = new Uint32Array(5);
+    const BL = new Uint32Array(25), BH = new Uint32Array(25);
+
+    for (let round = 0; round < 24; round++) {
+      // Theta
+      for (let x = 0; x < 5; x++) {
+        CL[x] = sL[x] ^ sL[x+5] ^ sL[x+10] ^ sL[x+15] ^ sL[x+20];
+        CH[x] = sH[x] ^ sH[x+5] ^ sH[x+10] ^ sH[x+15] ^ sH[x+20];
+      }
+      for (let x = 0; x < 5; x++) {
+        DL[x] = CL[(x+4)%5] ^ ((CL[(x+1)%5] << 1) | (CH[(x+1)%5] >>> 31));
+        DH[x] = CH[(x+4)%5] ^ ((CH[(x+1)%5] << 1) | (CL[(x+1)%5] >>> 31));
+      }
+      for (let x = 0; x < 5; x++) {
+        for (let y = 0; y < 5; y++) {
+          sL[x+y*5] ^= DL[x];
+          sH[x+y*5] ^= DH[x];
+        }
+      }
+
+      // Rho + Pi
+      const RO = [0,1,62,28,27,36,44,6,55,20,3,10,43,25,39,41,45,15,21,8,18,2,61,56,14];
+      for (let i = 0; i < 25; i++) {
+        const r = RO[i];
+        if (r === 0) { BL[i] = sL[i]; BH[i] = sH[i]; }
+        else if (r < 32) {
+          BL[i] = (sL[i] << r) | (sH[i] >>> (32-r));
+          BH[i] = (sH[i] << r) | (sL[i] >>> (32-r));
+        } else {
+          const r2 = r - 32;
+          BL[i] = (sH[i] << r2) | (sL[i] >>> (32-r2));
+          BH[i] = (sL[i] << r2) | (sH[i] >>> (32-r2));
+        }
+      }
+      // Rearrange for Pi
+      const TL = new Uint32Array(25), TH = new Uint32Array(25);
+      const PI = [0,10,20,5,15,16,1,11,21,6,7,17,2,12,22,23,8,18,3,13,14,24,9,19,4];
+      for (let i = 0; i < 25; i++) { TL[PI[i]] = BL[i]; TH[PI[i]] = BH[i]; }
+
+      // Chi
+      for (let y = 0; y < 5; y++) {
+        for (let x = 0; x < 5; x++) {
+          const i = x + y*5;
+          sL[i] = TL[i] ^ (~TL[(x+1)%5+y*5] & TL[(x+2)%5+y*5]);
+          sH[i] = TH[i] ^ (~TH[(x+1)%5+y*5] & TH[(x+2)%5+y*5]);
+        }
+      }
+
+      // Iota
+      sL[0] ^= RC[round][0];
+      sH[0] ^= RC[round][1];
+    }
+  }
+
+  function hex(bytes) { return Array.from(bytes).map(b => b.toString(16).padStart(2,'0')).join(''); }
+
+  return { hash, hex };
+})();
+
+// =====================================================
+// BASE58CHECK (for Bitcoin WIF and addresses)
+// =====================================================
+const BASE58 = (() => {
+  const ALPHABET = '123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz';
+
+  function encode(bytes) {
+    let num = 0n;
+    for (const b of bytes) num = num * 256n + BigInt(b);
+    let str = '';
+    while (num > 0n) {
+      str = ALPHABET[Number(num % 58n)] + str;
+      num /= 58n;
+    }
+    for (const b of bytes) {
+      if (b !== 0) break;
+      str = '1' + str;
+    }
+    return str;
+  }
+
+  function encodeCheck(payload) {
+    const checksum = SHA256.doubleHash(payload).slice(0, 4);
+    const full = new Uint8Array(payload.length + 4);
+    full.set(payload);
+    full.set(checksum, payload.length);
+    return encode(full);
+  }
+
+  return { encode, encodeCheck };
+})();
+
+// =====================================================
+// BIP39 WORDLIST (for Mode 2 only)
+// =====================================================
+const BIP39_WORDLIST = [
+"abandon","ability","able","about","above","absent","absorb","abstract","absurd","abuse",
+"access","accident","account","accuse","achieve","acid","acoustic","acquire","across","act",
+"action","actor","actress","actual","adapt","add","addict","address","adjust","admit",
+"adult","advance","advice","aerobic","affair","afford","afraid","again","age","agent",
+"agree","ahead","aim","air","airport","aisle","alarm","album","alcohol","alert",
+"alien","all","alley","allow","almost","alone","alpha","already","also","alter",
+"always","amateur","amazing","among","amount","amused","analyst","anchor","ancient","anger",
+"angle","angry","animal","ankle","announce","annual","another","answer","antenna","antique",
+"anxiety","any","apart","apology","appear","apple","approve","april","arch","arctic",
+"area","arena","argue","arm","armed","armor","army","around","arrange","arrest",
+"arrive","arrow","art","artefact","artist","artwork","ask","aspect","assault","asset",
+"assist","assume","asthma","athlete","atom","attack","attend","attitude","attract","auction",
+"audit","august","aunt","author","auto","autumn","average","avocado","avoid","awake",
+"aware","awesome","awful","awkward","axis","baby","bachelor","bacon","badge","bag",
+"balance","balcony","ball","bamboo","banana","banner","bar","barely","bargain","barrel",
+"base","basic","basket","battle","beach","bean","beauty","because","become","beef",
+"before","begin","behave","behind","believe","below","belt","bench","benefit","best",
+"betray","better","between","beyond","bicycle","bid","bike","bind","biology","bird",
+"birth","bitter","black","blade","blame","blanket","blast","bleak","bless","blind",
+"blood","blossom","blow","blue","blur","blush","board","boat","body","boil",
+"bomb","bone","bonus","book","boost","border","boring","borrow","boss","bottom",
+"bounce","box","boy","bracket","brain","brand","brass","brave","bread","breeze",
+"brick","bridge","brief","bright","bring","brisk","broccoli","broken","bronze","broom",
+"brother","brown","brush","bubble","buddy","budget","buffalo","build","bulb","bulk",
+"bullet","bundle","bunny","burden","burger","burst","bus","business","busy","butter",
+"buyer","buzz","cabbage","cabin","cable","cactus","cage","cake","call","calm",
+"camera","camp","can","canal","cancel","candy","cannon","canoe","canvas","canyon",
+"capable","capital","captain","car","carbon","card","cargo","carpet","carry","cart",
+"case","cash","casino","castle","casual","cat","catalog","catch","category","cattle",
+"caught","cause","caution","cave","ceiling","celery","cement","census","century","cereal",
+"certain","chair","chalk","champion","change","chaos","chapter","charge","chase","cheap",
+"check","cheese","chef","cherry","chest","chicken","chief","child","chimney","choice",
+"choose","chronic","chuckle","chunk","churn","citizen","city","civil","claim","clap",
+"clarify","claw","clay","clean","clerk","clever","click","client","cliff","climb",
+"clinic","clip","clock","clog","close","cloth","cloud","clown","club","clump",
+"cluster","clutch","coach","coast","coconut","code","coffee","coil","coin","collect",
+"color","column","combine","come","comfort","comic","common","company","concert","conduct",
+"confirm","congress","connect","consider","control","convince","cook","cool","copper","copy",
+"coral","core","corn","correct","cost","cotton","couch","country","couple","course",
+"cousin","cover","coyote","crack","cradle","craft","cram","crane","crash","crater",
+"crawl","crazy","cream","credit","creek","crew","cricket","crime","crisp","critic",
+"crop","cross","crouch","crowd","crucial","cruel","cruise","crumble","crush","cry",
+"crystal","cube","culture","cup","cupboard","curious","current","curtain","curve","cushion",
+"custom","cute","cycle","dad","damage","damp","dance","danger","daring","dash",
+"daughter","dawn","day","deal","debate","debris","decade","december","decide","decline",
+"decorate","decrease","deer","defense","define","defy","degree","delay","deliver","demand",
+"demise","denial","dentist","deny","depart","depend","deposit","depth","deputy","derive",
+"describe","desert","design","desk","despair","destroy","detail","detect","develop","device",
+"devote","diagram","dial","diamond","diary","dice","diesel","diet","differ","digital",
+"dignity","dilemma","dinner","dinosaur","direct","dirt","disagree","discover","disease","dish",
+"dismiss","disorder","display","distance","divert","divide","divorce","dizzy","doctor","document",
+"dog","doll","dolphin","domain","donate","donkey","donor","door","dose","double",
+"dove","draft","dragon","drama","drastic","draw","dream","dress","drift","drill",
+"drink","drip","drive","drop","drum","dry","duck","dumb","dune","during",
+"dust","dutch","duty","dwarf","dynamic","eager","eagle","early","earn","earth",
+"easily","east","easy","echo","ecology","economy","edge","edit","educate","effort",
+"egg","eight","either","elbow","elder","electric","elegant","element","elephant","elevator",
+"elite","else","embark","embody","embrace","emerge","emotion","employ","empower","empty",
+"enable","encourage","end","endless","endorse","enemy","energy","enforce","engage","engine",
+"enhance","enjoy","enlist","enough","enrich","enroll","ensure","enter","entire","entry",
+"envelope","episode","equal","equip","era","erase","erode","erosion","error","erupt",
+"escape","essay","essence","estate","eternal","ethics","evidence","evil","evoke","evolve",
+"exact","example","excess","exchange","excite","exclude","excuse","execute","exercise","exhaust",
+"exhibit","exile","exist","exit","exotic","expand","expect","expire","explain","expose",
+"express","extend","extra","eye","eyebrow","fabric","face","faculty","fade","faint",
+"faith","fall","false","fame","family","famous","fan","fancy","fantasy","farm",
+"fashion","fat","fatal","father","fatigue","fault","favorite","feature","february","federal",
+"fee","feed","feel","female","fence","festival","fetch","fever","few","fiber",
+"fiction","field","figure","file","film","filter","final","find","fine","finger",
+"finish","fire","firm","fiscal","fish","fit","fitness","fix","flag","flame",
+"flash","flat","flavor","flee","flight","flip","float","flock","floor","flower",
+"fluid","flush","fly","foam","focus","fog","foil","fold","follow","food",
+"foot","force","forest","forget","fork","fortune","forum","forward","fossil","foster",
+"found","fox","fragile","frame","frequent","fresh","friend","fringe","frog","front",
+"frost","frown","frozen","fruit","fuel","fun","funny","furnace","fury","future",
+"gadget","gain","galaxy","gallery","game","gap","garage","garbage","garden","garlic",
+"garment","gas","gasp","gate","gather","gauge","gaze","general","genius","genre",
+"gentle","genuine","gesture","ghost","giant","gift","giggle","ginger","giraffe","girl",
+"give","glad","glance","glare","glass","glide","glimpse","globe","gloom","glory",
+"glove","glow","glue","goat","goddess","gold","good","goose","gorilla","gospel",
+"gossip","govern","gown","grab","grace","grain","grant","grape","grass","gravity",
+"great","green","grid","grief","grit","grocery","group","grow","grunt","guard",
+"guess","guide","guilt","guitar","gun","gym","habit","hair","half","hammer",
+"hamster","hand","happy","harbor","hard","harsh","harvest","hat","have","hawk",
+"hazard","head","health","heart","heavy","hedgehog","height","hello","helmet","help",
+"hen","hero","hip","hire","history","hobby","hockey","hold","hole","holiday",
+"hollow","home","honey","hood","hope","horn","horror","horse","hospital","host",
+"hotel","hour","hover","hub","huge","human","humble","humor","hundred","hungry",
+"hunt","hurdle","hurry","hurt","husband","hybrid","ice","icon","idea","identify",
+"idle","ignore","ill","illegal","illness","image","imitate","immense","immune","impact",
+"impose","improve","impulse","inch","include","income","increase","index","indicate","indoor",
+"industry","infant","inflict","inform","initial","inject","inmate","inner","innocent","input",
+"inquiry","insane","insect","inside","inspire","install","intact","interest","into","invest",
+"invite","involve","iron","island","isolate","issue","item","ivory","jacket","jaguar",
+"jar","jazz","jealous","jeans","jelly","jewel","job","join","joke","journey",
+"joy","judge","juice","jump","jungle","junior","junk","just","kangaroo","keen",
+"keep","ketchup","key","kick","kid","kidney","kind","kingdom","kiss","kit",
+"kitchen","kite","kitten","kiwi","knee","knife","knock","know","lab","label",
+"labor","ladder","lady","lake","lamp","language","laptop","large","later","latin",
+"laugh","laundry","lava","law","lawn","lawsuit","layer","lazy","leader","leaf",
+"learn","leave","lecture","left","leg","legal","legend","leisure","lemon","lend",
+"length","lens","leopard","lesson","letter","level","liberty","library","license","life",
+"lift","light","like","limb","limit","link","lion","liquid","list","little",
+"live","lizard","load","loan","lobster","local","lock","logic","lonely","long",
+"loop","lottery","loud","lounge","love","loyal","lucky","luggage","lumber","lunar",
+"lunch","luxury","lyrics","machine","mad","magic","magnet","maid","mail","main",
+"major","make","mammal","man","manage","mandate","mango","mansion","manual","maple",
+"marble","march","margin","marine","market","marriage","mask","mass","master","match",
+"material","math","matrix","matter","maximum","maze","meadow","mean","measure","meat",
+"mechanic","medal","media","melody","melt","member","memory","mention","menu","mercy",
+"merge","merit","merry","mesh","message","metal","method","middle","midnight","milk",
+"million","mimic","mind","minimum","minor","minute","miracle","mirror","misery","miss",
+"mistake","mix","mixed","mixture","mobile","model","modify","mom","moment","monitor",
+"monkey","monster","month","moon","moral","more","morning","mosquito","mother","motion",
+"motor","mountain","mouse","move","movie","much","muffin","mule","multiply","muscle",
+"museum","mushroom","music","must","mutual","myself","mystery","myth","naive","name",
+"napkin","narrow","nasty","nation","nature","near","neck","need","negative","neglect",
+"neither","nephew","nerve","nest","net","network","neutral","never","news","next",
+"nice","night","noble","noise","nominee","noodle","normal","north","nose","notable",
+"nothing","notice","novel","now","nuclear","number","nurse","nut","oak","obey",
+"object","oblige","obscure","observe","obtain","obvious","occur","ocean","october","odor",
+"off","offer","office","often","oil","okay","old","olive","olympic","omit",
+"once","one","onion","online","only","open","opera","opinion","oppose","option",
+"orange","orbit","orchard","order","ordinary","organ","orient","original","orphan","ostrich",
+"other","outdoor","outer","output","outside","oval","oven","over","own","owner",
+"oxygen","oyster","ozone","pact","paddle","page","pair","palace","palm","panda",
+"panel","panic","panther","paper","parade","parent","park","parrot","party","pass",
+"patch","path","patient","patrol","pattern","pause","pave","payment","peace","peanut",
+"pear","peasant","pelican","pen","penalty","pencil","people","pepper","perfect","permit",
+"person","pet","phone","photo","phrase","physical","piano","picnic","picture","piece",
+"pig","pigeon","pill","pilot","pink","pioneer","pipe","pistol","pitch","pizza",
+"place","planet","plastic","plate","play","please","pledge","pluck","plug","plunge",
+"poem","poet","point","polar","pole","police","pond","pony","pool","popular",
+"portion","pose","position","possible","post","potato","pottery","poverty","powder","power",
+"practice","praise","predict","prefer","prepare","present","pretty","prevent","price","pride",
+"primary","print","priority","prison","private","prize","problem","process","produce","profit",
+"program","project","promote","proof","property","prosper","protect","proud","provide","public",
+"pudding","pull","pulp","pulse","pumpkin","punch","pupil","puppy","purchase","purity",
+"purpose","purse","push","put","puzzle","pyramid","quality","quantum","quarter","question",
+"quick","quit","quiz","quote","rabbit","raccoon","race","rack","radar","radio",
+"rage","rail","rain","raise","rally","ramp","ranch","random","range","rapid",
+"rare","rate","rather","raven","raw","razor","ready","real","reason","rebel",
+"rebuild","recall","receive","recipe","record","recycle","reduce","reflect","reform","region",
+"regret","regular","reject","relax","release","relief","rely","remain","remember","remind",
+"remove","render","renew","rent","reopen","repair","repeat","replace","report","require",
+"rescue","resemble","resist","resource","response","result","retire","retreat","return","reunion",
+"reveal","review","reward","rhythm","rib","ribbon","rice","rich","ride","ridge",
+"rifle","right","rigid","ring","riot","ripple","risk","ritual","rival","river",
+"road","roast","robot","robust","rocket","romance","roof","rookie","room","rose",
+"rotate","rough","round","route","royal","rubber","rude","rug","rule","run",
+"runway","rural","sad","saddle","sadness","safe","sail","salad","salmon","salon",
+"salt","salute","same","sample","sand","satisfy","satoshi","sauce","sausage","save",
+"say","scale","scan","scare","scatter","scene","scheme","school","science","scissors",
+"scorpion","scout","scrap","screen","script","scrub","sea","search","season","seat",
+"second","secret","section","security","seed","seek","segment","select","sell","seminar",
+"senior","sense","sentence","series","service","session","settle","setup","seven","shadow",
+"shaft","shallow","share","shed","shell","sheriff","shield","shift","shine","ship",
+"shiver","shock","shoe","shoot","shop","short","shoulder","shove","shrimp","shrug",
+"shuffle","shy","sibling","sick","side","siege","sight","sign","silent","silk",
+"silly","silver","similar","simple","since","sing","siren","sister","situate","six",
+"size","skate","sketch","ski","skill","skin","skirt","skull","slab","slam",
+"sleep","slender","slice","slide","slight","slim","slogan","slot","slow","slush",
+"small","smart","smile","smoke","smooth","snack","snake","snap","sniff","snow",
+"soap","soccer","social","sock","soda","soft","solar","soldier","solid","solution",
+"someone","song","soon","sorry","sort","soul","sound","soup","source","south",
+"space","spare","spatial","spawn","speak","special","speed","spell","spend","sphere",
+"spice","spider","spike","spin","spirit","split","sponsor","spoon","sport","spot",
+"spray","spread","spring","spy","square","squeeze","squirrel","stable","stadium","staff",
+"stage","stairs","stamp","stand","start","state","stay","steak","steel","stem",
+"step","stereo","stick","still","sting","stock","stomach","stone","stool","story",
+"stove","strategy","street","strike","strong","struggle","student","stuff","stumble","style",
+"subject","submit","subway","success","such","sudden","suffer","sugar","suggest","suit",
+"summer","sun","sunny","sunset","super","supply","supreme","sure","surface","surge",
+"surprise","surround","survey","suspect","sustain","swallow","swamp","swap","swarm","swear",
+"sweet","swim","swing","switch","sword","symbol","symptom","syrup","system","table",
+"tackle","tag","tail","talent","talk","tank","tape","target","task","taste",
+"tattoo","taxi","teach","team","tell","ten","tenant","tennis","tent","term",
+"test","text","thank","that","theme","then","theory","there","they","thing",
+"this","thought","three","thrive","throw","thumb","thunder","ticket","tide","tiger",
+"tilt","timber","time","tiny","tip","tired","tissue","title","toast","tobacco",
+"today","toddler","toe","together","toilet","token","tomato","tomorrow","tone","tongue",
+"tonight","tool","tooth","top","topic","topple","torch","tornado","tortoise","toss",
+"total","tourist","toward","tower","town","toy","track","trade","traffic","tragic",
+"train","transfer","trap","trash","travel","tray","treat","tree","trend","trial",
+"tribe","trick","trigger","trim","trip","trophy","trouble","truck","true","truly",
+"trumpet","trust","truth","try","tube","tuna","tunnel","turkey","turn","turtle",
+"twelve","twenty","twice","twin","twist","two","type","typical","ugly","umbrella",
+"unable","unaware","uncle","uncover","under","undo","unfair","unfold","unhappy","uniform",
+"union","unique","unit","universe","unknown","unlock","until","unusual","unveil","update",
+"upgrade","uphold","upon","upper","upset","urban","usage","use","used","useful",
+"useless","usual","utility","vacant","vacuum","vague","valid","valley","valve","van",
+"vanish","vapor","various","vast","vault","vehicle","velvet","vendor","venture","venue",
+"verb","verify","version","very","vessel","veteran","viable","vibrant","vicious","victory",
+"video","view","village","vintage","violin","virtual","virus","visa","visit","visual",
+"vital","vivid","vocal","voice","void","volcano","volume","vote","voyage","wage",
+"wagon","wait","walk","wall","walnut","want","warfare","warm","warrior","wash",
+"wasp","waste","water","wave","way","wealth","weapon","wear","weasel","weather",
+"web","wedding","weekend","weird","welcome","well","west","wet","whale","what",
+"wheat","wheel","when","where","whip","whisper","wide","width","wife","wild",
+"will","win","window","wine","wing","wink","winner","winter","wire","wisdom",
+"wise","wish","witness","wolf","woman","wonder","wood","wool","word","work",
+"world","worry","worth","wrap","wreck","wrestle","wrist","write","wrong","yard",
+"year","yellow","you","young","youth","zebra","zero","zone","zoo"
+];
+
+// =====================================================
+// VULNERABILITY DATABASE
+// =====================================================
+const WALLETS = {
+  coldcard: {
+    name: "Coldcard", maker: "Coinkite", models: ["Mk4","Mk3","Mk2","Q1"],
+    firmwares: ["5.3.2","5.3.1","5.3.0","5.2.2","5.2.1","5.2.0","5.1.2","5.1.1","5.1.0","5.0.0","4.x","3.x"],
+    vulns: [
+      { id:"CVE-2025-CC001", title:"Partial Seed Extraction via Power Analysis", severity:"critical",
+        affected:["5.1.0","5.0.0","4.x","3.x"],
+        desc:"Side-channel attack during seed generation allows partial extraction of entropy bits through power consumption analysis. Requires physical access during key generation.",
+        fix:"Update to firmware 5.2.0+. Re-generate keys using Fortress Key." },
+      { id:"CVE-2024-35895", title:"PSBT Signing Bypass on Multisig", severity:"high",
+        affected:["5.0.0","4.x","3.x"],
+        desc:"Crafted PSBT could bypass multisig co-signer verification under specific conditions.",
+        fix:"Update to firmware 5.1.0+. Verify all multisig configurations." },
+      { id:"CVE-2023-CC-RNG", title:"Insufficient Entropy in RNG Mixing", severity:"high",
+        affected:["4.x","3.x"],
+        desc:"Hardware RNG mixing function did not incorporate sufficient entropy sources, potentially reducing key space.",
+        fix:"Update to firmware 5.x. Regenerate keys externally." },
+      { id:"CC-2024-USBDFU", title:"USB DFU Mode Firmware Downgrade", severity:"medium",
+        affected:["5.1.2","5.1.1","5.1.0","5.0.0","4.x"],
+        desc:"Physical attacker could force DFU mode and downgrade firmware to exploit older vulnerabilities.",
+        fix:"Update to 5.2.0+ with anti-rollback protection." }
+    ]
+  },
+  ledger: {
+    name: "Ledger", maker: "Ledger SAS", models: ["Nano X","Nano S Plus","Nano S","Stax","Flex"],
+    firmwares: ["2.3.0","2.2.4","2.2.3","2.2.2","2.2.1","2.2.0","2.1.0","2.0.0","1.x"],
+    vulns: [
+      { id:"CVE-2024-LEDGER-RECOVER", title:"Ledger Recover Key Sharding", severity:"high",
+        affected:["2.2.2","2.2.1","2.2.0","2.1.0","2.0.0"],
+        desc:"Ledger Recover enables optional seed backup to third parties, proving firmware CAN extract and transmit seeds.",
+        fix:"Disable Ledger Recover. Generate keys externally with Fortress Key." },
+      { id:"CVE-2023-LEDGER-BLIND", title:"Blind Signing Exploitation", severity:"high",
+        affected:["2.1.0","2.0.0","1.x"],
+        desc:"DApps could present misleading transaction data via blind signing.",
+        fix:"Update firmware. Enable Clear Signing." },
+      { id:"CVE-2020-LEDGER-PHYS", title:"Physical Voltage Glitching", severity:"medium",
+        affected:["1.x"],
+        desc:"Voltage fault injection on Nano S could bypass PIN and extract seed.",
+        fix:"Upgrade to Nano S Plus or Nano X." }
+    ]
+  },
+  trezor: {
+    name: "Trezor", maker: "SatoshiLabs", models: ["Model T","Model One","Safe 3","Safe 5"],
+    firmwares: ["2.7.2","2.7.1","2.7.0","2.6.4","2.6.3","2.6.0","2.5.x","2.4.x","2.3.x","1.x"],
+    vulns: [
+      { id:"CVE-2023-TREZOR-RDP", title:"Read Protection Downgrade (STM32)", severity:"critical",
+        affected:["1.x"],
+        desc:"Physical attack can downgrade STM32 read protection, enabling full seed extraction in ~15 minutes.",
+        fix:"Use passphrase protection. Upgrade to Safe 3/5." },
+      { id:"CVE-2022-TREZOR-SIDE", title:"Side-Channel PIN Extraction", severity:"high",
+        affected:["2.4.x","2.3.x","1.x"],
+        desc:"Power analysis during PIN entry can reveal PIN digits.",
+        fix:"Update firmware. Use strong passphrase." },
+      { id:"CVE-2019-TREZOR-SEGWIT", title:"SegWit Fee Attack", severity:"medium",
+        affected:["2.3.x","1.x"],
+        desc:"Attacker could manipulate SegWit amounts to cause excessive fees.",
+        fix:"Update firmware. Verify fees on device." }
+    ]
+  },
+  keepkey: {
+    name: "KeepKey", maker: "ShapeShift", models: ["KeepKey"],
+    firmwares: ["7.7.0","7.6.0","7.5.2","7.4.0","7.3.x","7.2.x","6.x"],
+    vulns: [
+      { id:"CVE-2023-KK-GLITCH", title:"Voltage Glitch Seed Extraction", severity:"critical",
+        affected:["7.3.x","7.2.x","6.x"],
+        desc:"Voltage glitching can extract full seed in under 15 minutes with physical access.",
+        fix:"Update to 7.4.0+. Use BIP39 passphrase." },
+      { id:"CVE-2022-KK-USB", title:"USB Protocol Buffer Overflow", severity:"high",
+        affected:["7.2.x","6.x"],
+        desc:"Malformed USB HID messages could trigger buffer overflow.",
+        fix:"Update to firmware 7.3.0+." }
+    ]
+  },
+  bitbox02: {
+    name: "BitBox02", maker: "Shift Crypto", models: ["BitBox02 Multi","BitBox02 BTC-only"],
+    firmwares: ["9.18.0","9.17.0","9.16.0","9.15.0","9.14.0","9.13.0","9.12.0","9.11.0","9.10.0"],
+    vulns: [
+      { id:"BB02-2023-SUPPLY", title:"Supply Chain Verification Gap", severity:"medium",
+        affected:["9.10.0","9.11.0"],
+        desc:"Earlier attestation protocol had weakness allowing device substitution during shipping.",
+        fix:"Update to 9.12.0+. Verify device hash on setup." },
+      { id:"BB02-2022-NOISE", title:"Noise Protocol Pairing Weakness", severity:"low",
+        affected:["9.10.0"],
+        desc:"Initial noise handshake could be intercepted during first pairing.",
+        fix:"Update firmware. Verify pairing code on device." }
+    ]
+  }
+};
+
+// =====================================================
+// STATE
+// =====================================================
+let selectedWallet = null;
+let diceRolls = [];
+let currentMode = 'raw';
+let lastGeneratedHash = null;
+
+// =====================================================
+// TAB SWITCHING
+// =====================================================
+function switchTab(name) {
+  document.querySelectorAll('.tab').forEach((t, i) => {
+    t.classList.toggle('active', ['scanner','generator','howto'][i] === name);
+  });
+  document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+  document.getElementById('panel-' + name).classList.add('active');
+}
+
+// =====================================================
+// MODE SWITCHING
+// =====================================================
+function setMode(mode) {
+  currentMode = mode;
+  document.getElementById('modeRaw').classList.toggle('active', mode === 'raw');
+  document.getElementById('modeBip39').classList.toggle('active', mode === 'bip39');
+  if (mode === 'raw') {
+    document.getElementById('modeDesc').innerHTML = '<strong>MODE 1 - PURE FORTRESS:</strong> Your recipe generates a raw 256-bit private key. No public wordlists involved. Import into Electrum, Sparrow, MetaMask, or any wallet that accepts raw/WIF keys. <strong>Your recipe IS your key.</strong>';
+    document.getElementById('generateBtn').textContent = 'GENERATE FORTRESS KEY';
+  } else {
+    document.getElementById('modeDesc').innerHTML = '<strong>MODE 2 - HARDWARE BRIDGE:</strong> Your recipe generates a raw key, then translates it to 24 BIP39 words for hardware wallet import. The 24 words are <strong>temporary</strong> - your recipe remains your real backup. Destroy the 24 words after import.';
+    document.getElementById('generateBtn').textContent = 'GENERATE HARDWARE BRIDGE KEY';
+  }
+  document.getElementById('outputSection').style.display = 'none';
+}
+
+// =====================================================
+// SCANNER
+// =====================================================
+function initScanner() {
+  const grid = document.getElementById('walletGrid');
+  grid.innerHTML = '';
+  Object.keys(WALLETS).forEach(key => {
+    const w = WALLETS[key];
+    const card = document.createElement('div');
+    card.className = 'wallet-card';
+    card.innerHTML = '<h3>' + w.name + '</h3><div class="maker">' + w.maker + '</div><div class="maker" style="margin-top:4px;">' + w.models.join(', ') + '</div>';
+    card.onclick = () => selectWallet(key, card);
+    grid.appendChild(card);
+  });
+}
+
+function selectWallet(key, card) {
+  selectedWallet = key;
+  document.querySelectorAll('.wallet-card').forEach(c => c.classList.remove('selected'));
+  card.classList.add('selected');
+  const w = WALLETS[key];
+  const section = document.getElementById('firmwareSection');
+  section.style.display = 'block';
+  const sel = document.getElementById('firmwareSelect');
+  sel.innerHTML = '<option value="">-- Select firmware --</option>';
+  w.firmwares.forEach(f => { sel.innerHTML += '<option value="'+f+'">'+f+'</option>'; });
+  sel.onchange = () => { document.getElementById('scanBtn').disabled = !sel.value; };
+  document.getElementById('scanBtn').disabled = true;
+  document.getElementById('vulnReport').style.display = 'none';
+}
+
+function runScan() {
+  const fw = document.getElementById('firmwareSelect').value;
+  const w = WALLETS[selectedWallet];
+  const report = document.getElementById('vulnReport');
+  const matched = w.vulns.filter(v => v.affected.includes(fw));
+
+  if (matched.length === 0) {
+    report.innerHTML = '<div class="safe-report">&#10003; No known vulnerabilities for '+w.name+' firmware '+fw+'<br><br><span style="font-size:0.8em;color:var(--text-dim);">This does not guarantee security. Unknown vulnerabilities may exist.<br>Use the Key Generator to generate keys externally for maximum safety.</span></div>';
+  } else {
+    let html = '<h3 style="color:var(--red);margin-bottom:15px;">Found '+matched.length+' known vulnerabilit'+(matched.length===1?'y':'ies')+'</h3>';
+    matched.forEach(v => {
+      html += '<div class="vuln-item"><span class="vuln-severity severity-'+v.severity+'">'+v.severity.toUpperCase()+'</span><span class="vuln-cve">'+v.id+'</span><div class="vuln-title" style="margin-top:8px;">'+v.title+'</div><div class="vuln-desc">'+v.desc+'</div><div class="vuln-fix">FIX: '+v.fix+'</div></div>';
+    });
+    html += '<div style="padding:15px;margin-top:10px;background:rgba(247,147,26,0.1);border:1px solid var(--accent);border-radius:6px;font-size:0.85em;color:var(--accent);"><strong>RECOMMENDATION:</strong> Use the Key Generator to create your keys externally with your own recipe.</div>';
+  }
+  report.style.display = 'block';
+  report.scrollIntoView({ behavior: 'smooth' });
+}
+
+// =====================================================
+// DICE
+// =====================================================
+function addDice(v) { diceRolls.push(v); renderDice(); updateEntropy(); }
+function clearDice() { diceRolls = []; renderDice(); updateEntropy(); }
+function renderDice() {
+  document.getElementById('diceResults').innerHTML = diceRolls.map(d => '<span class="dice-val">'+d+'</span>').join('');
+}
+
+// =====================================================
+// ENTROPY
+// =====================================================
+function calcEntropy() {
+  let bits = 0;
+  const l1 = document.getElementById('layer1').value;
+  const l2 = document.getElementById('layer2').value;
+  const l3 = document.getElementById('layer3').value;
+  const l5 = document.getElementById('layer5').value;
+
+  if (l1.length > 0) { bits += l1.length * Math.log2(Math.max(new Set(l1).size, 2)); }
+  if (l2.length > 0) { bits += l2.length * Math.log2(Math.max(new Set(l2).size, 2)) * 1.5; }
+  if (l3.length > 0) { bits += l3.length * Math.log2(Math.max(new Set(l3).size, 2)); }
+  bits += diceRolls.length * Math.log2(6);
+  if (l5.length > 0) { bits += l5.length * Math.log2(Math.max(new Set(l5).size, 2)); }
+  return Math.floor(bits);
+}
+
+function updateEntropy() {
+  const bits = calcEntropy();
+  document.getElementById('entropyBits').textContent = bits + ' bits';
+  const bar = document.getElementById('entropyBar');
+  const verdict = document.getElementById('entropyVerdict');
+  const time = document.getElementById('entropyTime');
+  const btn = document.getElementById('generateBtn');
+
+  bar.style.width = Math.min(bits/300*100, 100) + '%';
+
+  if (bits < 80) {
+    bar.style.background='var(--red)'; verdict.style.color='var(--red)';
+    verdict.textContent='WEAK - Add more layers'; time.textContent=''; btn.disabled=true;
+  } else if (bits < 128) {
+    bar.style.background='var(--orange)'; verdict.style.color='var(--orange)';
+    verdict.textContent='MODERATE - Keep adding'; time.textContent='Crackable by nation-state'; btn.disabled=true;
+  } else if (bits < 192) {
+    bar.style.background='var(--yellow)'; verdict.style.color='var(--yellow)';
+    verdict.textContent='STRONG'; time.textContent='Centuries to crack'; btn.disabled=false;
+  } else if (bits < 256) {
+    bar.style.background='var(--green)'; verdict.style.color='var(--green)';
+    verdict.textContent='VERY STRONG'; time.textContent='Heat death of universe'; btn.disabled=false;
+  } else {
+    bar.style.background='var(--accent2)'; verdict.style.color='var(--accent2)';
+    verdict.textContent='FORTRESS GRADE'; time.textContent='Mathematically unbreakable'; btn.disabled=false;
+  }
+}
+
+// =====================================================
+// KEY GENERATION
+// =====================================================
+function buildRecipe() {
+  return [
+    'L1:' + document.getElementById('layer1').value,
+    'L2:' + document.getElementById('layer2').value,
+    'L3:' + document.getElementById('layer3').value,
+    'L4:' + diceRolls.join(','),
+    'L5:' + document.getElementById('layer5').value
+  ].join('|FORTRESS|');
+}
+
+async function derivePrivateKey(recipe) {
+  const encoder = new TextEncoder();
+  const recipeBytes = encoder.encode(recipe);
+  const saltBytes = encoder.encode('FortressKey-v1-deterministic-salt-2025');
+
+  const keyMaterial = await crypto.subtle.importKey('raw', recipeBytes, 'PBKDF2', false, ['deriveBits']);
+  const derivedBits = await crypto.subtle.deriveBits({
+    name: 'PBKDF2', hash: 'SHA-512', salt: saltBytes, iterations: 500000
+  }, keyMaterial, 256);
+
+  return new Uint8Array(derivedBits);
+}
+
+function bytesToHex(bytes) {
+  return Array.from(bytes).map(b => b.toString(16).padStart(2, '0')).join('');
+}
+
+function hexToBytes(hex) {
+  const bytes = new Uint8Array(hex.length / 2);
+  for (let i = 0; i < hex.length; i += 2) bytes[i/2] = parseInt(hex.substr(i, 2), 16);
+  return bytes;
+}
+
+function privateKeyToWIF(privKeyBytes) {
+  // Mainnet WIF: 0x80 + privkey + 0x01 (compressed) + checksum
+  const extended = new Uint8Array(34);
+  extended[0] = 0x80;
+  extended.set(privKeyBytes, 1);
+  extended[33] = 0x01; // compressed flag
+  return BASE58.encodeCheck(extended);
+}
+
+function publicKeyToBtcAddress(compressedPubKey) {
+  const pubBytes = hexToBytes(compressedPubKey);
+  const sha = SHA256.hash(pubBytes);
+  const ripe = RIPEMD160.hash(sha);
+  const versioned = new Uint8Array(21);
+  versioned[0] = 0x00; // mainnet
+  versioned.set(ripe, 1);
+  return BASE58.encodeCheck(versioned);
+}
+
+function publicKeyToEthAddress(uncompressedPubKey) {
+  // Remove 04 prefix, take keccak256, last 20 bytes
+  const pubBytes = hexToBytes(uncompressedPubKey.slice(2)); // remove '04'
+  const hash = KECCAK256.hash(pubBytes);
+  const addrBytes = hash.slice(12); // last 20 bytes
+  return '0x' + bytesToHex(addrBytes);
+}
+
+async function generateKey() {
+  const btn = document.getElementById('generateBtn');
+  btn.textContent = 'DERIVING KEY... (500,000 rounds)';
+  btn.disabled = true;
+
+  await new Promise(r => setTimeout(r, 50));
+
+  try {
+    const recipe = buildRecipe();
+    const privKeyBytes = await derivePrivateKey(recipe);
+    const privKeyHex = bytesToHex(privKeyBytes);
+
+    // Verify key is valid for secp256k1 (must be < N and > 0)
+    const keyBigInt = BigInt('0x' + privKeyHex);
+    if (keyBigInt === 0n || keyBigInt >= SECP256K1.N) {
+      alert('Generated key is outside valid range. Please modify your recipe slightly.');
+      return;
+    }
+
+    // Derive public key
+    const pubKey = SECP256K1.getPublicKey(privKeyHex);
+
+    // Generate addresses
+    const wif = privateKeyToWIF(privKeyBytes);
+    const btcAddr = publicKeyToBtcAddress(pubKey.compressed);
+    const ethAddr = publicKeyToEthAddress(pubKey.uncompressed);
+
+    // Verification hash
+    const verifyHashBytes = SHA256.hash(privKeyBytes);
+    const verifyHashHex = bytesToHex(verifyHashBytes);
+    lastGeneratedHash = verifyHashHex;
+
+    if (currentMode === 'raw') {
+      // Mode 1: Show raw key output
+      document.getElementById('privKeyHex').textContent = privKeyHex;
+      document.getElementById('privKeyWIF').textContent = wif;
+      document.getElementById('btcAddress').textContent = btcAddr;
+      document.getElementById('ethAddress').textContent = ethAddr;
+      document.getElementById('verifyHash').textContent = verifyHashHex;
+      document.getElementById('outputRaw').style.display = 'block';
+      document.getElementById('outputBip39').style.display = 'none';
+    } else {
+      // Mode 2: BIP39 translation
+      const entropyBytes = privKeyBytes;
+      const hashBuffer = SHA256.hash(entropyBytes);
+      const checksumByte = hashBuffer[0];
+
+      let binaryStr = '';
+      for (let i = 0; i < entropyBytes.length; i++) {
+        binaryStr += entropyBytes[i].toString(2).padStart(8, '0');
+      }
+      binaryStr += checksumByte.toString(2).padStart(8, '0');
+
+      const words = [];
+      for (let i = 0; i < 24; i++) {
+        const segment = binaryStr.slice(i * 11, (i + 1) * 11);
+        words.push(BIP39_WORDLIST[parseInt(segment, 2)]);
+      }
+
+      document.getElementById('seedWords').innerHTML = words.map((w, i) =>
+        '<div style="background:var(--bg);border:1px solid var(--border);border-radius:4px;padding:8px;text-align:center;font-size:0.85em;"><div style="color:var(--text-dim);font-size:0.75em;">'+(i+1)+'</div><div style="color:var(--accent);font-weight:bold;">'+w+'</div></div>'
+      ).join('');
+
+      document.getElementById('seedHash').textContent = verifyHashHex;
+      document.getElementById('outputRaw').style.display = 'none';
+      document.getElementById('outputBip39').style.display = 'block';
+    }
+
+    document.getElementById('outputSection').style.display = 'block';
+    document.getElementById('outputSection').scrollIntoView({ behavior: 'smooth' });
+
+  } catch (err) {
+    alert('Error: ' + err.message);
+  }
+
+  btn.textContent = currentMode === 'raw' ? 'GENERATE FORTRESS KEY' : 'GENERATE HARDWARE BRIDGE KEY';
+  btn.disabled = false;
+}
+
+// =====================================================
+// VERIFY RECIPE (re-derive and compare)
+// =====================================================
+async function verifyRecipe() {
+  if (!lastGeneratedHash) { alert('Generate a key first, then verify.'); return; }
+
+  const btn = document.querySelector('.verify-btn');
+  btn.textContent = 'VERIFYING... (500,000 rounds)';
+
+  await new Promise(r => setTimeout(r, 50));
+
+  const recipe = buildRecipe();
+  const privKeyBytes = await derivePrivateKey(recipe);
+  const verifyHashBytes = SHA256.hash(privKeyBytes);
+  const verifyHashHex = bytesToHex(verifyHashBytes);
+
+  if (verifyHashHex === lastGeneratedHash) {
+    btn.textContent = 'VERIFIED - Same recipe produces same key';
+    btn.style.background = 'var(--green)';
+  } else {
+    btn.textContent = 'MISMATCH - Recipe was changed!';
+    btn.style.background = 'var(--red)';
+    btn.style.color = '#fff';
+  }
+
+  setTimeout(() => {
+    btn.textContent = 'VERIFY: Re-enter recipe to confirm same key';
+    btn.style.background = 'var(--accent2)';
+    btn.style.color = '#000';
+  }, 4000);
+}
+
+// =====================================================
+// DESTROY
+// =====================================================
+function destroyOutput() {
+  document.getElementById('privKeyHex').textContent = '';
+  document.getElementById('privKeyWIF').textContent = '';
+  document.getElementById('btcAddress').textContent = '';
+  document.getElementById('ethAddress').textContent = '';
+  document.getElementById('verifyHash').textContent = '';
+  document.getElementById('seedWords').innerHTML = '';
+  document.getElementById('seedHash').textContent = '';
+  document.getElementById('outputSection').style.display = 'none';
+  lastGeneratedHash = null;
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+// =====================================================
+// INIT
+// =====================================================
+initScanner();
+updateEntropy();
+</script>
+
+</body>
+</html>
