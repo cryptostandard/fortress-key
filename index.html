@@ -587,13 +587,23 @@ body {
         </div>
 
         <div class="key-display">
-          <div class="label">Private Key (WIF - Wallet Import Format)</div>
+          <div class="label">Private Key (WIF - Bitcoin)</div>
           <div class="value private" id="privKeyWIF"></div>
+        </div>
+
+        <div class="key-display">
+          <div class="label">Private Key (WIF - Dogecoin)</div>
+          <div class="value private" id="privKeyWIF_DOGE"></div>
         </div>
 
         <div class="key-display">
           <div class="label">Bitcoin Address (P2PKH)</div>
           <div class="value address" id="btcAddress"></div>
+        </div>
+
+        <div class="key-display">
+          <div class="label" style="color:#c3a634;">Dogecoin Address</div>
+          <div class="value address" id="dogeAddress" style="color:#c3a634;"></div>
         </div>
 
         <div class="key-display">
@@ -608,10 +618,17 @@ body {
 
         <div class="success-box">
           <strong>HOW TO IMPORT:</strong><br><br>
-          <strong>Electrum (Bitcoin):</strong> File &gt; New &gt; Import Bitcoin Addresses or Private Keys &gt; paste WIF key<br>
-          <strong>Sparrow:</strong> New Wallet &gt; Import &gt; paste WIF key<br>
-          <strong>MetaMask (ETH):</strong> Import Account &gt; Private Key &gt; paste Hex key (without 0x)<br>
-          <strong>Exodus:</strong> Settings &gt; Import Private Key &gt; paste WIF<br><br>
+          <strong style="color:var(--accent);">BITCOIN:</strong><br>
+          <strong>Electrum:</strong> File &gt; New &gt; Import Private Keys &gt; paste BTC WIF<br>
+          <strong>Sparrow:</strong> New Wallet &gt; Import &gt; paste BTC WIF<br>
+          <strong>Exodus:</strong> Settings &gt; Import Private Key &gt; paste BTC WIF<br><br>
+          <strong style="color:#c3a634;">DOGECOIN:</strong><br>
+          <strong>Dogechain.info:</strong> Settings &gt; Import Private Key &gt; paste DOGE WIF<br>
+          <strong>Coinomi:</strong> Add Wallet &gt; Dogecoin &gt; Restore &gt; paste DOGE WIF<br>
+          <strong>Exodus:</strong> Settings &gt; Import Private Key &gt; select Dogecoin &gt; paste DOGE WIF<br>
+          <strong>MultiDoge:</strong> Tools &gt; Import Private Keys &gt; paste DOGE WIF<br><br>
+          <strong style="color:var(--accent2);">ETHEREUM:</strong><br>
+          <strong>MetaMask:</strong> Import Account &gt; Private Key &gt; paste Hex key (without 0x)<br><br>
           <strong>For hardware wallets:</strong> Switch to Mode 2 (Hardware Bridge) to get BIP39 format.
         </div>
       </div>
@@ -927,6 +944,30 @@ body {
         But here's the real difference: with BIP39, an attacker <strong>knows the wordlist</strong> (2,048 words) and just needs to guess the order. With Fortress Key, the attacker doesn't even know <strong>what characters you used</strong>, let alone the words you invented. The search space is effectively infinite.
       </div>
     </div>
+  </div>
+
+  <!-- Donation Section -->
+  <div style="background:var(--surface); border:1px solid var(--border); border-radius:8px; padding:25px; margin-top:30px;">
+    <h3 style="text-align:center; color:var(--accent); margin-bottom:15px;">Support Fortress Key</h3>
+    <p style="text-align:center; color:var(--text-dim); font-size:0.85em; margin-bottom:20px;">
+      This tool is free and open source. If it helped you secure your crypto, consider donating.<br>
+      100% of donations fund development, security audits, and keeping the tool free for everyone.
+    </p>
+    <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(280px, 1fr)); gap:15px;">
+      <div style="background:var(--bg); border:1px solid var(--accent); border-radius:6px; padding:15px;">
+        <div style="color:var(--accent); font-weight:bold; font-size:0.85em; margin-bottom:8px;">BITCOIN (BTC)</div>
+        <div style="word-break:break-all; font-size:0.75em; color:var(--text); user-select:all; cursor:pointer;" id="donateBTC" onclick="copyDonation(this)" title="Click to copy">YOUR_BTC_ADDRESS_HERE</div>
+        <div style="color:var(--text-dim); font-size:0.7em; margin-top:5px;" id="donateBTCmsg">Click to copy</div>
+      </div>
+      <div style="background:var(--bg); border:1px solid #c3a634; border-radius:6px; padding:15px;">
+        <div style="color:#c3a634; font-weight:bold; font-size:0.85em; margin-bottom:8px;">DOGECOIN (DOGE)</div>
+        <div style="word-break:break-all; font-size:0.75em; color:var(--text); user-select:all; cursor:pointer;" id="donateDOGE" onclick="copyDonation(this)" title="Click to copy">YOUR_DOGE_ADDRESS_HERE</div>
+        <div style="color:var(--text-dim); font-size:0.7em; margin-top:5px;" id="donateDOGEmsg">Click to copy</div>
+      </div>
+    </div>
+    <p style="text-align:center; color:var(--text-dim); font-size:0.75em; margin-top:15px;">
+      These donation addresses were generated using Fortress Key. We eat our own cooking.
+    </p>
   </div>
 
   <div class="footer">
@@ -1780,30 +1821,32 @@ function hexToBytes(hex) {
   return bytes;
 }
 
-function privateKeyToWIF(privKeyBytes) {
-  // Mainnet WIF: 0x80 + privkey + 0x01 (compressed) + checksum
+function privateKeyToWIF(privKeyBytes, networkByte) {
+  // WIF: networkByte + privkey + 0x01 (compressed) + checksum
+  // BTC mainnet: 0x80, DOGE mainnet: 0x9E
+  const prefix = networkByte || 0x80;
   const extended = new Uint8Array(34);
-  extended[0] = 0x80;
+  extended[0] = prefix;
   extended.set(privKeyBytes, 1);
   extended[33] = 0x01; // compressed flag
   return BASE58.encodeCheck(extended);
 }
 
-function publicKeyToBtcAddress(compressedPubKey) {
+function publicKeyToAddress(compressedPubKey, versionByte) {
+  // BTC mainnet: 0x00, DOGE mainnet: 0x1E
   const pubBytes = hexToBytes(compressedPubKey);
   const sha = SHA256.hash(pubBytes);
   const ripe = RIPEMD160.hash(sha);
   const versioned = new Uint8Array(21);
-  versioned[0] = 0x00; // mainnet
+  versioned[0] = versionByte || 0x00;
   versioned.set(ripe, 1);
   return BASE58.encodeCheck(versioned);
 }
 
 function publicKeyToEthAddress(uncompressedPubKey) {
-  // Remove 04 prefix, take keccak256, last 20 bytes
-  const pubBytes = hexToBytes(uncompressedPubKey.slice(2)); // remove '04'
+  const pubBytes = hexToBytes(uncompressedPubKey.slice(2));
   const hash = KECCAK256.hash(pubBytes);
-  const addrBytes = hash.slice(12); // last 20 bytes
+  const addrBytes = hash.slice(12);
   return '0x' + bytesToHex(addrBytes);
 }
 
@@ -1830,9 +1873,11 @@ async function generateKey() {
     // Derive public key
     const pubKey = SECP256K1.getPublicKey(privKeyHex);
 
-    // Generate addresses
-    const wif = privateKeyToWIF(privKeyBytes);
-    const btcAddr = publicKeyToBtcAddress(pubKey.compressed);
+    // Generate addresses for all networks
+    const wifBTC = privateKeyToWIF(privKeyBytes, 0x80);   // Bitcoin
+    const wifDOGE = privateKeyToWIF(privKeyBytes, 0x9E);  // Dogecoin
+    const btcAddr = publicKeyToAddress(pubKey.compressed, 0x00);   // BTC starts with 1
+    const dogeAddr = publicKeyToAddress(pubKey.compressed, 0x1E);  // DOGE starts with D
     const ethAddr = publicKeyToEthAddress(pubKey.uncompressed);
 
     // Verification hash
@@ -1846,8 +1891,10 @@ async function generateKey() {
     if (currentMode === 'raw') {
       // Mode 1: Show raw key output
       document.getElementById('privKeyHex').textContent = privKeyHex;
-      document.getElementById('privKeyWIF').textContent = wif;
+      document.getElementById('privKeyWIF').textContent = wifBTC;
+      document.getElementById('privKeyWIF_DOGE').textContent = wifDOGE;
       document.getElementById('btcAddress').textContent = btcAddr;
+      document.getElementById('dogeAddress').textContent = dogeAddr;
       document.getElementById('ethAddress').textContent = ethAddr;
       document.getElementById('verifyHash').textContent = verifyHashHex;
       document.getElementById('outputRaw').style.display = 'block';
@@ -1928,7 +1975,9 @@ async function verifyRecipe() {
 function destroyOutput() {
   document.getElementById('privKeyHex').textContent = '';
   document.getElementById('privKeyWIF').textContent = '';
+  document.getElementById('privKeyWIF_DOGE').textContent = '';
   document.getElementById('btcAddress').textContent = '';
+  document.getElementById('dogeAddress').textContent = '';
   document.getElementById('ethAddress').textContent = '';
   document.getElementById('verifyHash').textContent = '';
   document.getElementById('seedWords').innerHTML = '';
@@ -1936,6 +1985,20 @@ function destroyOutput() {
   document.getElementById('outputSection').style.display = 'none';
   lastGeneratedHash = null;
   window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+// =====================================================
+// COPY DONATION ADDRESS
+// =====================================================
+function copyDonation(el) {
+  const addr = el.textContent;
+  if (addr.includes('YOUR_')) return;
+  navigator.clipboard.writeText(addr).then(() => {
+    const msg = el.nextElementSibling;
+    msg.textContent = 'Copied!';
+    msg.style.color = 'var(--green)';
+    setTimeout(() => { msg.textContent = 'Click to copy'; msg.style.color = 'var(--text-dim)'; }, 2000);
+  });
 }
 
 // =====================================================
