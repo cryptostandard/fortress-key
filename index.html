@@ -447,6 +447,84 @@ body {
 .comparison-table th { background: var(--surface2); color: var(--accent); }
 .comparison-table td { background: var(--surface); }
 
+/* Air-Gap Signer */
+.airgap-step-box {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 20px;
+  margin-bottom: 15px;
+}
+.airgap-step-box h3 {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 12px;
+}
+.airgap-step-box h3 .step-badge {
+  background: var(--accent);
+  color: #000;
+  padding: 2px 10px;
+  border-radius: 4px;
+  font-size: 0.75em;
+}
+.airgap-step-box h3 .step-location {
+  font-size: 0.7em;
+  padding: 2px 8px;
+  border-radius: 4px;
+}
+.loc-online { background: rgba(76,175,80,0.2); border: 1px solid var(--green); color: var(--green); }
+.loc-offline { background: rgba(239,83,80,0.2); border: 1px solid var(--red); color: var(--red); }
+.airgap-step-box .desc { color: var(--text-dim); font-size: 0.8em; margin-bottom: 12px; }
+.airgap-input {
+  width: 100%;
+  padding: 10px;
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  color: var(--text);
+  font-family: inherit;
+  font-size: 0.85em;
+  margin-bottom: 8px;
+}
+.airgap-input::placeholder { color: var(--text-dim); }
+textarea.airgap-input { resize: vertical; min-height: 80px; }
+.airgap-output {
+  background: var(--bg);
+  border: 1px solid var(--accent);
+  border-radius: 4px;
+  padding: 15px;
+  word-break: break-all;
+  font-size: 0.8em;
+  color: var(--accent);
+  margin: 10px 0;
+  min-height: 50px;
+  user-select: all;
+  cursor: pointer;
+}
+.airgap-flow {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  padding: 20px;
+  margin-bottom: 15px;
+  font-size: 0.85em;
+  color: var(--text-dim);
+}
+.airgap-flow .flow-step {
+  padding: 8px 16px;
+  border-radius: 6px;
+  text-align: center;
+  font-size: 0.85em;
+}
+.airgap-flow .flow-arrow { color: var(--accent); font-size: 1.3em; }
+.input-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+}
+
 .footer {
   text-align: center;
   padding: 30px 0;
@@ -476,6 +554,7 @@ body {
   <div class="tabs">
     <button class="tab active" onclick="switchTab('scanner')">SCANNER</button>
     <button class="tab" onclick="switchTab('generator')">KEY GENERATOR</button>
+    <button class="tab" onclick="switchTab('airgap')">AIR-GAP SIGNER</button>
     <button class="tab" onclick="switchTab('quantum')">QUANTUM SHIELD</button>
     <button class="tab" onclick="switchTab('howto')">HOW IT WORKS</button>
   </div>
@@ -665,6 +744,206 @@ body {
 
       <button class="verify-btn" onclick="verifyRecipe()">VERIFY: Re-enter recipe to confirm same key</button>
       <button class="destroy-btn" onclick="destroyOutput()">DESTROY ALL OUTPUT</button>
+    </div>
+  </div>
+
+  <!-- ==================== AIR-GAP SIGNER PANEL ==================== -->
+  <div id="panel-airgap" class="panel">
+
+    <div class="info-box" style="margin-bottom:20px; border-color:var(--accent); color:var(--accent);">
+      <strong>MODE 3: FORTRESS KEY IS YOUR COLD WALLET</strong><br>
+      No hardware wallet needed. Use two computers: one online (to prepare transactions) and one offline (to sign with your recipe). The private key NEVER touches an internet-connected device.
+    </div>
+
+    <!-- Visual Flow -->
+    <div class="airgap-flow">
+      <div class="flow-step loc-online">ONLINE<br>Prepare TX</div>
+      <div class="flow-arrow">&#8594;</div>
+      <div class="flow-step" style="background:var(--surface2); border:1px solid var(--border); border-radius:6px;">Copy hex<br>via USB/paper</div>
+      <div class="flow-arrow">&#8594;</div>
+      <div class="flow-step loc-offline">OFFLINE<br>Sign TX</div>
+      <div class="flow-arrow">&#8594;</div>
+      <div class="flow-step" style="background:var(--surface2); border:1px solid var(--border); border-radius:6px;">Copy signed<br>via USB/paper</div>
+      <div class="flow-arrow">&#8594;</div>
+      <div class="flow-step loc-online">ONLINE<br>Broadcast</div>
+    </div>
+
+    <!-- Step 1: ONLINE - Prepare Transaction -->
+    <div class="airgap-step-box">
+      <h3>
+        <span class="step-badge">STEP 1</span>
+        <span class="step-location loc-online">ONLINE COMPUTER</span>
+        Prepare Transaction
+      </h3>
+      <div class="desc">
+        Get your UTXO info from a block explorer (blockchair.com, mempool.space, or blockchain.info).
+        Search your Bitcoin address and find unspent outputs.
+      </div>
+
+      <label style="color:var(--text-dim); font-size:0.8em; display:block; margin-bottom:4px;">Your Bitcoin Address (sender)</label>
+      <input class="airgap-input" id="agSenderAddr" placeholder="1ABC... (your Fortress Key BTC address)">
+
+      <label style="color:var(--text-dim); font-size:0.8em; display:block; margin-bottom:4px; margin-top:8px;">UTXO Transaction ID (from block explorer)</label>
+      <input class="airgap-input" id="agUtxoTxid" placeholder="e.g. 7a1b2c3d4e5f... (64 hex characters)">
+
+      <div class="input-row">
+        <div>
+          <label style="color:var(--text-dim); font-size:0.8em; display:block; margin-bottom:4px;">UTXO Output Index</label>
+          <input class="airgap-input" id="agUtxoVout" type="number" placeholder="0" value="0">
+        </div>
+        <div>
+          <label style="color:var(--text-dim); font-size:0.8em; display:block; margin-bottom:4px;">UTXO Amount (satoshis)</label>
+          <input class="airgap-input" id="agUtxoValue" type="number" placeholder="e.g. 100000">
+        </div>
+      </div>
+
+      <label style="color:var(--text-dim); font-size:0.8em; display:block; margin-bottom:4px; margin-top:8px;">Recipient Address</label>
+      <input class="airgap-input" id="agRecipient" placeholder="1XYZ... (destination BTC address)">
+
+      <div class="input-row">
+        <div>
+          <label style="color:var(--text-dim); font-size:0.8em; display:block; margin-bottom:4px;">Send Amount (satoshis)</label>
+          <input class="airgap-input" id="agAmount" type="number" placeholder="e.g. 50000">
+        </div>
+        <div>
+          <label style="color:var(--text-dim); font-size:0.8em; display:block; margin-bottom:4px;">Fee (satoshis)</label>
+          <input class="airgap-input" id="agFee" type="number" placeholder="e.g. 1000" value="2000">
+        </div>
+      </div>
+
+      <div id="agChangeInfo" style="color:var(--text-dim); font-size:0.8em; margin:8px 0;"></div>
+
+      <button class="action-btn" onclick="prepareTransaction()" style="margin-top:10px;">PREPARE UNSIGNED TRANSACTION</button>
+
+      <div id="agUnsignedOutput" style="display:none;">
+        <div style="color:var(--text-dim); font-size:0.8em; margin-top:10px;">Unsigned Transaction Hex (copy this to your OFFLINE computer):</div>
+        <div class="airgap-output" id="agUnsignedHex" onclick="copyAirgap(this)"></div>
+        <div style="color:var(--text-dim); font-size:0.7em;" id="agCopyMsg1">Click to copy</div>
+      </div>
+    </div>
+
+    <!-- Step 2: OFFLINE - Sign Transaction -->
+    <div class="airgap-step-box">
+      <h3>
+        <span class="step-badge">STEP 2</span>
+        <span class="step-location loc-offline">OFFLINE COMPUTER</span>
+        Sign Transaction
+      </h3>
+      <div class="desc">
+        On your air-gapped computer (NO internet), open Fortress Key and paste the unsigned transaction hex below.
+        Then enter your recipe to sign it.
+      </div>
+
+      <label style="color:var(--text-dim); font-size:0.8em; display:block; margin-bottom:4px;">Paste Unsigned Transaction Hex</label>
+      <textarea class="airgap-input" id="agUnsignedInput" placeholder="Paste the unsigned transaction hex from Step 1..."></textarea>
+
+      <div style="background:var(--surface2); border:1px solid var(--border); border-radius:6px; padding:15px; margin:10px 0;">
+        <div style="color:var(--red); font-weight:bold; font-size:0.85em; margin-bottom:8px;">ENTER YOUR RECIPE TO SIGN</div>
+        <div style="color:var(--text-dim); font-size:0.8em; margin-bottom:8px;">This derives your private key and signs the transaction. The key exists only during signing and is destroyed after.</div>
+        <input class="airgap-input" id="agLayer1" placeholder="Layer 1: Personal phrase">
+        <input class="airgap-input" id="agLayer2" placeholder="Layer 2: Invented words">
+        <input class="airgap-input" id="agLayer3" placeholder="Layer 3: Numbers + symbols">
+        <div style="margin:8px 0;">
+          <div style="color:var(--text-dim); font-size:0.8em; margin-bottom:4px;">Layer 4: Dice rolls</div>
+          <div style="display:flex; gap:6px; flex-wrap:wrap;">
+            <button class="dice-btn" style="padding:6px 14px; font-size:1em;" onclick="addDiceAG(1)">1</button>
+            <button class="dice-btn" style="padding:6px 14px; font-size:1em;" onclick="addDiceAG(2)">2</button>
+            <button class="dice-btn" style="padding:6px 14px; font-size:1em;" onclick="addDiceAG(3)">3</button>
+            <button class="dice-btn" style="padding:6px 14px; font-size:1em;" onclick="addDiceAG(4)">4</button>
+            <button class="dice-btn" style="padding:6px 14px; font-size:1em;" onclick="addDiceAG(5)">5</button>
+            <button class="dice-btn" style="padding:6px 14px; font-size:1em;" onclick="addDiceAG(6)">6</button>
+            <button class="clear-dice" onclick="clearDiceAG()">Clear</button>
+          </div>
+          <div id="agDiceResults" style="display:flex; gap:4px; flex-wrap:wrap; margin-top:6px;"></div>
+        </div>
+        <textarea class="airgap-input" id="agLayer5" placeholder="Layer 5: Extra secret sauce" style="min-height:40px;"></textarea>
+      </div>
+
+      <label style="display:flex; align-items:center; gap:8px; color:#bb86fc; font-size:0.85em; margin:8px 0; cursor:pointer;">
+        <input type="checkbox" id="agQuantumShield" checked style="accent-color:#bb86fc;"> Quantum Shield
+      </label>
+
+      <button class="action-btn" onclick="signTransaction()" style="background:var(--red); color:#fff; margin-top:10px;">SIGN TRANSACTION (OFFLINE)</button>
+
+      <div id="agSignedOutput" style="display:none;">
+        <div style="color:var(--text-dim); font-size:0.8em; margin-top:10px;">Signed Transaction Hex (copy this to your ONLINE computer):</div>
+        <div class="airgap-output" id="agSignedHex" onclick="copyAirgap(this)" style="border-color:var(--green); color:var(--green);"></div>
+        <div style="color:var(--text-dim); font-size:0.7em;" id="agCopyMsg2">Click to copy</div>
+
+        <div class="key-display" style="margin-top:10px;">
+          <div class="label">Transaction Details</div>
+          <div id="agTxDetails" style="font-size:0.8em; color:var(--text-dim);"></div>
+        </div>
+
+        <button class="destroy-btn" onclick="destroyAirgap()" style="margin-top:10px;">DESTROY SIGNING DATA</button>
+      </div>
+    </div>
+
+    <!-- Step 3: ONLINE - Broadcast -->
+    <div class="airgap-step-box">
+      <h3>
+        <span class="step-badge">STEP 3</span>
+        <span class="step-location loc-online">ONLINE COMPUTER</span>
+        Broadcast Transaction
+      </h3>
+      <div class="desc">
+        Paste the signed transaction hex and broadcast it to the Bitcoin network.
+      </div>
+
+      <label style="color:var(--text-dim); font-size:0.8em; display:block; margin-bottom:4px;">Paste Signed Transaction Hex</label>
+      <textarea class="airgap-input" id="agBroadcastInput" placeholder="Paste the signed transaction hex from Step 2..."></textarea>
+
+      <div class="success-box" style="margin-bottom:15px;">
+        <strong>Broadcast your signed transaction at any of these services:</strong><br><br>
+        <strong>BlockCypher:</strong> blockcypher.com/pushtx/btc<br>
+        <strong>Mempool.space:</strong> mempool.space/tx/push<br>
+        <strong>Blockchair:</strong> blockchair.com/broadcast<br>
+        <strong>Blockchain.com:</strong> blockchain.com/btc/pushtx<br><br>
+        Paste the signed hex, click submit, and your transaction is on the Bitcoin network.<br>
+        <strong>No wallet software needed. No account needed.</strong>
+      </div>
+    </div>
+
+    <!-- How Air-Gap Works -->
+    <div class="how-section">
+      <h3>Why Air-Gap Signing Is The Gold Standard</h3>
+      <table class="comparison-table">
+        <tr>
+          <th></th>
+          <th>Hardware Wallet</th>
+          <th>Fortress Key Air-Gap</th>
+        </tr>
+        <tr>
+          <td><strong>Private Key</strong></td>
+          <td>Stored on device chip</td>
+          <td>Never stored — derived from recipe each time, destroyed after</td>
+        </tr>
+        <tr>
+          <td><strong>If device is stolen</strong></td>
+          <td>PIN protects, but physical attacks possible</td>
+          <td>Nothing to steal — key is in your head</td>
+        </tr>
+        <tr>
+          <td><strong>Firmware bugs</strong></td>
+          <td>Can compromise keys</td>
+          <td>No firmware — just math in a browser</td>
+        </tr>
+        <tr>
+          <td><strong>Supply chain</strong></td>
+          <td>Must trust manufacturer shipping</td>
+          <td>Open source HTML file, verify yourself</td>
+        </tr>
+        <tr>
+          <td><strong>Cost</strong></td>
+          <td>$60-250</td>
+          <td>Free (use any old laptop offline)</td>
+        </tr>
+        <tr>
+          <td><strong>Recovery</strong></td>
+          <td>Need 24-word backup</td>
+          <td>Your recipe = your backup. Nothing to lose.</td>
+        </tr>
+      </table>
     </div>
   </div>
 
@@ -1632,7 +1911,7 @@ let lastGeneratedHash = null;
 // =====================================================
 function switchTab(name) {
   document.querySelectorAll('.tab').forEach((t, i) => {
-    t.classList.toggle('active', ['scanner','generator','quantum','howto'][i] === name);
+    t.classList.toggle('active', ['scanner','generator','airgap','quantum','howto'][i] === name);
   });
   document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
   document.getElementById('panel-' + name).classList.add('active');
@@ -1985,6 +2264,528 @@ function destroyOutput() {
   document.getElementById('outputSection').style.display = 'none';
   lastGeneratedHash = null;
   window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+// =====================================================
+// COPY DONATION ADDRESS
+// =====================================================
+// =====================================================
+// HMAC-SHA256 (needed for RFC 6979)
+// =====================================================
+function hmacSHA256(key, data) {
+  // key and data are Uint8Array
+  const blockSize = 64;
+  let k = key;
+  if (k.length > blockSize) k = SHA256.hash(k);
+  if (k.length < blockSize) {
+    const padded = new Uint8Array(blockSize);
+    padded.set(k);
+    k = padded;
+  }
+  const ipad = new Uint8Array(blockSize);
+  const opad = new Uint8Array(blockSize);
+  for (let i = 0; i < blockSize; i++) {
+    ipad[i] = k[i] ^ 0x36;
+    opad[i] = k[i] ^ 0x5c;
+  }
+  const inner = new Uint8Array(blockSize + data.length);
+  inner.set(ipad);
+  inner.set(data, blockSize);
+  const innerHash = SHA256.hash(inner);
+  const outer = new Uint8Array(blockSize + 32);
+  outer.set(opad);
+  outer.set(innerHash, blockSize);
+  return SHA256.hash(outer);
+}
+
+// =====================================================
+// RFC 6979 - Deterministic k for ECDSA
+// =====================================================
+function rfc6979k(privKeyBytes, msgHash) {
+  const N = BigInt('0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFEBAAEDCE6AF48A03BBFD25E8CD0364141');
+  const qlen = 32;
+  let v = new Uint8Array(32).fill(0x01);
+  let kk = new Uint8Array(32).fill(0x00);
+
+  // Step D
+  const data1 = new Uint8Array(32 + 1 + 32 + 32);
+  data1.set(v);
+  data1[32] = 0x00;
+  data1.set(privKeyBytes, 33);
+  data1.set(msgHash, 65);
+  kk = hmacSHA256(kk, data1);
+
+  // Step E
+  v = hmacSHA256(kk, v);
+
+  // Step F
+  const data2 = new Uint8Array(32 + 1 + 32 + 32);
+  data2.set(v);
+  data2[32] = 0x01;
+  data2.set(privKeyBytes, 33);
+  data2.set(msgHash, 65);
+  kk = hmacSHA256(kk, data2);
+
+  // Step G
+  v = hmacSHA256(kk, v);
+
+  // Step H
+  while (true) {
+    v = hmacSHA256(kk, v);
+    const t = BigInt('0x' + bytesToHex(v));
+    if (t >= 1n && t < N) return t;
+    const data3 = new Uint8Array(33);
+    data3.set(v);
+    data3[32] = 0x00;
+    kk = hmacSHA256(kk, data3);
+    v = hmacSHA256(kk, v);
+  }
+}
+
+// =====================================================
+// ECDSA SIGNING (secp256k1)
+// =====================================================
+function ecdsaSign(privKeyHex, msgHashBytes) {
+  const N = BigInt('0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFEBAAEDCE6AF48A03BBFD25E8CD0364141');
+  const P = BigInt('0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFEFFFFFC2F');
+  const Gx = BigInt('0x79BE667EF9DCBBAC55A06295CE870B07029BFCDB2DCE28D959F2815B16F81798');
+  const Gy = BigInt('0x483ADA7726A3C4655DA4FBFC0E1108A8FD17B448A68554199C47D08FFB10D4B8');
+
+  const d = BigInt('0x' + privKeyHex);
+  const z = BigInt('0x' + bytesToHex(msgHashBytes));
+  const privBytes = hexToBytes(privKeyHex);
+
+  // Get deterministic k via RFC 6979
+  const k = rfc6979k(privBytes, msgHashBytes);
+
+  // R = k * G
+  function mod(a, m) { const r = a % m; return r >= 0n ? r : r + m; }
+  function modInverse(a, m) {
+    let [old_r, r] = [mod(a, m), m];
+    let [old_s, s] = [1n, 0n];
+    while (r !== 0n) {
+      const q = old_r / r;
+      [old_r, r] = [r, old_r - q * r];
+      [old_s, s] = [s, old_s - q * s];
+    }
+    return mod(old_s, m);
+  }
+  function pointAdd(p1, p2) {
+    if (!p1) return p2;
+    if (!p2) return p1;
+    const [x1,y1] = p1; const [x2,y2] = p2;
+    if (x1 === x2 && y1 === y2) {
+      const s = mod(3n*x1*x1 * modInverse(2n*y1, P), P);
+      const x3 = mod(s*s - 2n*x1, P);
+      return [x3, mod(s*(x1-x3)-y1, P)];
+    }
+    if (x1 === x2) return null;
+    const s = mod((y2-y1) * modInverse(x2-x1, P), P);
+    const x3 = mod(s*s - x1 - x2, P);
+    return [x3, mod(s*(x1-x3)-y1, P)];
+  }
+  function pointMul(scalar, point) {
+    let result = null, addend = point;
+    let s = mod(scalar, N);
+    while (s > 0n) {
+      if (s & 1n) result = pointAdd(result, addend);
+      addend = pointAdd(addend, addend);
+      s >>= 1n;
+    }
+    return result;
+  }
+
+  const R = pointMul(k, [Gx, Gy]);
+  const r = mod(R[0], N);
+  if (r === 0n) throw new Error('Invalid r');
+
+  let s = mod(modInverse(k, N) * (z + r * d), N);
+  if (s === 0n) throw new Error('Invalid s');
+
+  // Enforce low-S (BIP-62)
+  const halfN = N / 2n;
+  if (s > halfN) s = N - s;
+
+  return { r, s };
+}
+
+function derEncode(r, s) {
+  function intBytes(n) {
+    let hex = n.toString(16);
+    if (hex.length % 2) hex = '0' + hex;
+    const bytes = hexToBytes(hex);
+    // Pad with 0x00 if high bit set
+    if (bytes[0] >= 0x80) {
+      const padded = new Uint8Array(bytes.length + 1);
+      padded.set(bytes, 1);
+      return padded;
+    }
+    return bytes;
+  }
+  const rb = intBytes(r);
+  const sb = intBytes(s);
+  const len = 2 + rb.length + 2 + sb.length;
+  const der = new Uint8Array(2 + len);
+  der[0] = 0x30; // SEQUENCE
+  der[1] = len;
+  der[2] = 0x02; // INTEGER
+  der[3] = rb.length;
+  der.set(rb, 4);
+  der[4 + rb.length] = 0x02; // INTEGER
+  der[5 + rb.length] = sb.length;
+  der.set(sb, 6 + rb.length);
+  return der;
+}
+
+// =====================================================
+// BASE58 DECODE (for address -> hash160)
+// =====================================================
+function base58Decode(str) {
+  const ALPHABET = '123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz';
+  let num = 0n;
+  for (const c of str) {
+    const idx = ALPHABET.indexOf(c);
+    if (idx < 0) throw new Error('Invalid Base58 character: ' + c);
+    num = num * 58n + BigInt(idx);
+  }
+  let hex = num.toString(16);
+  if (hex.length % 2) hex = '0' + hex;
+  // Add leading zeros
+  let leadingZeros = 0;
+  for (const c of str) { if (c === '1') leadingZeros++; else break; }
+  const bytes = new Uint8Array(leadingZeros + hex.length / 2);
+  for (let i = 0; i < hex.length / 2; i++) {
+    bytes[leadingZeros + i] = parseInt(hex.substr(i * 2, 2), 16);
+  }
+  return bytes;
+}
+
+function addressToHash160(addr) {
+  const decoded = base58Decode(addr);
+  // Remove version byte (1) and checksum (4)
+  return decoded.slice(1, 21);
+}
+
+// =====================================================
+// BITCOIN TRANSACTION BUILDER
+// =====================================================
+function writeUint32LE(n) {
+  const b = new Uint8Array(4);
+  b[0] = n & 0xff; b[1] = (n >> 8) & 0xff; b[2] = (n >> 16) & 0xff; b[3] = (n >> 24) & 0xff;
+  return b;
+}
+
+function writeUint64LE(n) {
+  const b = new Uint8Array(8);
+  const lo = Number(BigInt(n) & 0xffffffffn);
+  const hi = Number((BigInt(n) >> 32n) & 0xffffffffn);
+  b[0]=lo&0xff; b[1]=(lo>>8)&0xff; b[2]=(lo>>16)&0xff; b[3]=(lo>>24)&0xff;
+  b[4]=hi&0xff; b[5]=(hi>>8)&0xff; b[6]=(hi>>16)&0xff; b[7]=(hi>>24)&0xff;
+  return b;
+}
+
+function writeVarInt(n) {
+  if (n < 0xfd) return new Uint8Array([n]);
+  if (n <= 0xffff) { const b = new Uint8Array(3); b[0]=0xfd; b[1]=n&0xff; b[2]=(n>>8)&0xff; return b; }
+  const b = new Uint8Array(5); b[0]=0xfe; b.set(writeUint32LE(n), 1); return b;
+}
+
+function reverseTxid(txidHex) {
+  const bytes = hexToBytes(txidHex);
+  return bytes.reverse();
+}
+
+function createP2PKHScript(hash160) {
+  // OP_DUP OP_HASH160 <20 bytes> OP_EQUALVERIFY OP_CHECKSIG
+  const script = new Uint8Array(25);
+  script[0] = 0x76; // OP_DUP
+  script[1] = 0xa9; // OP_HASH160
+  script[2] = 0x14; // Push 20 bytes
+  script.set(hash160, 3);
+  script[23] = 0x88; // OP_EQUALVERIFY
+  script[24] = 0xac; // OP_CHECKSIG
+  return script;
+}
+
+function concatBytes(...arrays) {
+  const totalLen = arrays.reduce((sum, a) => sum + a.length, 0);
+  const result = new Uint8Array(totalLen);
+  let offset = 0;
+  for (const a of arrays) { result.set(a, offset); offset += a.length; }
+  return result;
+}
+
+function buildUnsignedTx(utxoTxid, utxoVout, utxoValue, recipientAddr, amount, fee, senderAddr) {
+  const change = utxoValue - amount - fee;
+  const recipientHash = addressToHash160(recipientAddr);
+  const recipientScript = createP2PKHScript(recipientHash);
+
+  // For signing, we need the sender's scriptPubKey in the input
+  const senderHash = addressToHash160(senderAddr);
+  const senderScript = createP2PKHScript(senderHash);
+
+  let outputs;
+  if (change > 0) {
+    const changeScript = createP2PKHScript(senderHash);
+    outputs = concatBytes(
+      new Uint8Array([0x02]), // 2 outputs
+      writeUint64LE(amount),
+      writeVarInt(recipientScript.length), recipientScript,
+      writeUint64LE(change),
+      writeVarInt(changeScript.length), changeScript
+    );
+  } else {
+    outputs = concatBytes(
+      new Uint8Array([0x01]), // 1 output
+      writeUint64LE(amount),
+      writeVarInt(recipientScript.length), recipientScript
+    );
+  }
+
+  // Build the transaction for signing (with scriptPubKey in input)
+  const txForSigning = concatBytes(
+    writeUint32LE(1), // version
+    new Uint8Array([0x01]), // 1 input
+    reverseTxid(utxoTxid),
+    writeUint32LE(utxoVout),
+    writeVarInt(senderScript.length), senderScript, // scriptPubKey for signing
+    writeUint32LE(0xffffffff), // sequence
+    outputs,
+    writeUint32LE(0), // locktime
+    writeUint32LE(1) // SIGHASH_ALL
+  );
+
+  // Store data needed for final tx assembly
+  return {
+    txForSigning,
+    utxoTxid,
+    utxoVout,
+    outputs,
+    amount,
+    fee,
+    change,
+    recipientAddr,
+    senderAddr
+  };
+}
+
+function buildSignedTx(txData, derSig, compressedPubKey) {
+  const sigWithHashType = concatBytes(derSig, new Uint8Array([0x01])); // SIGHASH_ALL
+  const pubKeyBytes = hexToBytes(compressedPubKey);
+
+  // scriptSig: <sig_len> <sig+hashtype> <pubkey_len> <pubkey>
+  const scriptSig = concatBytes(
+    new Uint8Array([sigWithHashType.length]), sigWithHashType,
+    new Uint8Array([pubKeyBytes.length]), pubKeyBytes
+  );
+
+  // Build final signed transaction
+  return concatBytes(
+    writeUint32LE(1), // version
+    new Uint8Array([0x01]), // 1 input
+    reverseTxid(txData.utxoTxid),
+    writeUint32LE(txData.utxoVout),
+    writeVarInt(scriptSig.length), scriptSig,
+    writeUint32LE(0xffffffff), // sequence
+    txData.outputs,
+    writeUint32LE(0) // locktime
+  );
+}
+
+// =====================================================
+// AIR-GAP SIGNER STATE
+// =====================================================
+let agDiceRolls = [];
+
+function addDiceAG(v) { agDiceRolls.push(v); renderDiceAG(); }
+function clearDiceAG() { agDiceRolls = []; renderDiceAG(); }
+function renderDiceAG() {
+  document.getElementById('agDiceResults').innerHTML = agDiceRolls.map(d => '<span class="dice-val" style="width:28px;height:28px;font-size:0.85em;">'+d+'</span>').join('');
+}
+
+function copyAirgap(el) {
+  navigator.clipboard.writeText(el.textContent).then(() => {
+    const msg = el.nextElementSibling;
+    if (msg) { msg.textContent = 'Copied!'; msg.style.color = 'var(--green)'; setTimeout(() => { msg.textContent = 'Click to copy'; msg.style.color = 'var(--text-dim)'; }, 2000); }
+  });
+}
+
+// =====================================================
+// STEP 1: PREPARE UNSIGNED TRANSACTION
+// =====================================================
+function prepareTransaction() {
+  const txid = document.getElementById('agUtxoTxid').value.trim();
+  const vout = parseInt(document.getElementById('agUtxoVout').value) || 0;
+  const utxoValue = parseInt(document.getElementById('agUtxoValue').value) || 0;
+  const recipient = document.getElementById('agRecipient').value.trim();
+  const amount = parseInt(document.getElementById('agAmount').value) || 0;
+  const fee = parseInt(document.getElementById('agFee').value) || 2000;
+  const sender = document.getElementById('agSenderAddr').value.trim();
+
+  // Validation
+  if (!txid || txid.length !== 64) { alert('UTXO Transaction ID must be 64 hex characters'); return; }
+  if (!sender || sender.length < 25) { alert('Enter your Bitcoin address (sender)'); return; }
+  if (!recipient || recipient.length < 25) { alert('Enter recipient Bitcoin address'); return; }
+  if (amount <= 0) { alert('Send amount must be greater than 0'); return; }
+  if (utxoValue <= 0) { alert('UTXO amount must be greater than 0'); return; }
+  if (amount + fee > utxoValue) { alert('Send amount + fee (' + (amount+fee) + ') exceeds UTXO value (' + utxoValue + ')'); return; }
+
+  const change = utxoValue - amount - fee;
+
+  // Show change info
+  const info = document.getElementById('agChangeInfo');
+  info.innerHTML = 'Sending: <strong style="color:var(--accent);">' + amount + ' sats</strong> (' + (amount/100000000).toFixed(8) + ' BTC)<br>' +
+    'Fee: <strong>' + fee + ' sats</strong><br>' +
+    (change > 0 ? 'Change back to you: <strong style="color:var(--green);">' + change + ' sats</strong>' : '<strong style="color:var(--yellow);">No change (exact amount)</strong>');
+
+  try {
+    const txData = buildUnsignedTx(txid, vout, utxoValue, recipient, amount, fee, sender);
+    const unsignedHex = bytesToHex(txData.txForSigning);
+
+    // Encode tx data as JSON for transfer (includes all metadata needed for signing)
+    const transferData = JSON.stringify({
+      v: 1,
+      txHex: unsignedHex,
+      utxoTxid: txid,
+      utxoVout: vout,
+      utxoValue: utxoValue,
+      recipient: recipient,
+      amount: amount,
+      fee: fee,
+      sender: sender,
+      change: change
+    });
+
+    const encoded = btoa(transferData);
+
+    document.getElementById('agUnsignedHex').textContent = encoded;
+    document.getElementById('agUnsignedOutput').style.display = 'block';
+  } catch (e) {
+    alert('Error building transaction: ' + e.message);
+  }
+}
+
+// =====================================================
+// STEP 2: SIGN TRANSACTION (OFFLINE)
+// =====================================================
+async function signTransaction() {
+  const unsignedInput = document.getElementById('agUnsignedInput').value.trim();
+  if (!unsignedInput) { alert('Paste the unsigned transaction data from Step 1'); return; }
+
+  // Parse the transfer data
+  let txInfo;
+  try {
+    txInfo = JSON.parse(atob(unsignedInput));
+  } catch (e) {
+    alert('Invalid transaction data. Make sure you copied the full text from Step 1.'); return;
+  }
+
+  // Build recipe from air-gap inputs
+  const recipe = [
+    'L1:' + document.getElementById('agLayer1').value,
+    'L2:' + document.getElementById('agLayer2').value,
+    'L3:' + document.getElementById('agLayer3').value,
+    'L4:' + agDiceRolls.join(','),
+    'L5:' + document.getElementById('agLayer5').value
+  ].join('|FORTRESS|');
+
+  const btn = document.querySelector('#panel-airgap .action-btn[style*="red"]');
+  btn.textContent = 'DERIVING KEY + SIGNING...';
+  btn.disabled = true;
+
+  await new Promise(r => setTimeout(r, 50));
+
+  try {
+    // Derive private key using same method as generator
+    const encoder = new TextEncoder();
+    const recipeBytes = encoder.encode(recipe);
+    const saltBytes = encoder.encode('FortressKey-v1-deterministic-salt-2025');
+
+    const keyMaterial = await crypto.subtle.importKey('raw', recipeBytes, 'PBKDF2', false, ['deriveBits']);
+    const derivedBits = await crypto.subtle.deriveBits({
+      name: 'PBKDF2', hash: 'SHA-512', salt: saltBytes, iterations: 500000
+    }, keyMaterial, 256);
+
+    let privKeyBytes = new Uint8Array(derivedBits);
+
+    // Apply Quantum Shield if enabled
+    if (document.getElementById('agQuantumShield').checked) {
+      for (let i = 0; i < 10000; i++) {
+        privKeyBytes = KECCAK256.hash(privKeyBytes);
+      }
+      const shaR = SHA256.hash(privKeyBytes);
+      const kecR = KECCAK256.hash(privKeyBytes);
+      const fused = new Uint8Array(32);
+      for (let i = 0; i < 32; i++) fused[i] = shaR[i] ^ kecR[i];
+      privKeyBytes = fused;
+    }
+
+    const privKeyHex = bytesToHex(privKeyBytes);
+
+    // Verify this key matches the sender address
+    const pubKey = SECP256K1.getPublicKey(privKeyHex);
+    const derivedAddr = publicKeyToAddress(pubKey.compressed, 0x00);
+
+    if (derivedAddr !== txInfo.sender) {
+      alert('WARNING: Your recipe produces address ' + derivedAddr + ' but the transaction is from ' + txInfo.sender + '. The recipe does not match! Make sure you entered the exact same recipe used to generate the sending address.');
+      btn.textContent = 'SIGN TRANSACTION (OFFLINE)';
+      btn.disabled = false;
+      return;
+    }
+
+    // Rebuild the unsigned transaction to get the hash for signing
+    const txData = buildUnsignedTx(txInfo.utxoTxid, txInfo.utxoVout, txInfo.utxoValue, txInfo.recipient, txInfo.amount, txInfo.fee, txInfo.sender);
+
+    // Double SHA-256 of the serialized tx (for signing)
+    const txHash = SHA256.doubleHash(txData.txForSigning);
+
+    // Sign with ECDSA
+    const sig = ecdsaSign(privKeyHex, txHash);
+    const derSig = derEncode(sig.r, sig.s);
+
+    // Build signed transaction
+    const signedTx = buildSignedTx(txData, derSig, pubKey.compressed);
+    const signedHex = bytesToHex(signedTx);
+
+    // Compute txid (double sha256 of signed tx, reversed)
+    const txidHash = SHA256.doubleHash(signedTx);
+    const txidHex = bytesToHex(txidHash.reverse());
+
+    // Display
+    document.getElementById('agSignedHex').textContent = signedHex;
+    document.getElementById('agTxDetails').innerHTML =
+      'TXID: <span style="color:var(--accent);">' + txidHex + '</span><br>' +
+      'From: ' + txInfo.sender + '<br>' +
+      'To: ' + txInfo.recipient + '<br>' +
+      'Amount: ' + txInfo.amount + ' sats (' + (txInfo.amount/100000000).toFixed(8) + ' BTC)<br>' +
+      'Fee: ' + txInfo.fee + ' sats<br>' +
+      (txInfo.change > 0 ? 'Change: ' + txInfo.change + ' sats (back to you)' : 'No change');
+
+    document.getElementById('agSignedOutput').style.display = 'block';
+    document.getElementById('agSignedOutput').scrollIntoView({ behavior: 'smooth' });
+
+    // Also populate the broadcast field
+    document.getElementById('agBroadcastInput').value = signedHex;
+
+  } catch (e) {
+    alert('Signing error: ' + e.message);
+  }
+
+  btn.textContent = 'SIGN TRANSACTION (OFFLINE)';
+  btn.disabled = false;
+}
+
+function destroyAirgap() {
+  document.getElementById('agSignedHex').textContent = '';
+  document.getElementById('agTxDetails').innerHTML = '';
+  document.getElementById('agSignedOutput').style.display = 'none';
+  document.getElementById('agUnsignedInput').value = '';
+  document.getElementById('agLayer1').value = '';
+  document.getElementById('agLayer2').value = '';
+  document.getElementById('agLayer3').value = '';
+  document.getElementById('agLayer5').value = '';
+  agDiceRolls = [];
+  renderDiceAG();
 }
 
 // =====================================================
