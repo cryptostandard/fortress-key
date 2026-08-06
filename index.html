@@ -1904,8 +1904,8 @@ function buildRecipe() {
 
 async function derivePrivateKey(recipe) {
   const encoder = new TextEncoder();
-  const recipeBytes = encoder.encode(recipe);
-  const saltBytes = encoder.encode('FortressKey-v1-deterministic-salt-2025');
+  const recipeBytes = new Uint8Array(encoder.encode(recipe));
+  const saltBytes = new Uint8Array(encoder.encode('FortressKey-v1-deterministic-salt-2025'));
 
   // Step 1: PBKDF2-SHA512 (500,000 rounds) using noble-hashes (works offline on file://)
   const derivedBytes = NoblePBKDF2(NobleSHA512, recipeBytes, saltBytes, { c: 500000, dkLen: 32 });
@@ -2397,8 +2397,8 @@ async function signTransaction() {
   try {
     // Derive private key using same method as generator
     const encoder = new TextEncoder();
-    const recipeBytes = encoder.encode(recipe);
-    const saltBytes = encoder.encode('FortressKey-v1-deterministic-salt-2025');
+    const recipeBytes = new Uint8Array(encoder.encode(recipe));
+    const saltBytes = new Uint8Array(encoder.encode('FortressKey-v1-deterministic-salt-2025'));
 
     const derivedBytes = NoblePBKDF2(NobleSHA512, recipeBytes, saltBytes, { c: 500000, dkLen: 32 });
 
@@ -2604,8 +2604,8 @@ async function runSelfTest() {
 
   // Test 13: PBKDF2-SHA512 determinism
   const encoder = new TextEncoder();
-  const recipe1 = encoder.encode('test-recipe');
-  const salt1 = encoder.encode('FortressKey-v1-deterministic-salt-2025');
+  const recipe1 = new Uint8Array(encoder.encode('test-recipe'));
+  const salt1 = new Uint8Array(encoder.encode('FortressKey-v1-deterministic-salt-2025'));
   const d1 = NoblePBKDF2(NobleSHA512, recipe1, salt1, { c: 1000, dkLen: 32 });
   const d2 = NoblePBKDF2(NobleSHA512, recipe1, salt1, { c: 1000, dkLen: 32 });
   const pbkdf2Match = bytesToHex(d1) === bytesToHex(d2);
