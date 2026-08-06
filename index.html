@@ -558,14 +558,25 @@ textarea.airgap-input { resize: vertical; min-height: 80px; }
     <span style="color:var(--red); font-size:0.85em;">
       For maximum security: <strong>disconnect from the internet</strong> before generating keys.<br>
       Never generate keys while connected to the internet.
-    </span><br>
-    <button onclick="downloadOffline()" style="margin-top:10px; padding:10px 24px; background:var(--red); color:#fff; border:none; border-radius:6px; font-family:inherit; font-size:0.9em; font-weight:bold; cursor:pointer;">DOWNLOAD FOR OFFLINE USE</button>
+    </span>
   </div>
 
   <!-- Offline Ready Banner -->
   <div id="offlineReady" style="display:none; background:rgba(76,175,80,0.15); border:2px solid var(--green); border-radius:8px; padding:15px; margin-bottom:20px; text-align:center;">
     <strong style="color:var(--green); font-size:1.1em;">OFFLINE MODE - SECURE</strong><br>
     <span style="color:var(--green); font-size:0.85em;">No internet connection detected. Safe to generate keys.</span>
+  </div>
+
+  <!-- Download Button (always visible) -->
+  <div id="downloadBar" style="background:var(--surface); border:1px solid var(--accent); border-radius:8px; padding:12px; margin-bottom:20px; text-align:center; display:flex; align-items:center; justify-content:center; gap:15px; flex-wrap:wrap;">
+    <span style="color:var(--text-dim); font-size:0.85em;">For maximum security, download and use offline:</span>
+    <button id="downloadBtn" style="padding:8px 20px; background:var(--accent); color:#000; border:none; border-radius:6px; font-family:inherit; font-size:0.85em; font-weight:bold; cursor:pointer;">DOWNLOAD fortress-key.html</button>
+  </div>
+
+  <!-- JS Error Banner (hidden unless error) -->
+  <div id="jsErrorBanner" style="display:none; background:rgba(239,83,80,0.15); border:2px solid var(--red); border-radius:8px; padding:15px; margin-bottom:20px;">
+    <strong style="color:var(--red);">JavaScript Error Detected</strong><br>
+    <span style="color:var(--red); font-size:0.85em;" id="jsErrorMsg"></span>
   </div>
 
   <div class="tabs">
@@ -1344,6 +1355,20 @@ textarea.airgap-input { resize: vertical; min-height: 80px; }
 </script>
 
 <script>
+// =====================================================
+// GLOBAL ERROR HANDLER
+// =====================================================
+window.onerror = function(msg, url, line, col, err) {
+  var banner = document.getElementById('jsErrorBanner');
+  var msgEl = document.getElementById('jsErrorMsg');
+  if (banner && msgEl) {
+    banner.style.display = 'block';
+    msgEl.textContent = msg + ' (line ' + line + ')';
+  }
+  console.error('Fortress Key Error:', msg, 'line:', line);
+  return false;
+};
+
 // =====================================================
 // CRYPTO WRAPPERS (using Cure53-audited noble libraries)
 // All cryptographic primitives below use:
