@@ -1380,8 +1380,9 @@ const SECP256K1 = (() => {
   const N = NobleSecp256k1.Point.Fn.ORDER;
 
   function getPublicKey(privKeyHex) {
-    const pubCompressed = NobleSecp256k1.getPublicKey(privKeyHex, true);
-    const pubUncompressed = NobleSecp256k1.getPublicKey(privKeyHex, false);
+    const privBytes = NobleFromHex(privKeyHex);
+    const pubCompressed = NobleSecp256k1.getPublicKey(privBytes, true);
+    const pubUncompressed = NobleSecp256k1.getPublicKey(privBytes, false);
     const compHex = NobleToHex(pubCompressed);
     const uncompHex = NobleToHex(pubUncompressed);
     return {
@@ -2120,7 +2121,8 @@ function destroyOutput() {
 // =====================================================
 function ecdsaSign(privKeyHex, msgHashBytes) {
   // noble-curves handles RFC 6979, low-S, and DER encoding internally
-  const sig = NobleSecp256k1.sign(msgHashBytes, privKeyHex, { lowS: true });
+  const privBytes = NobleFromHex(privKeyHex);
+  const sig = NobleSecp256k1.sign(msgHashBytes, privBytes, { lowS: true });
   return sig;
 }
 
@@ -2597,7 +2599,7 @@ async function runSelfTest() {
   test('ECDSA signing (deterministic, DER encoded)', derBytes.length > 68 && derBytes.length < 73 ? 'valid length' : 'invalid', 'valid length');
 
   // Test 12: ECDSA signature verification
-  const sigValid = NobleSecp256k1.verify(sig, testMsg, NobleSecp256k1.getPublicKey(testPriv, true));
+  const sigValid = NobleSecp256k1.verify(sig, testMsg, NobleSecp256k1.getPublicKey(NobleFromHex(testPriv), true));
   test('ECDSA signature verification', sigValid ? 'true' : 'false', 'true');
 
   // Test 13: PBKDF2-SHA512 determinism
