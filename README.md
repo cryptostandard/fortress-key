@@ -101,3 +101,4 @@ MIT — Free to use, modify, and distribute.
 Audit the code. Open issues. Submit PRs. The security of this tool depends on community review.
 
 **Trust nothing. Verify everything.**
+
