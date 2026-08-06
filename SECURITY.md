@@ -36,7 +36,7 @@ All cryptographic operations use the **noble** library family by Paul Miller, in
 | **SHA-512** | `@noble/hashes` | PBKDF2 key derivation |
 | **RIPEMD-160** | `@noble/hashes` | Bitcoin address derivation (Hash160) |
 | **Keccak-256** | `@noble/hashes` | Ethereum addresses, Quantum Shield |
-| **PBKDF2** | Web Crypto API (`crypto.subtle`) | Key derivation (500,000 iterations) — native browser implementation |
+| **PBKDF2-SHA512** | `@noble/hashes` | Key derivation (500,000 iterations) — works offline on file:// protocol |
 | **Base58Check** | Custom (non-cryptographic) | Bitcoin/Dogecoin address and WIF encoding |
 
 ### Audit Information

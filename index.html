@@ -554,11 +554,18 @@ textarea.airgap-input { resize: vertical; min-height: 80px; }
 
   <!-- Online Warning Banner -->
   <div id="onlineWarning" style="display:none; background:rgba(239,83,80,0.15); border:2px solid var(--red); border-radius:8px; padding:15px; margin-bottom:20px; text-align:center;">
-    <strong style="color:var(--red); font-size:1.1em;">YOU ARE ONLINE</strong><br>
+    <strong style="color:var(--red); font-size:1.1em;">WARNING: YOU ARE ONLINE</strong><br>
     <span style="color:var(--red); font-size:0.85em;">
       For maximum security: <strong>disconnect from the internet</strong> before generating keys.<br>
-      Download this file, go offline, then open it in your browser.
-    </span>
+      Never generate keys while connected to the internet.
+    </span><br>
+    <button onclick="downloadOffline()" style="margin-top:10px; padding:10px 24px; background:var(--red); color:#fff; border:none; border-radius:6px; font-family:inherit; font-size:0.9em; font-weight:bold; cursor:pointer;">DOWNLOAD FOR OFFLINE USE</button>
+  </div>
+
+  <!-- Offline Ready Banner -->
+  <div id="offlineReady" style="display:none; background:rgba(76,175,80,0.15); border:2px solid var(--green); border-radius:8px; padding:15px; margin-bottom:20px; text-align:center;">
+    <strong style="color:var(--green); font-size:1.1em;">OFFLINE MODE - SECURE</strong><br>
+    <span style="color:var(--green); font-size:0.85em;">No internet connection detected. Safe to generate keys.</span>
   </div>
 
   <div class="tabs">
@@ -1874,13 +1881,10 @@ async function derivePrivateKey(recipe) {
   const recipeBytes = encoder.encode(recipe);
   const saltBytes = encoder.encode('FortressKey-v1-deterministic-salt-2025');
 
-  // Step 1: PBKDF2-SHA512 (500,000 rounds)
-  const keyMaterial = await crypto.subtle.importKey('raw', recipeBytes, 'PBKDF2', false, ['deriveBits']);
-  const derivedBits = await crypto.subtle.deriveBits({
-    name: 'PBKDF2', hash: 'SHA-512', salt: saltBytes, iterations: 500000
-  }, keyMaterial, 256);
+  // Step 1: PBKDF2-SHA512 (500,000 rounds) using noble-hashes (works offline on file://)
+  const derivedBytes = NoblePBKDF2(NobleSHA512, recipeBytes, saltBytes, { c: 500000, dkLen: 32 });
 
-  let keyBytes = new Uint8Array(derivedBits);
+  let keyBytes = new Uint8Array(derivedBytes);
 
   // Step 2: Quantum Shield (if enabled)
   const quantumEnabled = document.getElementById('quantumShield').checked;
@@ -2267,10 +2271,15 @@ function renderDiceAG() {
 }
 
 function copyAirgap(el) {
-  navigator.clipboard.writeText(el.textContent).then(() => {
-    const msg = el.nextElementSibling;
-    if (msg) { msg.textContent = 'Copied!'; msg.style.color = 'var(--green)'; setTimeout(() => { msg.textContent = 'Click to copy'; msg.style.color = 'var(--text-dim)'; }, 2000); }
-  });
+  const text = el.textContent;
+  if (navigator.clipboard && navigator.clipboard.writeText) {
+    navigator.clipboard.writeText(text).then(() => {
+      const msg = el.nextElementSibling;
+      if (msg) { msg.textContent = 'Copied!'; msg.style.color = 'var(--green)'; setTimeout(() => { msg.textContent = 'Click to copy'; msg.style.color = 'var(--text-dim)'; }, 2000); }
+    }).catch(() => { fallbackCopy(text, el); });
+  } else {
+    fallbackCopy(text, el);
+  }
 }
 
 // =====================================================
@@ -2364,12 +2373,9 @@ async function signTransaction() {
     const recipeBytes = encoder.encode(recipe);
     const saltBytes = encoder.encode('FortressKey-v1-deterministic-salt-2025');
 
-    const keyMaterial = await crypto.subtle.importKey('raw', recipeBytes, 'PBKDF2', false, ['deriveBits']);
-    const derivedBits = await crypto.subtle.deriveBits({
-      name: 'PBKDF2', hash: 'SHA-512', salt: saltBytes, iterations: 500000
-    }, keyMaterial, 256);
+    const derivedBytes = NoblePBKDF2(NobleSHA512, recipeBytes, saltBytes, { c: 500000, dkLen: 32 });
 
-    let privKeyBytes = new Uint8Array(derivedBits);
+    let privKeyBytes = new Uint8Array(derivedBytes);
 
     // Apply Quantum Shield if enabled
     if (document.getElementById('agQuantumShield').checked) {
@@ -2454,15 +2460,32 @@ function destroyAirgap() {
 // =====================================================
 // COPY DONATION ADDRESS
 // =====================================================
+function fallbackCopy(text, el) {
+  const ta = document.createElement('textarea');
+  ta.value = text;
+  ta.style.position = 'fixed';
+  ta.style.opacity = '0';
+  document.body.appendChild(ta);
+  ta.select();
+  document.execCommand('copy');
+  document.body.removeChild(ta);
+  const msg = el.nextElementSibling;
+  if (msg) { msg.textContent = 'Copied!'; msg.style.color = 'var(--green)'; setTimeout(() => { msg.textContent = 'Click to copy'; msg.style.color = 'var(--text-dim)'; }, 2000); }
+}
+
 function copyDonation(el) {
   const addr = el.textContent;
   if (addr.includes('YOUR_')) return;
-  navigator.clipboard.writeText(addr).then(() => {
-    const msg = el.nextElementSibling;
-    msg.textContent = 'Copied!';
-    msg.style.color = 'var(--green)';
-    setTimeout(() => { msg.textContent = 'Click to copy'; msg.style.color = 'var(--text-dim)'; }, 2000);
-  });
+  if (navigator.clipboard && navigator.clipboard.writeText) {
+    navigator.clipboard.writeText(addr).then(() => {
+      const msg = el.nextElementSibling;
+      msg.textContent = 'Copied!';
+      msg.style.color = 'var(--green)';
+      setTimeout(() => { msg.textContent = 'Click to copy'; msg.style.color = 'var(--text-dim)'; }, 2000);
+    }).catch(() => { fallbackCopy(addr, el); });
+  } else {
+    fallbackCopy(addr, el);
+  }
 }
 
 // =====================================================
@@ -2556,11 +2579,9 @@ async function runSelfTest() {
   const encoder = new TextEncoder();
   const recipe1 = encoder.encode('test-recipe');
   const salt1 = encoder.encode('FortressKey-v1-deterministic-salt-2025');
-  const km1 = await crypto.subtle.importKey('raw', recipe1, 'PBKDF2', false, ['deriveBits']);
-  const d1 = await crypto.subtle.deriveBits({ name:'PBKDF2', hash:'SHA-512', salt:salt1, iterations:1000 }, km1, 256);
-  const km2 = await crypto.subtle.importKey('raw', recipe1, 'PBKDF2', false, ['deriveBits']);
-  const d2 = await crypto.subtle.deriveBits({ name:'PBKDF2', hash:'SHA-512', salt:salt1, iterations:1000 }, km2, 256);
-  const pbkdf2Match = bytesToHex(new Uint8Array(d1)) === bytesToHex(new Uint8Array(d2));
+  const d1 = NoblePBKDF2(NobleSHA512, recipe1, salt1, { c: 1000, dkLen: 32 });
+  const d2 = NoblePBKDF2(NobleSHA512, recipe1, salt1, { c: 1000, dkLen: 32 });
+  const pbkdf2Match = bytesToHex(d1) === bytesToHex(d2);
   test('PBKDF2-SHA512 determinism', pbkdf2Match ? 'true' : 'false', 'true');
 
   // Test 14: Base58Check encode/decode roundtrip
@@ -2588,15 +2609,31 @@ async function runSelfTest() {
 }
 
 // =====================================================
-// ONLINE DETECTION
+// ONLINE DETECTION + DOWNLOAD
 // =====================================================
 function checkOnlineStatus() {
   const warning = document.getElementById('onlineWarning');
+  const ready = document.getElementById('offlineReady');
   if (navigator.onLine) {
     warning.style.display = 'block';
+    ready.style.display = 'none';
   } else {
     warning.style.display = 'none';
+    ready.style.display = 'block';
   }
+}
+
+function downloadOffline() {
+  const html = document.documentElement.outerHTML;
+  const blob = new Blob(['<!DOCTYPE html>\n' + html], { type: 'text/html' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = 'fortress-key.html';
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
 }
 
 // =====================================================
