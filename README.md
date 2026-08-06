@@ -4,6 +4,8 @@
 
 Open source cold wallet security tool that eliminates dependency on hardware wallet firmware for key generation. Built in response to the Coldcard vulnerability that affected thousands of users.
 
+**Live:** https://cryptostandard.info | **Repo:** https://github.com/cryptostandard/fortress-key
+
 ## The Problem
 
 Hardware wallets generate your private keys using their firmware. When that firmware has bugs (like the Coldcard RNG vulnerability), your keys can be compromised — and you'd never know.
@@ -22,51 +24,75 @@ Fortress Key lets you create a **secret recipe** — a unique combination of:
 
 This recipe is processed through **PBKDF2-SHA512 (500,000 rounds)** to produce a raw 256-bit private key. No public wordlist involved. The attacker doesn't even know what characters you used.
 
-## Two Modes
+## Three Modes
 
 ### Mode 1: Pure Fortress (Recommended)
-Your recipe → raw private key + WIF + Bitcoin/Ethereum addresses. Import into Electrum, Sparrow, MetaMask, or any wallet that accepts raw keys.
+Recipe → raw private key + WIF + Bitcoin/Dogecoin/Ethereum addresses. Import into Electrum, Sparrow, MetaMask, or any wallet that accepts raw keys. **No 24-word seed phrase. No public wordlist.**
 
 ### Mode 2: Hardware Bridge
 For hardware wallets (Coldcard, Ledger, Trezor) that only accept BIP39 format. Generates a temporary 24-word translation for import. Destroy after use — your recipe is your real backup.
 
-## Why This Is Different
+### Mode 3: Air-Gap Transaction Signer
+**Fortress Key IS your cold wallet.** No hardware wallet needed. Prepare transactions online, sign offline with your recipe, broadcast online. The private key exists only during signing and is destroyed after.
 
-| | Traditional (BIP39) | Fortress Key |
+## Cryptographic Libraries
+
+All cryptographic primitives use the **noble** library family by Paul Miller, independently audited by **Cure53**:
+
+| Primitive | Library | Audit |
 |---|---|---|
-| **Key Source** | 24 words from a PUBLIC list of 2,048 | YOUR recipe: invented words, symbols, dice |
-| **Attacker Knows** | The exact 2,048 words | NOTHING — not even the character set |
-| **Dictionary Attack** | Possible | Impossible (your words exist in no dictionary) |
-| **Who Generates** | Wallet firmware (can have bugs) | YOU generate. Wallet is just a signing device |
-| **Backup** | Metal plate with 24 words (can be stolen) | Your memory. Nothing physical to steal |
-| **Recovery** | Need the 24 words | Re-enter recipe on any device, get same key |
+| secp256k1 (ECC, ECDSA) | `@noble/curves` | [Cure53 audit report](https://cure53.de/pentest-report_noble-libs.pdf) |
+| SHA-256, SHA-512, RIPEMD-160, Keccak-256 | `@noble/hashes` | [Cure53 audit report](https://cure53.de/pentest-report_noble-libs.pdf) |
+| PBKDF2-SHA512 | Web Crypto API (`crypto.subtle`) | Browser-native implementation |
 
-## Features
+Libraries are bundled and inlined directly into `index.html`. No external CDN, no network fetch, no runtime dependencies.
+
+## Self-Test Verification
+
+Built-in Self-Test tab runs **15 test vectors** on every cryptographic primitive:
+
+- SHA-256, RIPEMD-160, Keccak-256 against known outputs
+- secp256k1 public key derivation (privkey=1)
+- Bitcoin address: privkey=1 → `1BgGZ9tcN4rm9KBzDn7KprQz87SZ26SAMH`
+- Ethereum address: privkey=1 → `0x7e5f4552091a69125d5dfcb7b8c2659029395bdf`
+- WIF encoding, ECDSA signing + verification, PBKDF2 determinism
+- Base58Check roundtrip, Quantum Shield cascade determinism
+
+**Run the self-test every time you download a new copy.**
+
+## Additional Features
 
 - **Vulnerability Scanner** — Check known CVEs for Coldcard, Ledger, Trezor, KeepKey, BitBox02
-- **Key Generator** — 5-layer recipe system with real-time entropy meter
+- **Quantum Shield** — Optional post-quantum hardening (Keccak-256 cascade + SHA-256 XOR fusion)
+- **Online Detection** — Auto-warns if you're connected to the internet
+- **Multi-chain** — BTC, DOGE, ETH from one recipe
 - **Deterministic** — Same recipe always produces the same key
-- **Verification** — Re-derive to confirm reproducibility
-- **Destroy Button** — Wipe all output from memory
+- **Destroy Button** — Wipe all output from the page
 
 ## Security
 
-- **100% client-side** — zero network calls, zero data transmitted
-- **Zero dependencies** — single HTML file, no external libraries
-- **Runs offline** — download and disconnect from the internet
-- **Full crypto stack** — secp256k1, SHA-256, RIPEMD-160, Keccak-256, Base58Check all implemented in pure JavaScript
-- **Auditable** — single file, view source, verify everything
+- **Cure53-audited cryptographic libraries** — noble-curves + noble-hashes
+- **15 self-verifying test vectors** — Run before every use
+- **100% client-side** — Zero network calls, zero data transmitted
+- **Single file** — All code inlined in one HTML file for easy auditing
+- **Runs offline** — Download and disconnect from the internet
+- **Online detection** — Warns you if you're connected
+
+See [SECURITY.md](SECURITY.md) for full details on cryptographic primitives, known limitations, and audit information.
 
 ## How to Use
 
-1. **Download** `index.html`
-2. **Disconnect** from the internet
-3. **Open** in any browser
-4. **Create** your secret recipe (5 layers)
-5. **Generate** your key
-6. **Import** into your wallet (raw key or WIF)
-7. **Destroy** the output
-8. **Remember** your recipe — it's your permanent backup
+1. **Download** `index.html` from this repository
+2. **Verify** — Check the file hash matches the latest commit
+3. **Disconnect** from the internet
+4. **Open** in any browser
+5. **Run Self-Test** — Click the Self-Test tab, run all tests, confirm 15/15 pass
+6. **Create** your secret recipe (5 layers)
+7. **Generate** your key
+8. **Import** into your wallet
+9. **Destroy** the output
+10. **Close** the browser and reboot for maximum security
+11. **Remember** your recipe — it's your permanent backup
 
 ## How to Import
 
@@ -75,15 +101,25 @@ For hardware wallets (Coldcard, Ledger, Trezor) that only accept BIP39 format. G
 - **Sparrow:** New Wallet → Import → paste WIF
 - **MetaMask:** Import Account → Private Key → paste hex key
 - **Exodus:** Settings → Import Private Key → paste WIF
+- **Coinomi:** Add Wallet → Restore → paste WIF (supports BTC + DOGE)
 
 **Hardware Wallets (Mode 2):**
 - **Coldcard:** New Seed → Import Existing → 24 Words
 - **Ledger:** Restore from Recovery Phrase → 24 Words
 - **Trezor:** Recover Wallet → 24 Words
 
+## Known Limitations
+
+1. JavaScript timing side-channels (mitigated by noble, run offline)
+2. No secure memory wiping in browsers (close tab, reboot after use)
+3. Entropy depends entirely on user recipe quality
+4. Air-gap signer supports single-input P2PKH only (no SegWit yet)
+
+**This tool has not yet undergone a dedicated third-party audit of the integration and application logic.** The cryptographic libraries (noble) have been audited by Cure53. For significant funds, consider using alongside established tools. Community review is encouraged.
+
 ## The Math
 
-A typical 5-layer recipe produces **300+ bits of entropy**.
+A typical 5-layer recipe with invented words produces **300+ bits of entropy**.
 
 - To brute-force 256 bits: ~10⁷⁷ guesses needed
 - All computers on Earth: ~10²⁰ guesses/second
@@ -101,4 +137,3 @@ MIT — Free to use, modify, and distribute.
 Audit the code. Open issues. Submit PRs. The security of this tool depends on community review.
 
 **Trust nothing. Verify everything.**
-
