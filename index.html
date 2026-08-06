@@ -1377,7 +1377,7 @@ window.onerror = function(msg, url, line, col, err) {
 //   Audit report: https://cure53.de/pentest-report_noble-libs.pdf
 // =====================================================
 const SECP256K1 = (() => {
-  const N = NobleSecp256k1.CURVE.n;
+  const N = NobleSecp256k1.Point.Fn.ORDER;
 
   function getPublicKey(privKeyHex) {
     const pubCompressed = NobleSecp256k1.getPublicKey(privKeyHex, true);
@@ -2669,6 +2669,7 @@ updateEntropy();
 checkOnlineStatus();
 window.addEventListener('online', checkOnlineStatus);
 window.addEventListener('offline', checkOnlineStatus);
+document.getElementById('downloadBtn').addEventListener('click', downloadOffline);
 </script>
 
 </body>
