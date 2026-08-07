@@ -1301,6 +1301,47 @@ textarea.airgap-input { resize: vertical; min-height: 80px; }
     </div>
   </div>
 
+  <!-- Security Checklist -->
+  <div style="background:var(--surface); border:2px solid var(--red); border-radius:8px; padding:25px; margin-top:30px;">
+    <h3 style="text-align:center; color:var(--red); margin-bottom:15px;">Security Checklist</h3>
+    <p style="text-align:center; color:var(--text-dim); font-size:0.85em; margin-bottom:20px;">
+      The code is open source and audited. But YOUR environment determines your security.<br>
+      Follow this checklist every time you generate keys.
+    </p>
+    <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(320px, 1fr)); gap:20px;">
+      <div style="background:var(--bg); border:1px solid var(--border); border-radius:6px; padding:15px;">
+        <div style="color:var(--red); font-weight:bold; font-size:0.9em; margin-bottom:10px;">BEFORE GENERATING KEYS</div>
+        <div style="color:var(--text-dim); font-size:0.8em; line-height:2;">
+          <label style="display:block; cursor:pointer;"><input type="checkbox" style="accent-color:var(--green); margin-right:8px;">Downloaded from cryptostandard.info or GitHub</label>
+          <label style="display:block; cursor:pointer;"><input type="checkbox" style="accent-color:var(--green); margin-right:8px;">Disconnected from the internet</label>
+          <label style="display:block; cursor:pointer;"><input type="checkbox" style="accent-color:var(--green); margin-right:8px;">Using a clean browser (zero extensions)</label>
+          <label style="display:block; cursor:pointer;"><input type="checkbox" style="accent-color:var(--green); margin-right:8px;">Closed all other browser tabs</label>
+          <label style="display:block; cursor:pointer;"><input type="checkbox" style="accent-color:var(--green); margin-right:8px;">Ideally on an air-gapped computer</label>
+          <label style="display:block; cursor:pointer;"><input type="checkbox" style="accent-color:var(--green); margin-right:8px;">Ran Self-Test (15/15 passed)</label>
+        </div>
+      </div>
+      <div style="background:var(--bg); border:1px solid var(--border); border-radius:6px; padding:15px;">
+        <div style="color:var(--green); font-weight:bold; font-size:0.9em; margin-bottom:10px;">AFTER GENERATING KEYS</div>
+        <div style="color:var(--text-dim); font-size:0.8em; line-height:2;">
+          <label style="display:block; cursor:pointer;"><input type="checkbox" style="accent-color:var(--green); margin-right:8px;">Imported key into wallet</label>
+          <label style="display:block; cursor:pointer;"><input type="checkbox" style="accent-color:var(--green); margin-right:8px;">Clicked DESTROY ALL OUTPUT</label>
+          <label style="display:block; cursor:pointer;"><input type="checkbox" style="accent-color:var(--green); margin-right:8px;">Closed the browser completely</label>
+          <label style="display:block; cursor:pointer;"><input type="checkbox" style="accent-color:var(--green); margin-right:8px;">Rebooted the computer</label>
+          <label style="display:block; cursor:pointer;"><input type="checkbox" style="accent-color:var(--green); margin-right:8px;">Will NEVER type recipe on an online device</label>
+          <label style="display:block; cursor:pointer;"><input type="checkbox" style="accent-color:var(--green); margin-right:8px;">Recipe is memorized (not written digitally)</label>
+        </div>
+      </div>
+    </div>
+    <div style="margin-top:15px; padding:12px; background:rgba(239,83,80,0.1); border:1px solid var(--red); border-radius:6px; text-align:center;">
+      <span style="color:var(--red); font-size:0.85em;">
+        <strong>WARNING:</strong> Generating keys on a malware-infected computer, while online, or with browser extensions running can compromise your keys — regardless of how secure this tool is. The code is not the vulnerability. Your environment is.
+      </span>
+    </div>
+    <div style="margin-top:10px; text-align:center;">
+      <span style="color:var(--text-dim); font-size:0.8em;">Report bugs or security issues: <a href="https://x.com/jcreyx" target="_blank" style="color:var(--accent2); text-decoration:none;">@jcreyx on X</a> | <a href="https://github.com/cryptostandard/fortress-key/issues" target="_blank" style="color:var(--accent2); text-decoration:none;">GitHub Issues</a></span>
+    </div>
+  </div>
+
   <!-- Donation Section -->
   <div style="background:var(--surface); border:1px solid var(--border); border-radius:8px; padding:25px; margin-top:30px;">
     <h3 style="text-align:center; color:var(--accent); margin-bottom:15px;">Support Fortress Key</h3>
