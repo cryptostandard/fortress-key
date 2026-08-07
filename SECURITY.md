@@ -4,7 +4,7 @@
 
 If you discover a security vulnerability in Fortress Key, please report it responsibly.
 
-**Email:** security@cryptostandard.info
+**X/Twitter:** [@jcreyx](https://x.com/jcreyx)
 
 **Do NOT:**
 - Open a public GitHub issue for security vulnerabilities
