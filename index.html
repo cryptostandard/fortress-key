@@ -571,10 +571,13 @@ textarea.airgap-input { resize: vertical; min-height: 80px; }
   <div id="downloadBar" style="background:var(--surface); border:1px solid var(--accent); border-radius:8px; padding:15px; margin-bottom:20px; text-align:center;">
     <div style="color:var(--text-dim); font-size:0.85em; margin-bottom:10px;">For maximum security, download and use offline:</div>
     <div style="display:flex; align-items:center; justify-content:center; gap:12px; flex-wrap:wrap;">
-      <button id="downloadBtn" style="padding:8px 20px; background:var(--accent); color:#000; border:none; border-radius:6px; font-family:inherit; font-size:0.85em; font-weight:bold; cursor:pointer;">DOWNLOAD HTML (Browser)</button>
-      <a href="https://github.com/cryptostandard/fortress-key-desktop/releases/latest" target="_blank" style="padding:8px 20px; background:var(--green); color:#000; border:none; border-radius:6px; font-family:inherit; font-size:0.85em; font-weight:bold; cursor:pointer; text-decoration:none; display:inline-block;">DOWNLOAD DESKTOP APP (macOS)</a>
+      <button id="downloadBtn" style="padding:8px 20px; background:var(--accent); color:#000; border:none; border-radius:6px; font-family:inherit; font-size:0.85em; font-weight:bold; cursor:pointer;">DOWNLOAD HTML (All Platforms)</button>
+      <a href="https://github.com/cryptostandard/fortress-key-desktop/releases/latest" target="_blank" style="padding:8px 20px; background:var(--green); color:#000; border:none; border-radius:6px; font-family:inherit; font-size:0.85em; font-weight:bold; cursor:pointer; text-decoration:none; display:inline-block;">DESKTOP APP (macOS)</a>
     </div>
-    <div style="color:var(--text-dim); font-size:0.75em; margin-top:8px;">Desktop app uses Rust crypto with secure memory zeroing. Recommended for serious use.</div>
+    <div style="color:var(--text-dim); font-size:0.75em; margin-top:8px;">
+      <strong>HTML version:</strong> Works on any device (Mac, PC, Linux, phone). Download, disconnect, open in browser.<br>
+      <strong>Desktop app:</strong> Rust crypto + secure memory zeroing. macOS only. Windows &amp; Linux coming soon.
+    </div>
   </div>
 
   <!-- JS Error Banner (hidden unless error) -->
