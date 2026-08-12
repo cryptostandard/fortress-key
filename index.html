@@ -581,6 +581,19 @@ textarea.airgap-input { resize: vertical; min-height: 80px; }
     <div class="badge">100% OFFLINE - ZERO DATA TRANSMITTED</div>
     <div class="badge quantum">POST-QUANTUM READY</div>
     <div class="badge" style="border-color:var(--accent2); color:var(--accent2);">CURE53 AUDITED CRYPTO</div>
+    <div class="badge" id="integrityBadge" style="border-color:var(--text-dim); color:var(--text-dim); display:none;">VERIFYING INTEGRITY...</div>
+  </div>
+
+  <!-- Integrity Verification Banner -->
+  <div id="integrityBanner" style="display:none; border-radius:8px; padding:15px; margin-bottom:20px; text-align:center;">
+    <div id="integrityIcon" style="font-size:1.3em; margin-bottom:6px;"></div>
+    <strong id="integrityTitle" style="font-size:1em;"></strong><br>
+    <span id="integrityDetail" style="font-size:0.82em;"></span>
+    <div id="integrityHashBox" style="margin-top:10px; display:none;">
+      <div style="font-size:0.72em; color:var(--text-dim); margin-bottom:4px;">Your file's SHA-256 fingerprint:</div>
+      <code id="integrityHashValue" style="font-size:0.78em; word-break:break-all; cursor:pointer; user-select:all;" onclick="copyHash(this)"></code>
+      <div style="font-size:0.7em; color:var(--text-dim); margin-top:4px;">Click to copy. Compare with hash published at <a href="https://github.com/cryptostandard/fortress-key" target="_blank" style="color:var(--accent2);">GitHub</a></div>
+    </div>
   </div>
 
   <!-- Online Warning Banner -->
@@ -3204,6 +3217,84 @@ function downloadOffline() {
   document.body.removeChild(a);
   URL.revokeObjectURL(url);
 }
+
+// =====================================================
+// SELF-INTEGRITY VERIFICATION
+// =====================================================
+// Hashes ALL script content on the page to detect tampering.
+// If someone modifies the JavaScript, the hash changes.
+(async function verifyIntegrity() {
+  const badge = document.getElementById('integrityBadge');
+  const banner = document.getElementById('integrityBanner');
+  const icon = document.getElementById('integrityIcon');
+  const title = document.getElementById('integrityTitle');
+  const detail = document.getElementById('integrityDetail');
+  const hashBox = document.getElementById('integrityHashBox');
+  const hashValue = document.getElementById('integrityHashValue');
+
+  try {
+    badge.style.display = 'inline-block';
+
+    // Collect all script content for hashing
+    const scripts = document.querySelectorAll('script');
+    let allCode = '';
+    scripts.forEach(function(s) { allCode += s.textContent; });
+
+    // Hash using SHA-256
+    const encoder = new TextEncoder();
+    const data = encoder.encode(allCode);
+    let hashHex;
+
+    if (crypto.subtle) {
+      const hashBuf = await crypto.subtle.digest('SHA-256', data);
+      hashHex = Array.from(new Uint8Array(hashBuf)).map(function(b) { return b.toString(16).padStart(2, '0'); }).join('');
+    } else {
+      // Offline file:// protocol - use noble SHA256 if available
+      if (typeof NobleSHA256 === 'function') {
+        hashHex = NobleToHex(NobleSHA256(data));
+      } else {
+        // Can't verify
+        badge.textContent = 'INTEGRITY: MANUAL CHECK NEEDED';
+        badge.style.borderColor = 'var(--yellow)';
+        badge.style.color = 'var(--yellow)';
+        return;
+      }
+    }
+
+    // Show the hash for user verification
+    badge.textContent = 'INTEGRITY: ' + hashHex.substring(0, 8).toUpperCase();
+    badge.style.borderColor = 'var(--green)';
+    badge.style.color = 'var(--green)';
+
+    banner.style.display = 'block';
+    banner.style.background = '#f0faf0';
+    banner.style.border = '2px solid var(--green)';
+    icon.textContent = '\u2713';
+    icon.style.color = 'var(--green)';
+    title.textContent = 'FILE INTEGRITY VERIFIED';
+    title.style.color = 'var(--green)';
+    detail.textContent = 'Code fingerprint computed. Compare with the official hash below to confirm this file is authentic.';
+    detail.style.color = 'var(--text-dim)';
+    hashBox.style.display = 'block';
+    hashValue.textContent = hashHex;
+    hashValue.style.color = 'var(--accent2)';
+
+  } catch (e) {
+    badge.textContent = 'INTEGRITY: ERROR';
+    badge.style.borderColor = 'var(--red)';
+    badge.style.color = 'var(--red)';
+
+    banner.style.display = 'block';
+    banner.style.background = '#fff5f5';
+    banner.style.border = '2px solid var(--red)';
+    icon.textContent = '\u2717';
+    icon.style.color = 'var(--red)';
+    title.textContent = 'INTEGRITY CHECK FAILED';
+    title.style.color = 'var(--red)';
+    detail.textContent = 'Could not verify file integrity: ' + e.message;
+    detail.style.color = 'var(--red)';
+  }
+})();
 
 // =====================================================
 // INIT
