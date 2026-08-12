@@ -535,6 +535,21 @@ textarea.airgap-input { resize: vertical; min-height: 80px; }
   font-size: 0.8em;
 }
 
+/* Recipe Wizard */
+.wiz-circle {
+  width: 32px; height: 32px; border-radius: 50%;
+  background: var(--surface2); border: 2px solid var(--border);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 0.8em; font-weight: bold; color: var(--text-dim);
+  transition: all 0.3s;
+}
+.wiz-active { border-color: var(--accent); color: var(--accent); background: rgba(247,147,26,0.15); }
+.wiz-done { border-color: var(--green); color: var(--green); background: rgba(76,175,80,0.15); }
+.wiz-step { display: none; background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 25px; animation: wizFade 0.3s ease; }
+.wiz-step-active { display: block; }
+@keyframes wizFade { from { opacity:0; transform:translateY(10px); } to { opacity:1; transform:translateY(0); } }
+.wizard-input:focus { border-color: var(--accent) !important; }
+
 @media (max-width: 600px) {
   .wallet-grid { grid-template-columns: 1fr; }
   .header h1 { font-size: 1.5em; }
@@ -569,15 +584,27 @@ textarea.airgap-input { resize: vertical; min-height: 80px; }
   </div>
 
   <!-- Download Options (always visible) -->
-  <div id="downloadBar" style="background:var(--surface); border:1px solid var(--accent); border-radius:8px; padding:15px; margin-bottom:20px; text-align:center;">
-    <div style="color:var(--text-dim); font-size:0.85em; margin-bottom:10px;">For maximum security, download and use offline:</div>
-    <div style="display:flex; align-items:center; justify-content:center; gap:12px; flex-wrap:wrap;">
-      <button id="downloadBtn" style="padding:8px 20px; background:var(--accent); color:#000; border:none; border-radius:6px; font-family:inherit; font-size:0.85em; font-weight:bold; cursor:pointer;">DOWNLOAD HTML (All Platforms)</button>
-      <a href="https://github.com/cryptostandard/fortress-key-desktop/releases/latest" target="_blank" style="padding:8px 20px; background:var(--green); color:#000; border:none; border-radius:6px; font-family:inherit; font-size:0.85em; font-weight:bold; cursor:pointer; text-decoration:none; display:inline-block;">DESKTOP APP (macOS)</a>
+  <div id="downloadBar" style="background:var(--surface); border:1px solid var(--accent); border-radius:8px; padding:20px; margin-bottom:20px; text-align:center;">
+    <div style="color:var(--text-dim); font-size:0.85em; margin-bottom:12px;">For maximum security, download and use offline:</div>
+    <div style="display:flex; align-items:center; justify-content:center; gap:10px; flex-wrap:wrap; margin-bottom:12px;">
+      <button id="downloadBtn" style="padding:8px 18px; background:var(--accent); color:#000; border:none; border-radius:6px; font-family:inherit; font-size:0.8em; font-weight:bold; cursor:pointer;">DOWNLOAD HTML (All Devices)</button>
     </div>
-    <div style="color:var(--text-dim); font-size:0.75em; margin-top:8px;">
-      <strong>HTML version:</strong> Works on any device (Mac, PC, Linux, phone). Download, disconnect, open in browser.<br>
-      <strong>Desktop app:</strong> Rust crypto + secure memory zeroing. macOS only. Windows &amp; Linux coming soon.
+    <div style="color:var(--text-dim); font-size:0.75em; margin-bottom:12px;">
+      <strong>HTML version:</strong> Works everywhere (Mac, PC, Linux, phone). Download, disconnect, open in browser.
+    </div>
+    <div style="border-top:1px solid var(--border); padding-top:12px;">
+      <div style="color:var(--accent2); font-size:0.8em; font-weight:bold; margin-bottom:10px;">DESKTOP APP &mdash; Rust Crypto + Secure Memory Zeroing</div>
+      <div style="display:flex; align-items:center; justify-content:center; gap:8px; flex-wrap:wrap;">
+        <a href="https://github.com/inbotai/fortress-key-desktop/releases/latest/download/Fortress.Key_1.0.0_aarch64.dmg" style="padding:7px 14px; background:var(--green); color:#000; border:none; border-radius:6px; font-family:inherit; font-size:0.78em; font-weight:bold; cursor:pointer; text-decoration:none; display:inline-block;">macOS (Apple Silicon)</a>
+        <a href="https://github.com/inbotai/fortress-key-desktop/releases/latest/download/Fortress.Key_1.0.0_x64.dmg" style="padding:7px 14px; background:var(--green); color:#000; border:none; border-radius:6px; font-family:inherit; font-size:0.78em; font-weight:bold; cursor:pointer; text-decoration:none; display:inline-block;">macOS (Intel)</a>
+        <a href="https://github.com/inbotai/fortress-key-desktop/releases/latest/download/Fortress.Key_1.0.0_x64-setup.exe" style="padding:7px 14px; background:var(--accent2); color:#000; border:none; border-radius:6px; font-family:inherit; font-size:0.78em; font-weight:bold; cursor:pointer; text-decoration:none; display:inline-block;">Windows (.exe)</a>
+        <a href="https://github.com/inbotai/fortress-key-desktop/releases/latest/download/Fortress.Key_1.0.0_x64_en-US.msi" style="padding:7px 14px; background:var(--accent2); color:#000; border:none; border-radius:6px; font-family:inherit; font-size:0.78em; font-weight:bold; cursor:pointer; text-decoration:none; display:inline-block;">Windows (.msi)</a>
+        <a href="https://github.com/inbotai/fortress-key-desktop/releases/latest/download/Fortress.Key_1.0.0_amd64.AppImage" style="padding:7px 14px; background:#bb86fc; color:#000; border:none; border-radius:6px; font-family:inherit; font-size:0.78em; font-weight:bold; cursor:pointer; text-decoration:none; display:inline-block;">Linux (.AppImage)</a>
+        <a href="https://github.com/inbotai/fortress-key-desktop/releases/latest/download/Fortress.Key_1.0.0_amd64.deb" style="padding:7px 14px; background:#bb86fc; color:#000; border:none; border-radius:6px; font-family:inherit; font-size:0.78em; font-weight:bold; cursor:pointer; text-decoration:none; display:inline-block;">Linux (.deb)</a>
+      </div>
+      <div style="color:var(--text-dim); font-size:0.7em; margin-top:8px;">
+        Desktop app uses Rust cryptography with secure memory zeroing. Private keys are wiped from RAM after use.
+      </div>
     </div>
   </div>
 
@@ -589,6 +616,7 @@ textarea.airgap-input { resize: vertical; min-height: 80px; }
 
   <div class="tabs">
     <button class="tab active" onclick="switchTab('scanner')">SCANNER</button>
+    <button class="tab" onclick="switchTab('wizard')">RECIPE WIZARD</button>
     <button class="tab" onclick="switchTab('generator')">KEY GENERATOR</button>
     <button class="tab" onclick="switchTab('airgap')">AIR-GAP SIGNER</button>
     <button class="tab" onclick="switchTab('quantum')">QUANTUM SHIELD</button>
@@ -606,6 +634,183 @@ textarea.airgap-input { resize: vertical; min-height: 80px; }
     </div>
     <button class="action-btn" id="scanBtn" onclick="runScan()" disabled>SCAN FOR VULNERABILITIES</button>
     <div class="vuln-report" id="vulnReport"></div>
+  </div>
+
+  <!-- ==================== RECIPE WIZARD PANEL ==================== -->
+  <div id="panel-wizard" class="panel">
+
+    <!-- Wizard Progress Bar -->
+    <div style="display:flex; justify-content:space-between; margin-bottom:25px; position:relative;">
+      <div style="position:absolute; top:15px; left:30px; right:30px; height:2px; background:var(--border); z-index:0;"></div>
+      <div style="display:flex; flex-direction:column; align-items:center; z-index:1;" id="wp1c">
+        <div class="wiz-circle wiz-active" id="wp1">1</div>
+        <div style="font-size:0.6em; color:var(--text-dim); margin-top:5px;">Memory</div>
+      </div>
+      <div style="display:flex; flex-direction:column; align-items:center; z-index:1;" id="wp2c">
+        <div class="wiz-circle" id="wp2">2</div>
+        <div style="font-size:0.6em; color:var(--text-dim); margin-top:5px;">Invented</div>
+      </div>
+      <div style="display:flex; flex-direction:column; align-items:center; z-index:1;" id="wp3c">
+        <div class="wiz-circle" id="wp3">3</div>
+        <div style="font-size:0.6em; color:var(--text-dim); margin-top:5px;">Numbers</div>
+      </div>
+      <div style="display:flex; flex-direction:column; align-items:center; z-index:1;" id="wp4c">
+        <div class="wiz-circle" id="wp4">4</div>
+        <div style="font-size:0.6em; color:var(--text-dim); margin-top:5px;">Dice</div>
+      </div>
+      <div style="display:flex; flex-direction:column; align-items:center; z-index:1;" id="wp5c">
+        <div class="wiz-circle" id="wp5">5</div>
+        <div style="font-size:0.6em; color:var(--text-dim); margin-top:5px;">Secret</div>
+      </div>
+      <div style="display:flex; flex-direction:column; align-items:center; z-index:1;" id="wp6c">
+        <div class="wiz-circle" id="wp6">R</div>
+        <div style="font-size:0.6em; color:var(--text-dim); margin-top:5px;">Review</div>
+      </div>
+    </div>
+
+    <!-- WIZARD STEP 1: Sensory Memory -->
+    <div class="wiz-step wiz-step-active" id="ws1">
+      <h3 style="color:var(--accent); margin-bottom:8px;">Step 1: A Memory Only You Lived</h3>
+      <p style="color:var(--text-dim); font-size:0.82em; margin-bottom:15px;">
+        Think of a specific moment from your life involving your senses: what you saw, smelled, tasted, heard, or felt. Nobody else on Earth can guess this.
+      </p>
+      <div style="background:rgba(79,195,247,0.08); border:1px solid rgba(79,195,247,0.25); border-radius:6px; padding:12px; margin-bottom:15px; font-size:0.78em; color:var(--accent2);">
+        Why: Episodic memories are stored differently in your brain than facts. They're vivid, emotional, and nearly impossible to forget.
+      </div>
+      <div style="background:var(--bg); border:1px solid var(--border); border-radius:6px; padding:12px; margin-bottom:15px; font-size:0.75em; color:var(--text-dim);">
+        <strong style="color:var(--yellow);">Good:</strong> "Abuela Rosa's kitchen smelled like burnt garlic every Sunday at 11am"<br>
+        <strong style="color:var(--yellow);">Good:</strong> "The hospital room was freezing when my daughter was born at 3:42am"<br>
+        <strong style="color:var(--red);">Bad:</strong> "I love my family" (too vague) &bull; "My birthday is June 15" (public info)
+      </div>
+      <input type="text" class="wizard-input" id="wiz1" placeholder="A moment only you remember..." oninput="wizInput(1)" autocomplete="off" spellcheck="false" style="width:100%; padding:12px; background:var(--bg); border:2px solid var(--border); border-radius:8px; color:var(--text); font-family:inherit; font-size:0.9em; outline:none;">
+      <div style="text-align:right; font-size:0.7em; color:var(--text-dim); margin:4px 0 8px;"><span id="wc1">0</span> chars</div>
+      <div style="height:4px; background:var(--surface2); border-radius:2px; margin-bottom:4px; overflow:hidden;"><div id="wf1" style="height:100%; width:0%; border-radius:2px; transition:all 0.3s;"></div></div>
+      <div id="wl1" style="font-size:0.72em; color:var(--text-dim); margin-bottom:15px;">Enter your memory</div>
+      <div style="display:flex; justify-content:flex-end;"><button class="action-btn" id="wn1" onclick="wizGo(2)" disabled style="padding:10px 30px;">NEXT</button></div>
+    </div>
+
+    <!-- WIZARD STEP 2: Invented Words -->
+    <div class="wiz-step" id="ws2">
+      <h3 style="color:var(--accent); margin-bottom:8px;">Step 2: Words You Invented</h3>
+      <p style="color:var(--text-dim); font-size:0.82em; margin-bottom:15px;">
+        Create 2+ words that do NOT exist in any language or dictionary. Sounds that mean something only to you.
+      </p>
+      <div style="background:rgba(79,195,247,0.08); border:1px solid rgba(79,195,247,0.25); border-radius:6px; padding:12px; margin-bottom:15px; font-size:0.78em; color:var(--accent2);">
+        Why: BIP39 uses 2,048 known words. Attackers can brute-force known wordlists. Your invented words exist in NO wordlist &mdash; the search space is infinite.
+      </div>
+      <div style="background:var(--bg); border:1px solid var(--border); border-radius:6px; padding:12px; margin-bottom:15px; font-size:0.75em; color:var(--text-dim);">
+        <strong style="color:var(--yellow);">Techniques:</strong> Mash syllables ("churplex"), childhood nicknames ("tukimoshi"), funny sounds ("blorpnax fantomila"), imaginary names ("zikkel morvayne")<br>
+        <strong style="color:var(--red);">Don't use:</strong> Real words from any language, celebrity names, "leet speak"
+      </div>
+      <input type="text" class="wizard-input" id="wiz2" placeholder="Your invented words (at least 2)..." oninput="wizInput(2)" autocomplete="off" spellcheck="false" style="width:100%; padding:12px; background:var(--bg); border:2px solid var(--border); border-radius:8px; color:var(--text); font-family:inherit; font-size:0.9em; outline:none;">
+      <div style="text-align:right; font-size:0.7em; color:var(--text-dim); margin:4px 0 8px;"><span id="wc2">0</span> chars</div>
+      <div style="height:4px; background:var(--surface2); border-radius:2px; margin-bottom:4px; overflow:hidden;"><div id="wf2" style="height:100%; width:0%; border-radius:2px; transition:all 0.3s;"></div></div>
+      <div id="wl2" style="font-size:0.72em; color:var(--text-dim); margin-bottom:15px;">Enter your invented words</div>
+      <div style="display:flex; justify-content:space-between;"><button class="action-btn" onclick="wizGo(1)" style="padding:10px 20px; background:var(--surface2); border:1px solid var(--border);">BACK</button><button class="action-btn" id="wn2" onclick="wizGo(3)" disabled style="padding:10px 30px;">NEXT</button></div>
+    </div>
+
+    <!-- WIZARD STEP 3: Numbers + Symbols -->
+    <div class="wiz-step" id="ws3">
+      <h3 style="color:var(--accent); margin-bottom:8px;">Step 3: Numbers + Symbols</h3>
+      <p style="color:var(--text-dim); font-size:0.82em; margin-bottom:15px;">
+        Numbers and special characters meaningful to you but impossible to guess. Prices, dates, coordinates, patterns.
+      </p>
+      <div style="background:var(--bg); border:1px solid var(--border); border-radius:6px; padding:12px; margin-bottom:15px; font-size:0.75em; color:var(--text-dim);">
+        <strong style="color:var(--yellow);">Good:</strong> "47300!!@@" &bull; "40.7128##-74.0060" &bull; "$$$342.17***"<br>
+        <strong style="color:var(--red);">Avoid:</strong> "123456" (sequential) &bull; Your phone number or SSN (could be leaked)
+      </div>
+      <input type="text" class="wizard-input" id="wiz3" placeholder="Numbers and symbols..." oninput="wizInput(3)" autocomplete="off" spellcheck="false" style="width:100%; padding:12px; background:var(--bg); border:2px solid var(--border); border-radius:8px; color:var(--text); font-family:inherit; font-size:0.9em; outline:none;">
+      <div style="text-align:right; font-size:0.7em; color:var(--text-dim); margin:4px 0 8px;"><span id="wc3">0</span> chars</div>
+      <div style="height:4px; background:var(--surface2); border-radius:2px; margin-bottom:4px; overflow:hidden;"><div id="wf3" style="height:100%; width:0%; border-radius:2px; transition:all 0.3s;"></div></div>
+      <div id="wl3" style="font-size:0.72em; color:var(--text-dim); margin-bottom:15px;">Enter numbers and symbols</div>
+      <div style="display:flex; justify-content:space-between;"><button class="action-btn" onclick="wizGo(2)" style="padding:10px 20px; background:var(--surface2); border:1px solid var(--border);">BACK</button><button class="action-btn" id="wn3" onclick="wizGo(4)" disabled style="padding:10px 30px;">NEXT</button></div>
+    </div>
+
+    <!-- WIZARD STEP 4: Dice Rolls -->
+    <div class="wiz-step" id="ws4">
+      <h3 style="color:var(--accent); margin-bottom:8px;">Step 4: Dice Rolls (Physical Randomness)</h3>
+      <p style="color:var(--text-dim); font-size:0.82em; margin-bottom:15px;">
+        Roll a REAL physical die and click the result. Minimum 10 rolls. This adds true randomness no computer can predict.
+      </p>
+      <div style="display:flex; gap:8px; flex-wrap:wrap; margin-bottom:10px;">
+        <button class="dice-btn" onclick="wizDice(1)">1</button>
+        <button class="dice-btn" onclick="wizDice(2)">2</button>
+        <button class="dice-btn" onclick="wizDice(3)">3</button>
+        <button class="dice-btn" onclick="wizDice(4)">4</button>
+        <button class="dice-btn" onclick="wizDice(5)">5</button>
+        <button class="dice-btn" onclick="wizDice(6)">6</button>
+      </div>
+      <div id="wizDiceDisplay" style="min-height:30px; background:var(--bg); border:1px solid var(--border); border-radius:6px; padding:10px; font-size:1.1em; letter-spacing:4px; color:var(--accent); margin-bottom:8px; word-break:break-all;">Roll your die and click...</div>
+      <button onclick="wizDiceClear()" style="background:none; border:1px solid var(--red); color:var(--red); padding:5px 14px; border-radius:4px; font-family:inherit; font-size:0.75em; cursor:pointer; margin-bottom:10px;">Clear Rolls</button>
+      <div style="height:4px; background:var(--surface2); border-radius:2px; margin-bottom:4px; overflow:hidden;"><div id="wf4" style="height:100%; width:0%; border-radius:2px; transition:all 0.3s;"></div></div>
+      <div id="wl4" style="font-size:0.72em; color:var(--text-dim); margin-bottom:15px;">Roll at least 10 times</div>
+      <div style="display:flex; justify-content:space-between;"><button class="action-btn" onclick="wizGo(3)" style="padding:10px 20px; background:var(--surface2); border:1px solid var(--border);">BACK</button><button class="action-btn" id="wn4" onclick="wizGo(5)" disabled style="padding:10px 30px;">NEXT</button></div>
+    </div>
+
+    <!-- WIZARD STEP 5: Secret Sauce -->
+    <div class="wiz-step" id="ws5">
+      <h3 style="color:var(--accent); margin-bottom:8px;">Step 5: Your Secret Sauce</h3>
+      <p style="color:var(--text-dim); font-size:0.82em; margin-bottom:15px;">
+        Anything else uniquely YOU: song lyrics, coordinates, emojis, another language, inside jokes, formulas...
+      </p>
+      <div style="background:var(--bg); border:1px solid var(--border); border-radius:6px; padding:12px; margin-bottom:15px; font-size:0.75em; color:var(--text-dim);">
+        <strong style="color:var(--yellow);">Ideas:</strong> A lyric from an obscure song &bull; GPS coordinates of where you proposed &bull; "the purple elephant ate my homework" &bull; "f(x)=3x^2+7" &bull; A sentence mixing 2 languages
+      </div>
+      <input type="text" class="wizard-input" id="wiz5" placeholder="Your secret sauce (optional but recommended)..." oninput="wizInput(5)" autocomplete="off" spellcheck="false" style="width:100%; padding:12px; background:var(--bg); border:2px solid var(--border); border-radius:8px; color:var(--text); font-family:inherit; font-size:0.9em; outline:none;">
+      <div style="text-align:right; font-size:0.7em; color:var(--text-dim); margin:4px 0 8px;"><span id="wc5">0</span> chars</div>
+      <div style="height:4px; background:var(--surface2); border-radius:2px; margin-bottom:4px; overflow:hidden;"><div id="wf5" style="height:100%; width:0%; border-radius:2px; transition:all 0.3s;"></div></div>
+      <div id="wl5" style="font-size:0.72em; color:var(--text-dim); margin-bottom:15px;">Add your secret sauce</div>
+      <div style="display:flex; justify-content:space-between;"><button class="action-btn" onclick="wizGo(4)" style="padding:10px 20px; background:var(--surface2); border:1px solid var(--border);">BACK</button><button class="action-btn" id="wn5" onclick="wizGo(6)" style="padding:10px 30px;">REVIEW</button></div>
+    </div>
+
+    <!-- WIZARD STEP 6: Review -->
+    <div class="wiz-step" id="ws6">
+      <h3 style="color:var(--accent); margin-bottom:8px;">Review Your Recipe</h3>
+      <p style="color:var(--text-dim); font-size:0.82em; margin-bottom:15px;">
+        Verify each layer. Can you close your eyes and recall all 5? If not, go back and choose something more memorable.
+      </p>
+
+      <div style="background:var(--bg); border:1px solid var(--border); border-radius:6px; padding:12px; margin-bottom:8px;">
+        <div style="font-size:0.7em; color:var(--text-dim); text-transform:uppercase; letter-spacing:1px; margin-bottom:3px;">Layer 1 &mdash; Sensory Memory</div>
+        <div style="font-size:0.82em;" id="wizRev1"></div>
+      </div>
+      <div style="background:var(--bg); border:1px solid var(--border); border-radius:6px; padding:12px; margin-bottom:8px;">
+        <div style="font-size:0.7em; color:var(--text-dim); text-transform:uppercase; letter-spacing:1px; margin-bottom:3px;">Layer 2 &mdash; Invented Words</div>
+        <div style="font-size:0.82em;" id="wizRev2"></div>
+      </div>
+      <div style="background:var(--bg); border:1px solid var(--border); border-radius:6px; padding:12px; margin-bottom:8px;">
+        <div style="font-size:0.7em; color:var(--text-dim); text-transform:uppercase; letter-spacing:1px; margin-bottom:3px;">Layer 3 &mdash; Numbers + Symbols</div>
+        <div style="font-size:0.82em;" id="wizRev3"></div>
+      </div>
+      <div style="background:var(--bg); border:1px solid var(--border); border-radius:6px; padding:12px; margin-bottom:8px;">
+        <div style="font-size:0.7em; color:var(--text-dim); text-transform:uppercase; letter-spacing:1px; margin-bottom:3px;">Layer 4 &mdash; Dice Rolls</div>
+        <div style="font-size:0.82em; color:var(--accent);" id="wizRev4"></div>
+      </div>
+      <div style="background:var(--bg); border:1px solid var(--border); border-radius:6px; padding:12px; margin-bottom:15px;">
+        <div style="font-size:0.7em; color:var(--text-dim); text-transform:uppercase; letter-spacing:1px; margin-bottom:3px;">Layer 5 &mdash; Secret Sauce</div>
+        <div style="font-size:0.82em;" id="wizRev5"></div>
+      </div>
+
+      <div style="background:var(--surface); border-radius:8px; padding:20px; text-align:center; margin-bottom:15px;">
+        <div id="wizEntropy" style="font-size:2em; font-weight:bold; color:var(--green);">0</div>
+        <div style="font-size:0.75em; color:var(--text-dim);">estimated bits of entropy</div>
+        <div id="wizVerdict" style="margin-top:8px; font-size:0.75em;"></div>
+      </div>
+
+      <div style="background:rgba(239,83,80,0.08); border:1px solid rgba(239,83,80,0.25); border-radius:6px; padding:12px; margin-bottom:15px; font-size:0.78em; color:var(--red);">
+        <strong>IMPORTANT:</strong> A forgotten recipe = lost crypto forever. Make sure you can recall all 5 layers from memory before proceeding.
+      </div>
+
+      <div style="display:flex; justify-content:space-between; gap:10px;">
+        <button class="action-btn" onclick="wizGo(5)" style="padding:10px 20px; background:var(--surface2); border:1px solid var(--border);">BACK</button>
+        <button class="action-btn" onclick="wizUseRecipe()" style="padding:12px 30px; background:var(--green); color:#000; flex-grow:1; font-weight:bold;">USE THIS RECIPE &rarr; KEY GENERATOR</button>
+      </div>
+    </div>
+
+    <!-- Wizard data cleared notice -->
+    <div style="margin-top:15px; text-align:center;">
+      <span style="color:var(--text-dim); font-size:0.7em;">This wizard NEVER saves or transmits anything. All data stays in your browser and is cleared when you close the page.</span>
+    </div>
   </div>
 
   <!-- ==================== GENERATOR PANEL ==================== -->
@@ -1899,8 +2104,9 @@ let lastGeneratedHash = null;
 // TAB SWITCHING
 // =====================================================
 function switchTab(name) {
+  const tabs = ['scanner','wizard','generator','airgap','quantum','verify','howto'];
   document.querySelectorAll('.tab').forEach((t, i) => {
-    t.classList.toggle('active', ['scanner','generator','airgap','quantum','verify','howto'][i] === name);
+    t.classList.toggle('active', tabs[i] === name);
   });
   document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
   document.getElementById('panel-' + name).classList.add('active');
@@ -2772,6 +2978,157 @@ async function runSelfTest() {
     '<span style="font-size:0.8em;">' + (failed === 0 ? 'All cryptographic primitives produce correct, verified outputs.' : 'DO NOT USE THIS TOOL. Cryptographic verification failed.') + '</span></div>' + html;
 
   results.innerHTML = html;
+}
+
+// =====================================================
+// RECIPE WIZARD
+// =====================================================
+let wizDiceRolls = [];
+let wizCurrentStep = 1;
+
+function wizGo(n) {
+  for (let i = 1; i <= 6; i++) {
+    const s = document.getElementById('ws' + i);
+    if (s) { s.classList.remove('wiz-step-active'); s.style.display = 'none'; }
+    const c = document.getElementById('wp' + i);
+    c.classList.remove('wiz-active', 'wiz-done');
+    if (i < n) { c.classList.add('wiz-done'); c.textContent = '\u2713'; }
+    else if (i === n) { c.classList.add('wiz-active'); c.textContent = i <= 5 ? i : 'R'; }
+    else { c.textContent = i <= 5 ? i : 'R'; }
+  }
+  const target = document.getElementById('ws' + n);
+  if (target) { target.classList.add('wiz-step-active'); target.style.display = 'block'; }
+  wizCurrentStep = n;
+  if (n === 6) wizPopulateReview();
+}
+
+function wizInput(step) {
+  const input = document.getElementById('wiz' + step);
+  const val = input.value;
+  document.getElementById('wc' + step).textContent = val.length;
+  const fill = document.getElementById('wf' + step);
+  const label = document.getElementById('wl' + step);
+  const btn = document.getElementById('wn' + step);
+  let strength = 0, color = 'var(--text-dim)', text = '';
+
+  if (step === 1) {
+    if (val.length === 0) { text = 'Enter your memory'; }
+    else if (val.length < 10) { strength = 15; text = 'Too short - add more detail'; color = 'var(--red)'; }
+    else if (val.length < 20) { strength = 35; text = 'Getting there - be more specific'; color = 'var(--yellow)'; }
+    else if (val.length < 35) { strength = 65; text = 'Good - specific and personal'; color = 'var(--accent)'; }
+    else { strength = 100; text = 'Excellent - rich sensory detail'; color = 'var(--green)'; }
+    btn.disabled = val.length < 10;
+  } else if (step === 2) {
+    const words = val.trim().split(/\s+/).filter(w => w.length > 0);
+    if (val.length === 0) { text = 'Enter your invented words'; }
+    else if (words.length < 2) { strength = 25; text = 'Add at least 2 invented words'; color = 'var(--red)'; }
+    else if (val.length < 12) { strength = 50; text = 'Good start - longer is stronger'; color = 'var(--yellow)'; }
+    else if (val.length < 20) { strength = 75; text = 'Strong - unique words'; color = 'var(--accent)'; }
+    else { strength = 100; text = 'Excellent - unguessable'; color = 'var(--green)'; }
+    btn.disabled = words.length < 2 || val.length < 6;
+  } else if (step === 3) {
+    const hasNum = /\d/.test(val), hasSym = /[^a-zA-Z0-9\s]/.test(val);
+    if (val.length === 0) { text = 'Enter numbers and symbols'; }
+    else if (!hasNum && !hasSym) { strength = 15; text = 'Add numbers or symbols'; color = 'var(--red)'; }
+    else if (!hasNum || !hasSym) { strength = 40; text = 'Add both numbers AND symbols'; color = 'var(--yellow)'; }
+    else if (val.length < 8) { strength = 65; text = 'Good mix - add more'; color = 'var(--accent)'; }
+    else { strength = 100; text = 'Excellent number/symbol mix'; color = 'var(--green)'; }
+    btn.disabled = val.length < 4;
+  } else if (step === 5) {
+    if (val.length === 0) { text = 'Optional but recommended'; }
+    else if (val.length < 8) { strength = 35; text = 'Short but adds entropy'; color = 'var(--yellow)'; }
+    else if (val.length < 20) { strength = 70; text = 'Good extra layer'; color = 'var(--accent)'; }
+    else { strength = 100; text = 'Excellent wildcard layer'; color = 'var(--green)'; }
+  }
+  fill.style.width = strength + '%';
+  fill.style.background = color;
+  label.style.color = color;
+  label.textContent = text;
+}
+
+function wizDice(n) {
+  wizDiceRolls.push(n);
+  wizUpdateDice();
+}
+function wizDiceClear() {
+  wizDiceRolls = [];
+  wizUpdateDice();
+}
+function wizUpdateDice() {
+  const display = document.getElementById('wizDiceDisplay');
+  const fill = document.getElementById('wf4');
+  const label = document.getElementById('wl4');
+  const btn = document.getElementById('wn4');
+  if (wizDiceRolls.length === 0) {
+    display.textContent = 'Roll your die and click...';
+    display.style.color = 'var(--text-dim)';
+  } else {
+    display.textContent = wizDiceRolls.join(' ');
+    display.style.color = 'var(--accent)';
+  }
+  const count = wizDiceRolls.length;
+  const strength = Math.min(100, (count / 10) * 100);
+  let color, text;
+  if (count === 0) { color = 'var(--text-dim)'; text = 'Roll at least 10 times'; }
+  else if (count < 5) { color = 'var(--red)'; text = count + ' rolls - need at least 10'; }
+  else if (count < 10) { color = 'var(--yellow)'; text = count + ' rolls - almost there'; }
+  else if (count < 20) { color = 'var(--accent)'; text = count + ' rolls - good randomness'; }
+  else { color = 'var(--green)'; text = count + ' rolls - excellent entropy'; }
+  fill.style.width = strength + '%';
+  fill.style.background = color;
+  label.style.color = color;
+  label.textContent = text;
+  btn.disabled = count < 10;
+}
+
+function wizMask(val) {
+  if (!val || val.length <= 4) return val || '(none)';
+  return val.substring(0, 2) + '\u2022'.repeat(Math.min(val.length - 4, 20)) + val.substring(val.length - 2);
+}
+
+function wizPopulateReview() {
+  const v1 = document.getElementById('wiz1').value;
+  const v2 = document.getElementById('wiz2').value;
+  const v3 = document.getElementById('wiz3').value;
+  const v4 = wizDiceRolls.join(' ');
+  const v5 = document.getElementById('wiz5').value;
+  document.getElementById('wizRev1').textContent = wizMask(v1);
+  document.getElementById('wizRev2').textContent = wizMask(v2);
+  document.getElementById('wizRev3').textContent = wizMask(v3);
+  document.getElementById('wizRev4').textContent = v4 || '(none)';
+  document.getElementById('wizRev5').textContent = v5 ? wizMask(v5) : '(none - optional)';
+
+  // Entropy
+  let bits = v1.length * 4.5 + v2.length * 5 + v3.length * 4 + wizDiceRolls.length * 2.585 + v5.length * 4.5;
+  bits = Math.round(bits);
+  document.getElementById('wizEntropy').textContent = bits;
+  let verdict, vColor;
+  if (bits < 80) { verdict = 'WEAK - Add more to your layers.'; vColor = 'var(--red)'; }
+  else if (bits < 128) { verdict = 'MODERATE - OK for small amounts.'; vColor = 'var(--yellow)'; }
+  else if (bits < 200) { verdict = 'STRONG - Good for most use cases.'; vColor = 'var(--accent)'; }
+  else if (bits < 300) { verdict = 'VERY STRONG - Exceeds Bitcoin 256-bit requirement.'; vColor = 'var(--green)'; }
+  else { verdict = 'FORTRESS GRADE - Mathematically impossible to brute force.'; vColor = 'var(--green)'; }
+  document.getElementById('wizVerdict').innerHTML = '<span style="color:' + vColor + ';">' + verdict + '</span>';
+  document.getElementById('wizEntropy').style.color = vColor;
+}
+
+function wizUseRecipe() {
+  // Transfer wizard values to the Key Generator layers
+  document.getElementById('layer1').value = document.getElementById('wiz1').value;
+  document.getElementById('layer2').value = document.getElementById('wiz2').value;
+  document.getElementById('layer3').value = document.getElementById('wiz3').value;
+  document.getElementById('layer5').value = document.getElementById('wiz5').value;
+
+  // Transfer dice rolls
+  diceRolls = wizDiceRolls.slice();
+  document.getElementById('diceResults').textContent = diceRolls.join(' ');
+
+  // Switch to Key Generator tab
+  switchTab('generator');
+  updateEntropy();
+
+  // Scroll to top
+  window.scrollTo({ top: 0, behavior: 'smooth' });
 }
 
 // =====================================================
