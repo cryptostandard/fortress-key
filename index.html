@@ -3,6 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'unsafe-inline'; style-src 'unsafe-inline'; img-src data: blob:; connect-src 'none'; form-action 'none'; frame-ancestors 'none';">
 <title>Fortress Key - Open Source Cold Wallet Security</title>
 <style>
 :root {
@@ -617,7 +618,7 @@ textarea.airgap-input { resize: vertical; min-height: 80px; }
     </div>
 
     <div class="info-box" id="modeDesc" style="margin-bottom:20px;">
-      <strong>MODE 1 - PURE FORTRESS:</strong> Your recipe generates a raw 256-bit private key. No public wordlists involved. Import into Electrum, Sparrow, or any wallet that accepts raw/WIF keys. Your recipe IS your key.
+      <strong>MODE 1 - PURE FORTRESS:</strong> Your recipe generates a raw 256-bit private key. No public wordlists involved. Import into MetaMask, Trust Wallet, Electrum, Sparrow, or any wallet that accepts raw/WIF keys. Your recipe IS your key.
     </div>
 
     <!-- Layers -->
@@ -732,18 +733,21 @@ textarea.airgap-input { resize: vertical; min-height: 80px; }
         </div>
 
         <div class="success-box">
-          <strong>HOW TO IMPORT:</strong><br><br>
+          <strong>HOW TO IMPORT YOUR KEY:</strong><br><br>
           <strong style="color:var(--accent);">BITCOIN:</strong><br>
           <strong>Electrum:</strong> File &gt; New &gt; Import Private Keys &gt; paste BTC WIF<br>
           <strong>Sparrow:</strong> New Wallet &gt; Import &gt; paste BTC WIF<br>
-          <strong>Exodus:</strong> Settings &gt; Import Private Key &gt; paste BTC WIF<br><br>
+          <strong>Exodus:</strong> Settings &gt; Import Private Key &gt; paste BTC WIF<br>
+          <strong>BlueWallet:</strong> Add Wallet &gt; Import Wallet &gt; paste BTC WIF<br><br>
           <strong style="color:#c3a634;">DOGECOIN:</strong><br>
-          <strong>Dogechain.info:</strong> Settings &gt; Import Private Key &gt; paste DOGE WIF<br>
           <strong>Coinomi:</strong> Add Wallet &gt; Dogecoin &gt; Restore &gt; paste DOGE WIF<br>
-          <strong>Exodus:</strong> Settings &gt; Import Private Key &gt; select Dogecoin &gt; paste DOGE WIF<br>
-          <strong>MultiDoge:</strong> Tools &gt; Import Private Keys &gt; paste DOGE WIF<br><br>
-          <strong style="color:var(--accent2);">ETHEREUM:</strong><br>
-          <strong>MetaMask:</strong> Import Account &gt; Private Key &gt; paste Hex key (without 0x)<br><br>
+          <strong>Exodus:</strong> Settings &gt; Import Private Key &gt; select Dogecoin &gt; paste DOGE WIF<br><br>
+          <strong style="color:var(--accent2);">ETHEREUM / ERC-20 / POLYGON / BASE / ARBITRUM:</strong><br>
+          <strong>MetaMask:</strong> Import Account &gt; Private Key &gt; paste Hex key (without 0x)<br>
+          <strong>Trust Wallet:</strong> Settings &gt; Wallets &gt; + &gt; Import &gt; Private Key &gt; paste Hex<br>
+          <strong>Coinbase Wallet:</strong> Settings &gt; Import Wallet &gt; Private Key &gt; paste Hex<br>
+          <strong>Rainbow:</strong> Settings &gt; Import &gt; Private Key &gt; paste Hex<br><br>
+          <strong style="color:var(--green);">MULTI-CHAIN:</strong> Your ETH private key works on ALL EVM chains (Polygon, Arbitrum, Base, Optimism, BSC, Avalanche). Same key, same address everywhere.<br><br>
           <strong>For hardware wallets:</strong> Switch to Mode 2 (Hardware Bridge) to get BIP39 format.
         </div>
       </div>
@@ -1273,7 +1277,7 @@ textarea.airgap-input { resize: vertical; min-height: 80px; }
         <div class="step-num">4</div>
         <div class="step-text">
           <h4>Import Into Any Wallet</h4>
-          <p><strong>Software wallets</strong> (Electrum, Sparrow, MetaMask): Import the raw key or WIF directly. No 24 words needed.<br><strong>Hardware wallets</strong> (Coldcard, Ledger): Use Mode 2 to get a temporary BIP39 translation for import only.</p>
+          <p><strong>Software wallets</strong> (MetaMask, Trust Wallet, Coinbase Wallet, Electrum, Sparrow): Import the raw key or WIF directly. No 24 words needed. One key works on ALL EVM chains.<br><strong>Hardware wallets</strong> (Coldcard, Ledger): Use Mode 2 to get a temporary BIP39 translation for import only.</p>
         </div>
       </div>
 
@@ -1349,6 +1353,59 @@ textarea.airgap-input { resize: vertical; min-height: 80px; }
     </div>
   </div>
 
+  <!-- Travel / Airport Use Case -->
+  <div style="background:var(--surface); border:1px solid var(--accent); border-radius:8px; padding:25px; margin-top:30px;">
+    <h3 style="text-align:center; color:var(--accent); margin-bottom:15px;">Cross Any Border With Your Crypto</h3>
+    <p style="text-align:center; color:var(--text-dim); font-size:0.85em; margin-bottom:20px;">
+      Hardware wallets get flagged at airports. Seed phrases on paper can be seized. Your recipe lives in your head.
+    </p>
+    <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(280px, 1fr)); gap:15px;">
+      <div style="background:var(--bg); border:1px solid var(--border); border-radius:6px; padding:15px;">
+        <div style="color:var(--red); font-weight:bold; font-size:0.85em; margin-bottom:8px;">THE PROBLEM</div>
+        <div style="color:var(--text-dim); font-size:0.8em; line-height:1.8;">
+          &bull; Hardware wallets raise questions at customs<br>
+          &bull; Paper seed phrases can be photographed or confiscated<br>
+          &bull; Metal backup plates are suspicious in luggage<br>
+          &bull; Some countries restrict crypto hardware at borders
+        </div>
+      </div>
+      <div style="background:var(--bg); border:1px solid var(--green); border-radius:6px; padding:15px;">
+        <div style="color:var(--green); font-weight:bold; font-size:0.85em; margin-bottom:8px;">THE FORTRESS KEY SOLUTION</div>
+        <div style="color:var(--text-dim); font-size:0.8em; line-height:1.8;">
+          &bull; Your recipe is in your head &mdash; nothing to confiscate<br>
+          &bull; Land anywhere, open this file offline, regenerate your key<br>
+          &bull; Import into MetaMask or any wallet in 30 seconds<br>
+          &bull; Same recipe = same key = same wallet, every time, forever
+        </div>
+      </div>
+    </div>
+    <p style="text-align:center; color:var(--text-dim); font-size:0.8em; margin-top:15px;">
+      <strong style="color:var(--accent);">Travel light. Carry nothing. Own everything.</strong>
+    </p>
+  </div>
+
+  <!-- File Integrity Verification -->
+  <div style="background:var(--surface); border:1px solid var(--accent2); border-radius:8px; padding:25px; margin-top:30px;">
+    <h3 style="text-align:center; color:var(--accent2); margin-bottom:15px;">Verify File Integrity</h3>
+    <p style="text-align:center; color:var(--text-dim); font-size:0.85em; margin-bottom:15px;">
+      Before using this tool, verify you have the authentic file. Run this command on your downloaded copy:
+    </p>
+    <div style="background:var(--bg); border:1px solid var(--border); border-radius:6px; padding:15px; margin-bottom:15px;">
+      <div style="color:var(--text-dim); font-size:0.75em; margin-bottom:5px;">macOS / Linux:</div>
+      <code style="color:var(--accent2); font-size:0.8em; word-break:break-all;">shasum -a 256 fortress-key.html</code>
+    </div>
+    <div style="background:var(--bg); border:1px solid var(--border); border-radius:6px; padding:15px; margin-bottom:15px;">
+      <div style="color:var(--text-dim); font-size:0.75em; margin-bottom:5px;">Windows (PowerShell):</div>
+      <code style="color:var(--accent2); font-size:0.8em; word-break:break-all;">Get-FileHash fortress-key.html -Algorithm SHA256</code>
+    </div>
+    <div style="text-align:center; margin-top:15px;">
+      <div style="color:var(--text-dim); font-size:0.75em; margin-bottom:5px;">Compare with the official hash published at:</div>
+      <a href="https://github.com/cryptostandard/fortress-key" target="_blank" style="color:var(--accent2); font-size:0.8em;">github.com/cryptostandard/fortress-key</a>
+      <span style="color:var(--text-dim); font-size:0.75em;"> &mdash; check the README for the current SHA-256 hash</span>
+    </div>
+    <div id="integrityStatus" style="text-align:center; margin-top:15px; padding:10px; border-radius:6px; display:none;"></div>
+  </div>
+
   <!-- Donation Section -->
   <div style="background:var(--surface); border:1px solid var(--border); border-radius:8px; padding:25px; margin-top:30px;">
     <h3 style="text-align:center; color:var(--accent); margin-bottom:15px;">Support Fortress Key</h3>
@@ -1403,6 +1460,40 @@ textarea.airgap-input { resize: vertical; min-height: 80px; }
 </script>
 
 <script>
+// =====================================================
+// ANTI-TAMPERING: Block ALL network requests
+// =====================================================
+(function() {
+  // Override fetch to block any outbound requests
+  const _origFetch = window.fetch;
+  window.fetch = function() {
+    console.warn('Fortress Key: Network request blocked (fetch)');
+    return Promise.reject(new Error('Network requests are disabled for security'));
+  };
+  // Override XMLHttpRequest
+  const _origXHR = window.XMLHttpRequest;
+  window.XMLHttpRequest = function() {
+    const xhr = new _origXHR();
+    const _origOpen = xhr.open;
+    xhr.open = function() {
+      console.warn('Fortress Key: Network request blocked (XHR)');
+      throw new Error('Network requests are disabled for security');
+    };
+    return xhr;
+  };
+  // Override WebSocket
+  window.WebSocket = function() {
+    throw new Error('WebSocket connections are disabled for security');
+  };
+  // Override sendBeacon
+  if (navigator.sendBeacon) {
+    navigator.sendBeacon = function() {
+      console.warn('Fortress Key: Beacon blocked');
+      return false;
+    };
+  }
+})();
+
 // =====================================================
 // GLOBAL ERROR HANDLER
 // =====================================================
