@@ -1591,24 +1591,37 @@ textarea.airgap-input { resize: vertical; min-height: 80px; }
 
   <!-- File Integrity Verification -->
   <div style="background:var(--surface); border:1px solid var(--accent2); border-radius:8px; padding:25px; margin-top:30px;">
-    <h3 style="text-align:center; color:var(--accent2); margin-bottom:15px;">Verify File Integrity</h3>
-    <p style="text-align:center; color:var(--text-dim); font-size:0.85em; margin-bottom:15px;">
-      Before using this tool, verify you have the authentic file. Run this command on your downloaded copy:
+    <h3 style="text-align:center; color:var(--accent2); margin-bottom:5px;">Verify Your Download</h3>
+    <p style="text-align:center; color:var(--text-dim); font-size:0.82em; margin-bottom:20px;">
+      Before using any downloaded file, verify it hasn't been tampered with.<br>
+      Compare the SHA-256 hash of your file with the official hashes below.
     </p>
+
     <div style="background:var(--bg); border:1px solid var(--border); border-radius:6px; padding:15px; margin-bottom:15px;">
-      <div style="color:var(--text-dim); font-size:0.75em; margin-bottom:5px;">macOS / Linux:</div>
-      <code style="color:var(--accent2); font-size:0.8em; word-break:break-all;">shasum -a 256 fortress-key.html</code>
+      <div style="color:var(--accent2); font-weight:bold; font-size:0.8em; margin-bottom:8px;">HOW TO VERIFY:</div>
+      <div style="color:var(--text-dim); font-size:0.75em; line-height:1.8;">
+        <strong>macOS / Linux:</strong> <code style="color:var(--accent2);">shasum -a 256 &lt;filename&gt;</code><br>
+        <strong>Windows (PowerShell):</strong> <code style="color:var(--accent2);">Get-FileHash &lt;filename&gt; -Algorithm SHA256</code>
+      </div>
     </div>
-    <div style="background:var(--bg); border:1px solid var(--border); border-radius:6px; padding:15px; margin-bottom:15px;">
-      <div style="color:var(--text-dim); font-size:0.75em; margin-bottom:5px;">Windows (PowerShell):</div>
-      <code style="color:var(--accent2); font-size:0.8em; word-break:break-all;">Get-FileHash fortress-key.html -Algorithm SHA256</code>
+
+    <div style="background:var(--bg); border:1px solid var(--green); border-radius:6px; padding:15px; margin-bottom:10px;">
+      <div style="color:var(--green); font-weight:bold; font-size:0.8em; margin-bottom:10px;">OFFICIAL SHA-256 CHECKSUMS (v1.1.0)</div>
+      <div style="font-size:0.68em; color:var(--text); line-height:2; font-family:monospace; word-break:break-all;">
+        <div style="margin-bottom:4px;"><span style="color:var(--green);">macOS ARM (.dmg):</span><br><span style="user-select:all; cursor:pointer;" onclick="copyHash(this)">5be3c6042546a5613a8e06eb67c233f599be5cabaa97c98968497492fd3d81a0</span></div>
+        <div style="margin-bottom:4px;"><span style="color:var(--green);">macOS Intel (.dmg):</span><br><span style="user-select:all; cursor:pointer;" onclick="copyHash(this)">e61c3ed6fc15506f8555f9b3f3049733f9a2869a4ffb43910938bda5fee3350a</span></div>
+        <div style="margin-bottom:4px;"><span style="color:var(--accent2);">Windows (.exe):</span><br><span style="user-select:all; cursor:pointer;" onclick="copyHash(this)">b402c86a9ae0db973d4260ccb5b23ef56a97cef20a981189efba33fa0e9da7bd</span></div>
+        <div style="margin-bottom:4px;"><span style="color:var(--accent2);">Windows (.msi):</span><br><span style="user-select:all; cursor:pointer;" onclick="copyHash(this)">7312df45fb20b7902bf5833aab22c5a358f16508cd39fc9d8014f77a31795d58</span></div>
+        <div style="margin-bottom:4px;"><span style="color:#bb86fc;">Linux (.AppImage):</span><br><span style="user-select:all; cursor:pointer;" onclick="copyHash(this)">0b83dba37f10e0ca83e2778ab30a0408cb72bfbf1f4a99bd2f89f9f618c2c082</span></div>
+        <div style="margin-bottom:4px;"><span style="color:#bb86fc;">Linux (.deb):</span><br><span style="user-select:all; cursor:pointer;" onclick="copyHash(this)">0c1eee3aafe234f547a28ddc50ce0fff64a26ebc762423f3081014583c775699</span></div>
+        <div><span style="color:#bb86fc;">Linux (.rpm):</span><br><span style="user-select:all; cursor:pointer;" onclick="copyHash(this)">d2a57511d06d638abe9fdfdcc60081d3ad1498d039018027deefaaf7c6ad6c33</span></div>
+      </div>
     </div>
-    <div style="text-align:center; margin-top:15px;">
-      <div style="color:var(--text-dim); font-size:0.75em; margin-bottom:5px;">Compare with the official hash published at:</div>
-      <a href="https://github.com/cryptostandard/fortress-key" target="_blank" style="color:var(--accent2); font-size:0.8em;">github.com/cryptostandard/fortress-key</a>
-      <span style="color:var(--text-dim); font-size:0.75em;"> &mdash; check the README for the current SHA-256 hash</span>
+
+    <div style="text-align:center; font-size:0.7em; color:var(--text-dim);">
+      Click any hash to copy. Also published at <a href="https://github.com/inbotai/fortress-key-desktop/releases/tag/v1.1.0" target="_blank" style="color:var(--accent2);">GitHub Release</a>.<br>
+      If your hash does NOT match &mdash; <strong style="color:var(--red);">DO NOT USE THE FILE</strong>. Download again from this site.
     </div>
-    <div id="integrityStatus" style="text-align:center; margin-top:15px; padding:10px; border-radius:6px; display:none;"></div>
   </div>
 
   <!-- Donation Section -->
@@ -2843,6 +2856,24 @@ function fallbackCopy(text, el) {
   document.body.removeChild(ta);
   const msg = el.nextElementSibling;
   if (msg) { msg.textContent = 'Copied!'; msg.style.color = 'var(--green)'; setTimeout(() => { msg.textContent = 'Click to copy'; msg.style.color = 'var(--text-dim)'; }, 2000); }
+}
+
+function copyHash(el) {
+  const hash = el.textContent.trim();
+  if (navigator.clipboard && navigator.clipboard.writeText) {
+    navigator.clipboard.writeText(hash).then(() => {
+      const orig = el.textContent;
+      el.textContent = 'Copied!';
+      el.style.color = 'var(--green)';
+      setTimeout(() => { el.textContent = orig; el.style.color = ''; }, 1500);
+    }).catch(() => {
+      const ta = document.createElement('textarea');
+      ta.value = hash; ta.style.position = 'fixed'; ta.style.opacity = '0';
+      document.body.appendChild(ta); ta.select();
+      document.execCommand('copy');
+      document.body.removeChild(ta);
+    });
+  }
 }
 
 function copyDonation(el) {
