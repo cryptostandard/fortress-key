@@ -7,46 +7,48 @@
 <title>Fortress Key - Open Source Cold Wallet Security</title>
 <style>
 :root {
-  --bg: #0a0a0f;
-  --surface: #12121a;
-  --surface2: #1a1a2e;
-  --border: #2a2a3e;
-  --text: #e0e0e8;
-  --text-dim: #8888a0;
+  --bg: #0f1117;
+  --surface: #181b24;
+  --surface2: #21252f;
+  --border: #333848;
+  --text: #eaedf3;
+  --text-dim: #a0a8bc;
   --accent: #f7931a;
   --accent2: #4fc3f7;
-  --green: #4caf50;
+  --green: #66bb6a;
   --red: #ef5350;
   --yellow: #ffd54f;
   --orange: #ff9800;
 }
 * { margin:0; padding:0; box-sizing:border-box; }
 body {
-  font-family: 'SF Mono', 'Fira Code', 'Consolas', monospace;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
   background: var(--bg);
   color: var(--text);
   min-height: 100vh;
-  line-height: 1.6;
+  line-height: 1.7;
+  font-size: 16px;
 }
-.container { max-width: 900px; margin: 0 auto; padding: 20px; }
+.container { max-width: 940px; margin: 0 auto; padding: 24px; }
 
 .header {
   text-align: center;
-  padding: 40px 0 30px;
+  padding: 48px 0 32px;
   border-bottom: 1px solid var(--border);
-  margin-bottom: 30px;
+  margin-bottom: 32px;
 }
-.header h1 { font-size: 2.2em; color: var(--accent); letter-spacing: 2px; }
-.header .subtitle { color: var(--text-dim); font-size: 0.9em; margin-top: 8px; }
+.header h1 { font-size: 2.5em; color: var(--accent); letter-spacing: 3px; font-weight: 800; }
+.header .subtitle { color: var(--text-dim); font-size: 1.05em; margin-top: 10px; line-height: 1.6; }
 .badge {
   display: inline-block;
   background: var(--surface2);
   border: 1px solid var(--green);
   color: var(--green);
-  padding: 4px 12px;
+  padding: 6px 14px;
   border-radius: 20px;
-  font-size: 0.75em;
-  margin-top: 12px;
+  font-size: 0.82em;
+  margin-top: 14px;
+  font-weight: 600;
 }
 .badge.quantum {
   border-color: #bb86fc;
@@ -65,8 +67,8 @@ body {
   justify-content: space-between;
   gap: 15px;
 }
-.quantum-toggle .qt-label { color: #bb86fc; font-weight: bold; font-size: 0.95em; }
-.quantum-toggle .qt-desc { color: var(--text-dim); font-size: 0.8em; margin-top: 4px; }
+.quantum-toggle .qt-label { color: #bb86fc; font-weight: bold; font-size: 1.02em; }
+.quantum-toggle .qt-desc { color: var(--text-dim); font-size: 0.88em; margin-top: 4px; line-height: 1.6; }
 .qt-switch {
   position: relative;
   width: 56px;
@@ -119,18 +121,19 @@ body {
 }
 .tab {
   flex: 1;
-  padding: 14px;
+  padding: 14px 8px;
   text-align: center;
   cursor: pointer;
   background: var(--surface);
   border: none;
   color: var(--text-dim);
   font-family: inherit;
-  font-size: 0.95em;
+  font-size: 0.88em;
+  font-weight: 500;
   transition: all 0.2s;
 }
 .tab:hover { background: var(--surface2); color: var(--text); }
-.tab.active { background: var(--accent); color: #000; font-weight: bold; }
+.tab.active { background: var(--accent); color: #000; font-weight: 700; }
 
 .panel { display: none; }
 .panel.active { display: block; }
@@ -152,8 +155,8 @@ body {
 }
 .wallet-card:hover { border-color: var(--accent); transform: translateY(-2px); }
 .wallet-card.selected { border-color: var(--accent); background: var(--surface2); }
-.wallet-card h3 { color: var(--accent); margin-bottom: 5px; }
-.wallet-card .maker { color: var(--text-dim); font-size: 0.8em; }
+.wallet-card h3 { color: var(--accent); margin-bottom: 5px; font-size: 1.05em; }
+.wallet-card .maker { color: var(--text-dim); font-size: 0.88em; }
 
 .firmware-input {
   background: var(--surface);
@@ -162,7 +165,7 @@ body {
   padding: 20px;
   margin-bottom: 20px;
 }
-.firmware-input label { display: block; margin-bottom: 8px; color: var(--text-dim); font-size: 0.85em; }
+.firmware-input label { display: block; margin-bottom: 8px; color: var(--text-dim); font-size: 0.92em; }
 .firmware-input select {
   width: 100%;
   padding: 10px;
@@ -213,9 +216,9 @@ body {
 .severity-medium { background: var(--yellow); color: #000; }
 .severity-low { background: var(--accent2); color: #000; }
 .vuln-title { font-weight: bold; margin-bottom: 5px; }
-.vuln-desc { color: var(--text-dim); font-size: 0.85em; margin-bottom: 8px; }
-.vuln-fix { color: var(--green); font-size: 0.85em; }
-.vuln-cve { color: var(--accent2); font-size: 0.8em; }
+.vuln-desc { color: var(--text-dim); font-size: 0.92em; margin-bottom: 8px; line-height: 1.6; }
+.vuln-fix { color: var(--green); font-size: 0.92em; }
+.vuln-cve { color: var(--accent2); font-size: 0.85em; }
 .safe-report { text-align: center; padding: 40px; color: var(--green); font-size: 1.1em; }
 
 /* Generator */
@@ -229,14 +232,15 @@ body {
 }
 .mode-btn {
   flex: 1;
-  padding: 12px;
+  padding: 14px;
   text-align: center;
   cursor: pointer;
   background: var(--surface);
   border: none;
   color: var(--text-dim);
   font-family: inherit;
-  font-size: 0.85em;
+  font-size: 0.92em;
+  font-weight: 500;
   transition: all 0.2s;
 }
 .mode-btn:hover { background: var(--surface2); }
@@ -249,19 +253,22 @@ body {
   padding: 20px;
   margin-bottom: 15px;
 }
-.layer-section h3 { color: var(--accent2); margin-bottom: 5px; font-size: 0.95em; }
-.layer-section .desc { color: var(--text-dim); font-size: 0.8em; margin-bottom: 12px; }
+.layer-section h3 { color: var(--accent2); margin-bottom: 6px; font-size: 1.05em; font-weight: 700; }
+.layer-section .desc { color: var(--text-dim); font-size: 0.9em; margin-bottom: 14px; line-height: 1.6; }
 .layer-section input, .layer-section textarea {
   width: 100%;
-  padding: 10px;
+  padding: 12px 14px;
   background: var(--bg);
   border: 1px solid var(--border);
-  border-radius: 4px;
+  border-radius: 6px;
   color: var(--text);
   font-family: inherit;
-  font-size: 0.9em;
+  font-size: 1em;
+  outline: none;
+  transition: border-color 0.2s;
 }
-.layer-section textarea { resize: vertical; min-height: 60px; }
+.layer-section input:focus, .layer-section textarea:focus { border-color: var(--accent); }
+.layer-section textarea { resize: vertical; min-height: 70px; }
 
 .dice-area { display: flex; gap: 10px; flex-wrap: wrap; align-items: center; }
 .dice-btn {
@@ -320,7 +327,7 @@ body {
   transition: width 0.4s, background 0.4s;
   width: 0%;
 }
-.entropy-label { display: flex; justify-content: space-between; font-size: 0.85em; }
+.entropy-label { display: flex; justify-content: space-between; font-size: 0.92em; }
 .entropy-bits { color: var(--accent); font-weight: bold; }
 .entropy-verdict { font-weight: bold; }
 
@@ -336,17 +343,18 @@ body {
 .key-display {
   background: var(--bg);
   border: 1px solid var(--border);
-  border-radius: 4px;
-  padding: 15px;
-  margin: 10px 0;
+  border-radius: 6px;
+  padding: 16px;
+  margin: 12px 0;
   word-break: break-all;
-  font-size: 0.85em;
+  font-size: 0.92em;
 }
 .key-display .label {
   color: var(--text-dim);
-  font-size: 0.75em;
-  margin-bottom: 4px;
+  font-size: 0.8em;
+  margin-bottom: 5px;
   text-transform: uppercase;
+  font-weight: 600;
 }
 .key-display .value { color: var(--accent); font-weight: bold; }
 .key-display .value.private { color: var(--red); }
@@ -355,29 +363,32 @@ body {
 .warning-box {
   background: rgba(239,83,80,0.1);
   border: 1px solid var(--red);
-  border-radius: 6px;
-  padding: 15px;
-  margin-top: 15px;
-  font-size: 0.85em;
+  border-radius: 8px;
+  padding: 18px;
+  margin-top: 16px;
+  font-size: 0.92em;
   color: var(--red);
+  line-height: 1.7;
 }
 .info-box {
   background: rgba(79,195,247,0.1);
   border: 1px solid var(--accent2);
-  border-radius: 6px;
-  padding: 15px;
-  margin-top: 15px;
-  font-size: 0.85em;
+  border-radius: 8px;
+  padding: 18px;
+  margin-top: 16px;
+  font-size: 0.92em;
   color: var(--accent2);
+  line-height: 1.7;
 }
 .success-box {
   background: rgba(76,175,80,0.1);
   border: 1px solid var(--green);
-  border-radius: 6px;
-  padding: 15px;
-  margin-top: 15px;
-  font-size: 0.85em;
+  border-radius: 8px;
+  padding: 18px;
+  margin-top: 16px;
+  font-size: 0.92em;
   color: var(--green);
+  line-height: 1.7;
 }
 
 .destroy-btn {
@@ -418,11 +429,11 @@ body {
   padding: 25px;
   margin-bottom: 20px;
 }
-.how-section h3 { color: var(--accent); margin-bottom: 15px; }
-.step { display: flex; gap: 15px; margin-bottom: 20px; align-items: flex-start; }
+.how-section h3 { color: var(--accent); margin-bottom: 16px; font-size: 1.15em; }
+.step { display: flex; gap: 16px; margin-bottom: 22px; align-items: flex-start; }
 .step-num {
   flex-shrink: 0;
-  width: 36px; height: 36px;
+  width: 40px; height: 40px;
   background: var(--accent);
   color: #000;
   border-radius: 50%;
@@ -430,15 +441,16 @@ body {
   align-items: center;
   justify-content: center;
   font-weight: bold;
+  font-size: 1.05em;
 }
-.step-text h4 { margin-bottom: 4px; }
-.step-text p { color: var(--text-dim); font-size: 0.85em; }
+.step-text h4 { margin-bottom: 5px; font-size: 1.05em; }
+.step-text p { color: var(--text-dim); font-size: 0.92em; line-height: 1.7; }
 
 .comparison-table {
   width: 100%;
   border-collapse: collapse;
   margin: 15px 0;
-  font-size: 0.85em;
+  font-size: 0.92em;
 }
 .comparison-table th, .comparison-table td {
   padding: 10px;
@@ -476,7 +488,7 @@ body {
 }
 .loc-online { background: rgba(76,175,80,0.2); border: 1px solid var(--green); color: var(--green); }
 .loc-offline { background: rgba(239,83,80,0.2); border: 1px solid var(--red); color: var(--red); }
-.airgap-step-box .desc { color: var(--text-dim); font-size: 0.8em; margin-bottom: 12px; }
+.airgap-step-box .desc { color: var(--text-dim); font-size: 0.9em; margin-bottom: 12px; line-height: 1.6; }
 .airgap-input {
   width: 100%;
   padding: 10px;
@@ -528,11 +540,12 @@ textarea.airgap-input { resize: vertical; min-height: 80px; }
 
 .footer {
   text-align: center;
-  padding: 30px 0;
-  margin-top: 40px;
+  padding: 36px 0;
+  margin-top: 48px;
   border-top: 1px solid var(--border);
   color: var(--text-dim);
-  font-size: 0.8em;
+  font-size: 0.88em;
+  line-height: 1.8;
 }
 
 /* Recipe Wizard */
@@ -552,8 +565,10 @@ textarea.airgap-input { resize: vertical; min-height: 80px; }
 
 @media (max-width: 600px) {
   .wallet-grid { grid-template-columns: 1fr; }
-  .header h1 { font-size: 1.5em; }
+  .header h1 { font-size: 1.7em; }
   .mode-toggle { flex-direction: column; }
+  .tabs { flex-wrap: wrap; }
+  .tab { flex: 0 0 auto; min-width: 33%; }
 }
 </style>
 </head>
