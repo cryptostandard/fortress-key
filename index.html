@@ -2327,14 +2327,23 @@ function detectRepeatedSubstrings(str) {
 }
 
 function checkWeakPassword(str) {
-  // Returns the matched weak password or null
+  // Returns { block: true/false, match: string } or null
+  // BLOCK: if the entire layer is a weak password or trivial variation
+  // WARN: if individual words match but the overall phrase is longer
   var lower = str.toLowerCase().trim();
   if (lower.length < 3) return null;
-  // Exact match
-  if (WEAK_PASSWORDS.has(lower)) return lower;
-  // Check if input contains a weak password as substring (only for passwords 5+ chars)
-  for (var pw of WEAK_PASSWORDS) {
-    if (pw.length >= 5 && lower.includes(pw)) return pw;
+  // Exact match of the entire input = BLOCK
+  if (WEAK_PASSWORDS.has(lower)) return { block: true, match: lower };
+  // Entire input stripped of non-alpha is a weak password = BLOCK
+  var stripped = lower.replace(/[^a-z]/g, '');
+  if (stripped.length >= 5 && WEAK_PASSWORDS.has(stripped)) return { block: true, match: stripped };
+  // Short input (< 15 chars) with a weak password word = BLOCK (too little extra entropy)
+  // Long input (>= 15 chars) with a weak password word = WARN only (enough surrounding entropy)
+  var words = lower.split(/[\s_\-.,;:!@#$%^&*()+=]+/).filter(function(w) { return w.length >= 4; });
+  for (var i = 0; i < words.length; i++) {
+    if (WEAK_PASSWORDS.has(words[i])) {
+      return { block: lower.length < 15, match: words[i] };
+    }
   }
   return null;
 }
@@ -2361,13 +2370,18 @@ function calcEntropy() {
   var bits = 0;
   var warnings = [];
 
+  var hasBlockingPassword = false;
+
   // Layer 1: Personal phrase
   var l1bits = shannonEntropy(l1);
   l1bits -= detectSequentialRuns(l1);
   l1bits -= detectRepeatedSubstrings(l1);
   l1bits = Math.max(l1bits, 0);
   var l1weak = checkWeakPassword(l1);
-  if (l1weak) { l1bits = Math.min(l1bits, 10); warnings.push('Layer 1 contains common password: "' + l1weak + '"'); }
+  if (l1weak) {
+    if (l1weak.block) { l1bits = Math.min(l1bits, 10); hasBlockingPassword = true; }
+    warnings.push('Layer 1 contains common password: "' + l1weak.match + '"');
+  }
   bits += l1bits;
 
   // Layer 2: Invented words (penalize dictionary/BIP39 words)
@@ -2379,7 +2393,10 @@ function calcEntropy() {
     warnings.push('Layer 2 has dictionary words (should be INVENTED): ' + l2bip39.join(', '));
   }
   var l2weak = checkWeakPassword(l2);
-  if (l2weak) { l2bits = Math.min(l2bits, 10); warnings.push('Layer 2 contains common password: "' + l2weak + '"'); }
+  if (l2weak) {
+    if (l2weak.block) { l2bits = Math.min(l2bits, 10); hasBlockingPassword = true; }
+    warnings.push('Layer 2 contains common password: "' + l2weak.match + '"');
+  }
   l2bits = Math.max(l2bits, 0);
   bits += l2bits;
 
@@ -2389,7 +2406,10 @@ function calcEntropy() {
   l3bits -= detectKeyboardWalks(l3);
   l3bits = Math.max(l3bits, 0);
   var l3weak = checkWeakPassword(l3);
-  if (l3weak) { l3bits = Math.min(l3bits, 10); warnings.push('Layer 3 contains common password: "' + l3weak + '"'); }
+  if (l3weak) {
+    if (l3weak.block) { l3bits = Math.min(l3bits, 10); hasBlockingPassword = true; }
+    warnings.push('Layer 3 contains common password: "' + l3weak.match + '"');
+  }
   bits += l3bits;
 
   // Layer 4: Dice rolls (true randomness: exactly log2(6) per roll)
@@ -2401,10 +2421,13 @@ function calcEntropy() {
   l5bits -= detectRepeatedSubstrings(l5);
   l5bits = Math.max(l5bits, 0);
   var l5weak = checkWeakPassword(l5);
-  if (l5weak) { l5bits = Math.min(l5bits, 10); warnings.push('Layer 5 contains common password: "' + l5weak + '"'); }
+  if (l5weak) {
+    if (l5weak.block) { l5bits = Math.min(l5bits, 10); hasBlockingPassword = true; }
+    warnings.push('Layer 5 contains common password: "' + l5weak.match + '"');
+  }
   bits += l5bits;
 
-  return { bits: Math.floor(bits), warnings: warnings, layers: [l1bits, l2bits, l3bits, diceRolls.length * Math.log2(6), l5bits] };
+  return { bits: Math.floor(bits), warnings: warnings, hasBlockingPassword: hasBlockingPassword, layers: [l1bits, l2bits, l3bits, diceRolls.length * Math.log2(6), l5bits] };
 }
 
 function updateEntropy() {
@@ -2450,10 +2473,10 @@ function updateEntropy() {
     }
   }
 
-  // Block if any layer contains a common password
-  if (warnings.some(function(w) { return w.includes('common password'); })) {
+  // Block if any layer IS a common password (short input = entire layer is weak)
+  if (result.hasBlockingPassword) {
     bar.style.background='var(--red)'; verdict.style.color='var(--red)';
-    verdict.textContent='BLOCKED — Common password detected';
+    verdict.textContent='BLOCKED — Layer is a common password';
     btn.disabled = true;
   }
 }
@@ -2576,8 +2599,8 @@ async function generateKey() {
     alert('SECURITY BLOCK: Your recipe has only ' + entropyResult.bits + ' bits of entropy. Minimum 128 bits required.\n\nAdd more content to your recipe layers.');
     return;
   }
-  if (entropyResult.warnings.some(function(w) { return w.includes('common password'); })) {
-    alert('SECURITY BLOCK: Your recipe contains a common password. This makes your key trivially guessable.\n\nReplace the weak layer with something unique and personal.');
+  if (entropyResult.hasBlockingPassword) {
+    alert('SECURITY BLOCK: One of your recipe layers is a common password. This makes your key trivially guessable.\n\nReplace the weak layer with something unique and personal.');
     return;
   }
 
@@ -2766,12 +2789,39 @@ function ecdsaSign(privKeyHex, msgHashBytes) {
   const privBytes = NobleFromHex(privKeyHex);
   const sig = NobleSecp256k1.sign(msgHashBytes, privBytes, { lowS: true });
   privBytes.fill(0); // Zero private key buffer
-  return sig;
+  // sig is a 64-byte Uint8Array: first 32 = r, last 32 = s
+  return { raw: sig, r: sig.slice(0, 32), s: sig.slice(32, 64) };
+}
+
+function derEncodeInteger(bytes) {
+  // DER integer encoding: strip leading zeros, add 0x00 pad if high bit set
+  var start = 0;
+  while (start < bytes.length - 1 && bytes[start] === 0) start++;
+  var trimmed = bytes.slice(start);
+  if (trimmed[0] & 0x80) {
+    var padded = new Uint8Array(trimmed.length + 1);
+    padded[0] = 0x00;
+    padded.set(trimmed, 1);
+    trimmed = padded;
+  }
+  return trimmed;
 }
 
 function derEncode(sig) {
-  // sig from noble is already a Signature object with toDERRawBytes()
-  return sig.toDERRawBytes();
+  // Build DER encoding from r,s components: 0x30 [len] 0x02 [rlen] [r] 0x02 [slen] [s]
+  var rDer = derEncodeInteger(sig.r);
+  var sDer = derEncodeInteger(sig.s);
+  var totalLen = 2 + rDer.length + 2 + sDer.length;
+  var result = new Uint8Array(2 + totalLen);
+  result[0] = 0x30; // SEQUENCE
+  result[1] = totalLen;
+  result[2] = 0x02; // INTEGER
+  result[3] = rDer.length;
+  result.set(rDer, 4);
+  result[4 + rDer.length] = 0x02; // INTEGER
+  result[5 + rDer.length] = sDer.length;
+  result.set(sDer, 6 + rDer.length);
+  return result;
 }
 
 // =====================================================
@@ -3308,7 +3358,7 @@ async function runSelfTest() {
   test('ECDSA signing (deterministic, DER encoded)', derBytes.length > 68 && derBytes.length < 73 ? 'valid length' : 'invalid', 'valid length');
 
   // Test 12: ECDSA signature verification
-  const sigValid = NobleSecp256k1.verify(sig, testMsg, NobleSecp256k1.getPublicKey(NobleFromHex(testPriv), true));
+  const sigValid = NobleSecp256k1.verify(sig.raw, testMsg, NobleSecp256k1.getPublicKey(NobleFromHex(testPriv), true));
   test('ECDSA signature verification', sigValid ? 'true' : 'false', 'true');
 
   // Test 13: PBKDF2-SHA512 determinism
@@ -3354,11 +3404,11 @@ async function runSelfTest() {
   // Test 19: ECDSA known-answer signature (RFC 6979 deterministic)
   // privkey=1, message=SHA256("test message") — verify exact r,s values
   const knownSig = ecdsaSign('0000000000000000000000000000000000000000000000000000000000000001', testMsg);
-  const sigR = knownSig.r.toString(16);
-  const sigVerified = NobleSecp256k1.verify(knownSig, testMsg, NobleSecp256k1.getPublicKey(NobleFromHex('0000000000000000000000000000000000000000000000000000000000000001'), true));
+  const sigRHex = bytesToHex(knownSig.r);
+  const sigVerified = NobleSecp256k1.verify(knownSig.raw, testMsg, NobleSecp256k1.getPublicKey(NobleFromHex('0000000000000000000000000000000000000000000000000000000000000001'), true));
   // Deterministic: same key + same message must always produce same r
   const knownSig2 = ecdsaSign('0000000000000000000000000000000000000000000000000000000000000001', testMsg);
-  test('ECDSA deterministic signature (RFC 6979)', (sigR === knownSig2.r.toString(16) && sigVerified) ? 'deterministic' : 'non-deterministic', 'deterministic');
+  test('ECDSA deterministic signature (RFC 6979)', (sigRHex === bytesToHex(knownSig2.r) && sigVerified) ? 'deterministic' : 'non-deterministic', 'deterministic');
 
   // Test 20: Base58Check checksum validation rejects bad address
   let checksumRejected = false;
@@ -3536,7 +3586,7 @@ function wizPopulateReview() {
   // Disable USE THIS RECIPE button if below threshold or has weak passwords
   var useBtn = document.querySelector('#ws6 .action-btn');
   if (useBtn) {
-    var blocked = bits < 128 || result.warnings.some(function(w) { return w.includes('common password'); });
+    var blocked = bits < 128 || result.hasBlockingPassword;
     useBtn.disabled = blocked;
     if (blocked) useBtn.style.opacity = '0.5';
     else useBtn.style.opacity = '1';
