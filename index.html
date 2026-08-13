@@ -357,7 +357,7 @@ body {
   font-weight: 600;
 }
 .key-display .value { color: #b45309; font-weight: bold; }
-.key-display .value.private { color: var(--red); }
+.key-display .value.private { color: var(--red); -webkit-user-select: none; user-select: none; }
 .key-display .value.address { color: var(--green); }
 
 .warning-box {
@@ -932,6 +932,7 @@ textarea.airgap-input { resize: vertical; min-height: 80px; }
         <span class="entropy-verdict" id="entropyVerdict" style="color:var(--red);">Add more layers</span>
         <span id="entropyTime" style="color:var(--text-dim); font-size:0.8em;"></span>
       </div>
+      <div id="entropyWarnings" style="display:none; margin-top:8px; padding:8px 12px; background:#fff5f5; border:1px solid var(--red); border-radius:6px;"></div>
     </div>
 
     <button class="action-btn" id="generateBtn" onclick="generateKey()" disabled>GENERATE FORTRESS KEY</button>
@@ -2245,46 +2246,215 @@ function renderDice() {
 // =====================================================
 // ENTROPY
 // =====================================================
-function calcEntropy() {
-  let bits = 0;
-  const l1 = document.getElementById('layer1').value;
-  const l2 = document.getElementById('layer2').value;
-  const l3 = document.getElementById('layer3').value;
-  const l5 = document.getElementById('layer5').value;
+// =====================================================
+// WEAK PASSWORD BLOCKLIST (top 200 common passwords)
+// =====================================================
+const WEAK_PASSWORDS = new Set('password,123456,12345678,qwerty,abc123,monkey,1234567,letmein,trustno1,dragon,baseball,iloveyou,master,sunshine,ashley,michael,shadow,123123,654321,superman,qazwsx,football,password1,password123,batman,login,starwars,access,hello,charlie,donald,admin,qwerty123,welcome,1q2w3e4r,passw0rd,princess,whatever,000000,123456789,mustang,password2,abcdef,121212,flower,hottie,loveme,cheese,pepper,marina,secret,summer,1q2w3e,freedom,soccer,jesus,ninja,corvette,knight,robert,purple,asshole,fuckyou,jordan,hunter,thomas,ranger,buster,tigger,andrea,harley,ginger,hammer,silver,222222,joshua,gibson,anthony,rocket,amanda,bigdog,sparky,cowboys,ferrari,cheese,andrea,bulldog,compaq,cookie,falcon,taylor,welcome1,merlin,phoenix,panther,steelers,yankees,george,whatever1,diamond,fender,trinity,blowme,digital,mercedes,thunder,computer,ginger1,matrix,arsenal,scorpion,alex,asdfgh,asdfghjkl,zxcvbnm,1234567890,internet,blaster,golden,gateway,creative,jasmine,pumpkin,jackson,samantha,brandon,pokemon,melissa,morgan,cooper,midnight,coffee,killer,monster,lakers,banana,enter,james,robert,richard,daniel,jennifer,jessica,william,christopher,joseph,andrew,success,nothing,baseball1,biteme,martin,debbie,carlos,samson,casino,butter,celtic,snoopy,december,rabbit,natasha,snickers,fantasy,spencer,stupid,fishing,johnson,eagles,raiders,winner,pakistan,chicken,slipknot,victoria,angels,england'.split(','));
 
-  if (l1.length > 0) { bits += l1.length * Math.log2(Math.max(new Set(l1).size, 2)); }
-  if (l2.length > 0) { bits += l2.length * Math.log2(Math.max(new Set(l2).size, 2)) * 1.5; }
-  if (l3.length > 0) { bits += l3.length * Math.log2(Math.max(new Set(l3).size, 2)); }
+// =====================================================
+// KEYBOARD WALK SEQUENCES
+// =====================================================
+const KEYBOARD_ROWS = ['qwertyuiop','asdfghjkl','zxcvbnm','1234567890'];
+const KEYBOARD_WALKS = ['qweasdzxc','1qaz2wsx','3edc4rfv','5tgb6yhn','7ujm8ik','qweasd','asdzxc','zaq1','xsw2','cde3','vfr4','bgt5','nhy6','mju7'];
+
+// =====================================================
+// ENTROPY CALCULATION (Shannon + pattern detection)
+// =====================================================
+function shannonEntropy(str) {
+  if (str.length === 0) return 0;
+  var freq = {};
+  for (var i = 0; i < str.length; i++) {
+    var c = str[i];
+    freq[c] = (freq[c] || 0) + 1;
+  }
+  var H = 0;
+  var len = str.length;
+  for (var c in freq) {
+    var p = freq[c] / len;
+    H -= p * Math.log2(p);
+  }
+  return H * len; // total bits
+}
+
+function detectSequentialRuns(str) {
+  // Detect runs of 3+ sequential chars (abc, 123, cba, 321)
+  var penalty = 0;
+  var lower = str.toLowerCase();
+  for (var i = 0; i < lower.length - 2; i++) {
+    var c0 = lower.charCodeAt(i), c1 = lower.charCodeAt(i+1), c2 = lower.charCodeAt(i+2);
+    if ((c1 === c0+1 && c2 === c0+2) || (c1 === c0-1 && c2 === c0-2)) {
+      penalty += 3; // each sequential run costs 3 bits
+    }
+  }
+  return penalty;
+}
+
+function detectKeyboardWalks(str) {
+  var penalty = 0;
+  var lower = str.toLowerCase();
+  // Check known keyboard walk patterns
+  for (var w = 0; w < KEYBOARD_WALKS.length; w++) {
+    if (lower.includes(KEYBOARD_WALKS[w])) penalty += KEYBOARD_WALKS[w].length * 2;
+  }
+  // Check 4+ char runs along keyboard rows
+  for (var r = 0; r < KEYBOARD_ROWS.length; r++) {
+    var row = KEYBOARD_ROWS[r];
+    for (var len = 4; len <= row.length; len++) {
+      for (var s = 0; s <= row.length - len; s++) {
+        var sub = row.substring(s, s + len);
+        if (lower.includes(sub) || lower.includes(sub.split('').reverse().join(''))) {
+          penalty += len * 2;
+        }
+      }
+    }
+  }
+  return penalty;
+}
+
+function detectRepeatedSubstrings(str) {
+  if (str.length < 6) return 0;
+  var penalty = 0;
+  // Check if any substring of length 3-8 repeats
+  for (var len = 3; len <= Math.min(8, Math.floor(str.length/2)); len++) {
+    var seen = {};
+    for (var i = 0; i <= str.length - len; i++) {
+      var sub = str.substring(i, i + len).toLowerCase();
+      if (seen[sub]) { penalty += len; break; }
+      seen[sub] = true;
+    }
+  }
+  return penalty;
+}
+
+function checkWeakPassword(str) {
+  // Returns the matched weak password or null
+  var lower = str.toLowerCase().trim();
+  if (lower.length < 3) return null;
+  // Exact match
+  if (WEAK_PASSWORDS.has(lower)) return lower;
+  // Check if input contains a weak password as substring (only for passwords 5+ chars)
+  for (var pw of WEAK_PASSWORDS) {
+    if (pw.length >= 5 && lower.includes(pw)) return pw;
+  }
+  return null;
+}
+
+function checkBIP39Words(str) {
+  // Check if Layer 2 "invented" words are actually BIP39 words
+  if (typeof BIP39_WORDLIST === 'undefined') return [];
+  var bip39Set = new Set(BIP39_WORDLIST);
+  var words = str.toLowerCase().trim().split(/\s+/).filter(function(w) { return w.length > 0; });
+  var found = [];
+  for (var i = 0; i < words.length; i++) {
+    if (bip39Set.has(words[i])) found.push(words[i]);
+  }
+  return found;
+}
+
+function calcEntropy() {
+  var l1 = document.getElementById('layer1').value;
+  var l2 = document.getElementById('layer2').value;
+  var l3 = document.getElementById('layer3').value;
+  var l5 = document.getElementById('layer5').value;
+
+  // Shannon entropy per layer (honest calculation)
+  var bits = 0;
+  var warnings = [];
+
+  // Layer 1: Personal phrase
+  var l1bits = shannonEntropy(l1);
+  l1bits -= detectSequentialRuns(l1);
+  l1bits -= detectRepeatedSubstrings(l1);
+  l1bits = Math.max(l1bits, 0);
+  var l1weak = checkWeakPassword(l1);
+  if (l1weak) { l1bits = Math.min(l1bits, 10); warnings.push('Layer 1 contains common password: "' + l1weak + '"'); }
+  bits += l1bits;
+
+  // Layer 2: Invented words (penalize dictionary/BIP39 words)
+  var l2bits = shannonEntropy(l2);
+  l2bits -= detectRepeatedSubstrings(l2);
+  var l2bip39 = checkBIP39Words(l2);
+  if (l2bip39.length > 0) {
+    l2bits -= l2bip39.length * 11; // BIP39 words are only 11 bits each
+    warnings.push('Layer 2 has dictionary words (should be INVENTED): ' + l2bip39.join(', '));
+  }
+  var l2weak = checkWeakPassword(l2);
+  if (l2weak) { l2bits = Math.min(l2bits, 10); warnings.push('Layer 2 contains common password: "' + l2weak + '"'); }
+  l2bits = Math.max(l2bits, 0);
+  bits += l2bits;
+
+  // Layer 3: Numbers & symbols
+  var l3bits = shannonEntropy(l3);
+  l3bits -= detectSequentialRuns(l3);
+  l3bits -= detectKeyboardWalks(l3);
+  l3bits = Math.max(l3bits, 0);
+  var l3weak = checkWeakPassword(l3);
+  if (l3weak) { l3bits = Math.min(l3bits, 10); warnings.push('Layer 3 contains common password: "' + l3weak + '"'); }
+  bits += l3bits;
+
+  // Layer 4: Dice rolls (true randomness: exactly log2(6) per roll)
   bits += diceRolls.length * Math.log2(6);
-  if (l5.length > 0) { bits += l5.length * Math.log2(Math.max(new Set(l5).size, 2)); }
-  return Math.floor(bits);
+
+  // Layer 5: Wildcard
+  var l5bits = shannonEntropy(l5);
+  l5bits -= detectSequentialRuns(l5);
+  l5bits -= detectRepeatedSubstrings(l5);
+  l5bits = Math.max(l5bits, 0);
+  var l5weak = checkWeakPassword(l5);
+  if (l5weak) { l5bits = Math.min(l5bits, 10); warnings.push('Layer 5 contains common password: "' + l5weak + '"'); }
+  bits += l5bits;
+
+  return { bits: Math.floor(bits), warnings: warnings, layers: [l1bits, l2bits, l3bits, diceRolls.length * Math.log2(6), l5bits] };
 }
 
 function updateEntropy() {
-  const bits = calcEntropy();
+  var result = calcEntropy();
+  var bits = result.bits;
+  var warnings = result.warnings;
   document.getElementById('entropyBits').textContent = bits + ' bits';
-  const bar = document.getElementById('entropyBar');
-  const verdict = document.getElementById('entropyVerdict');
-  const time = document.getElementById('entropyTime');
-  const btn = document.getElementById('generateBtn');
+  var bar = document.getElementById('entropyBar');
+  var verdict = document.getElementById('entropyVerdict');
+  var time = document.getElementById('entropyTime');
+  var btn = document.getElementById('generateBtn');
 
   bar.style.width = Math.min(bits/300*100, 100) + '%';
 
   if (bits < 80) {
     bar.style.background='var(--red)'; verdict.style.color='var(--red)';
-    verdict.textContent='WEAK - Add more layers'; time.textContent=''; btn.disabled=true;
+    verdict.textContent='BLOCKED — Too weak to generate'; time.textContent=''; btn.disabled=true;
   } else if (bits < 128) {
     bar.style.background='var(--orange)'; verdict.style.color='var(--orange)';
-    verdict.textContent='MODERATE - Keep adding'; time.textContent='Crackable by nation-state'; btn.disabled=true;
+    verdict.textContent='BLOCKED — Minimum 128 bits required'; time.textContent='Crackable by nation-state'; btn.disabled=true;
   } else if (bits < 192) {
     bar.style.background='var(--yellow)'; verdict.style.color='var(--yellow)';
-    verdict.textContent='STRONG'; time.textContent='Centuries to crack'; btn.disabled=false;
+    verdict.textContent='ACCEPTABLE — Recommend adding more'; time.textContent='Centuries to crack'; btn.disabled=false;
   } else if (bits < 256) {
     bar.style.background='var(--green)'; verdict.style.color='var(--green)';
-    verdict.textContent='VERY STRONG'; time.textContent='Heat death of universe'; btn.disabled=false;
+    verdict.textContent='STRONG'; time.textContent='Heat death of universe'; btn.disabled=false;
   } else {
     bar.style.background='var(--accent2)'; verdict.style.color='var(--accent2)';
     verdict.textContent='FORTRESS GRADE'; time.textContent='Mathematically unbreakable'; btn.disabled=false;
+  }
+
+  // Show warnings
+  var warningEl = document.getElementById('entropyWarnings');
+  if (warningEl) {
+    if (warnings.length > 0) {
+      warningEl.innerHTML = warnings.map(function(w) {
+        return '<div style="color:var(--red); font-size:0.82em; padding:3px 0;">⚠ ' + escapeHtml(w) + '</div>';
+      }).join('');
+      warningEl.style.display = 'block';
+    } else {
+      warningEl.style.display = 'none';
+      warningEl.innerHTML = '';
+    }
+  }
+
+  // Block if any layer contains a common password
+  if (warnings.some(function(w) { return w.includes('common password'); })) {
+    bar.style.background='var(--red)'; verdict.style.color='var(--red)';
+    verdict.textContent='BLOCKED — Common password detected';
+    btn.disabled = true;
   }
 }
 
@@ -2396,7 +2566,36 @@ function publicKeyToEthAddress(uncompressedPubKey) {
   return '0x' + bytesToHex(addrBytes);
 }
 
+let _fkGenCount = 0;
+let _fkGenCooldown = false;
+
 async function generateKey() {
+  // DEFENSE IN DEPTH: Hard entropy gate (cannot be bypassed via DevTools button enable)
+  var entropyResult = calcEntropy();
+  if (entropyResult.bits < 128) {
+    alert('SECURITY BLOCK: Your recipe has only ' + entropyResult.bits + ' bits of entropy. Minimum 128 bits required.\n\nAdd more content to your recipe layers.');
+    return;
+  }
+  if (entropyResult.warnings.some(function(w) { return w.includes('common password'); })) {
+    alert('SECURITY BLOCK: Your recipe contains a common password. This makes your key trivially guessable.\n\nReplace the weak layer with something unique and personal.');
+    return;
+  }
+
+  // Rate limiting: 5-second cooldown between generations
+  if (_fkGenCooldown) {
+    alert('Please wait a few seconds between key generations.');
+    return;
+  }
+
+  // Warning after 3+ generations in a session
+  _fkGenCount++;
+  if (_fkGenCount > 3) {
+    if (!confirm('You have generated ' + _fkGenCount + ' keys in this session. Generating many keys increases risk of confusion. Continue?')) return;
+  }
+
+  _fkGenCooldown = true;
+  setTimeout(function() { _fkGenCooldown = false; }, 5000);
+
   const btn = document.getElementById('generateBtn');
   const qsOn = document.getElementById('quantumShield').checked;
   btn.textContent = qsOn ? 'DERIVING KEY... (500K PBKDF2 + 10K KECCAK + XOR FUSION)' : 'DERIVING KEY... (500,000 rounds)';
@@ -3294,18 +3493,54 @@ function wizPopulateReview() {
   document.getElementById('wizRev4').textContent = v4 || '(none)';
   document.getElementById('wizRev5').textContent = v5 ? wizMask(v5) : '(none - optional)';
 
-  // Entropy
-  let bits = v1.length * 4.5 + v2.length * 5 + v3.length * 4 + wizDiceRolls.length * 2.585 + v5.length * 4.5;
-  bits = Math.round(bits);
+  // Entropy (using unified Shannon calculation via temp layer values)
+  // Temporarily set generator inputs to wizard values for calcEntropy()
+  var _origL1 = document.getElementById('layer1').value;
+  var _origL2 = document.getElementById('layer2').value;
+  var _origL3 = document.getElementById('layer3').value;
+  var _origL5 = document.getElementById('layer5').value;
+  var _origDice = diceRolls.slice();
+  document.getElementById('layer1').value = v1;
+  document.getElementById('layer2').value = v2;
+  document.getElementById('layer3').value = v3;
+  document.getElementById('layer5').value = v5;
+  diceRolls = wizDiceRolls.slice();
+  var result = calcEntropy();
+  // Restore originals
+  document.getElementById('layer1').value = _origL1;
+  document.getElementById('layer2').value = _origL2;
+  document.getElementById('layer3').value = _origL3;
+  document.getElementById('layer5').value = _origL5;
+  diceRolls = _origDice;
+
+  var bits = result.bits;
   document.getElementById('wizEntropy').textContent = bits;
-  let verdict, vColor;
-  if (bits < 80) { verdict = 'WEAK - Add more to your layers.'; vColor = 'var(--red)'; }
-  else if (bits < 128) { verdict = 'MODERATE - OK for small amounts.'; vColor = 'var(--yellow)'; }
-  else if (bits < 200) { verdict = 'STRONG - Good for most use cases.'; vColor = 'var(--accent)'; }
-  else if (bits < 300) { verdict = 'VERY STRONG - Exceeds Bitcoin 256-bit requirement.'; vColor = 'var(--green)'; }
-  else { verdict = 'FORTRESS GRADE - Mathematically impossible to brute force.'; vColor = 'var(--green)'; }
-  document.getElementById('wizVerdict').innerHTML = '<span style="color:' + vColor + ';">' + verdict + '</span>';
+  var verdict, vColor;
+  if (bits < 80) { verdict = 'BLOCKED — Too weak. Go back and add more.'; vColor = 'var(--red)'; }
+  else if (bits < 128) { verdict = 'BLOCKED — Minimum 128 bits required.'; vColor = 'var(--red)'; }
+  else if (bits < 192) { verdict = 'ACCEPTABLE — Recommend adding more layers.'; vColor = 'var(--yellow)'; }
+  else if (bits < 256) { verdict = 'STRONG — Good for most use cases.'; vColor = 'var(--green)'; }
+  else { verdict = 'FORTRESS GRADE — Mathematically unbreakable.'; vColor = 'var(--green)'; }
+
+  // Show warnings in wizard
+  var warnHtml = '';
+  if (result.warnings.length > 0) {
+    warnHtml = '<div style="margin-top:8px;">' + result.warnings.map(function(w) {
+      return '<div style="color:var(--red); font-size:0.82em; padding:2px 0;">⚠ ' + escapeHtml(w) + '</div>';
+    }).join('') + '</div>';
+  }
+
+  document.getElementById('wizVerdict').innerHTML = '<span style="color:' + vColor + ';">' + verdict + '</span>' + warnHtml;
   document.getElementById('wizEntropy').style.color = vColor;
+
+  // Disable USE THIS RECIPE button if below threshold or has weak passwords
+  var useBtn = document.querySelector('#ws6 .action-btn');
+  if (useBtn) {
+    var blocked = bits < 128 || result.warnings.some(function(w) { return w.includes('common password'); });
+    useBtn.disabled = blocked;
+    if (blocked) useBtn.style.opacity = '0.5';
+    else useBtn.style.opacity = '1';
+  }
 }
 
 function wizUseRecipe() {
@@ -3534,6 +3769,66 @@ document.addEventListener('dragstart', function(e) {
   var _err = console.error;
   console.error = function() { _err('Fortress Key: An internal error occurred.'); };
 })();
+
+// =====================================================
+// SECURITY: Environment checks (secure context, iframe, HTTP)
+// =====================================================
+(function() {
+  var banner = document.getElementById('jsErrorBanner');
+  var msg = document.getElementById('jsErrorMsg');
+  var warnings = [];
+
+  // Iframe detection
+  if (window.self !== window.top) {
+    warnings.push('This page is embedded in an iframe. This is a clickjacking risk. Open the file directly.');
+  }
+
+  // HTTP detection (not HTTPS, not file://)
+  if (location.protocol === 'http:') {
+    warnings.push('This page is loaded over HTTP (insecure). A man-in-the-middle could modify this page. Use file:// (offline) or HTTPS.');
+  }
+
+  // Non-file, non-HTTPS context
+  if (location.protocol !== 'file:' && location.protocol !== 'https:' && location.protocol !== 'blob:') {
+    warnings.push('Insecure context detected (' + location.protocol + '). Use file:// for maximum security.');
+  }
+
+  if (warnings.length > 0 && banner && msg) {
+    msg.innerHTML = warnings.map(function(w) { return escapeHtml(w); }).join('<br>');
+    banner.style.display = 'block';
+  }
+})();
+
+// =====================================================
+// SECURITY: Block PrintScreen key
+// =====================================================
+document.addEventListener('keyup', function(e) {
+  if (e.key === 'PrintScreen') {
+    destroyOutput();
+    if (typeof destroyAirgap === 'function') destroyAirgap();
+    alert('PrintScreen detected. All displayed keys have been destroyed for security.');
+  }
+});
+
+// =====================================================
+// SECURITY: Warn if DevTools appears to be open
+// =====================================================
+var _fkDevToolsWarned = false;
+setInterval(function() {
+  var widthThreshold = window.outerWidth - window.innerWidth > 160;
+  var heightThreshold = window.outerHeight - window.innerHeight > 200;
+  if ((widthThreshold || heightThreshold) && !_fkDevToolsWarned) {
+    _fkDevToolsWarned = true;
+    var banner = document.getElementById('jsErrorBanner');
+    var msg = document.getElementById('jsErrorMsg');
+    if (banner && msg) {
+      var existing = msg.innerHTML;
+      msg.innerHTML = (existing ? existing + '<br>' : '') + 'Developer Tools may be open. Close DevTools before generating keys — extensions and tools can read displayed key material.';
+      banner.style.display = 'block';
+    }
+  }
+  if (!widthThreshold && !heightThreshold) { _fkDevToolsWarned = false; }
+}, 2000);
 </script>
 
 </body>
