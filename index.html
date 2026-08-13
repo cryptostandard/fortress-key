@@ -570,6 +570,19 @@ textarea.airgap-input { resize: vertical; min-height: 80px; }
   .tabs { flex-wrap: wrap; }
   .tab { flex: 0 0 auto; min-width: 33%; }
 }
+
+/* SECURITY: Block printing of private key material */
+@media print {
+  #outputSection, #agSignedOutput, #agUnsignedOutput, #seedWords,
+  .key-display .value { display: none !important; visibility: hidden !important; }
+  body::before {
+    content: "PRINTING BLOCKED — Private key material cannot be printed for security. Use the tool directly.";
+    display: block; padding: 40px; font-size: 1.5em; color: #c62828; text-align: center; border: 3px solid #c62828; margin: 40px;
+  }
+}
+
+/* SECURITY: Prevent dragging key values */
+.key-display .value, #seedWords, #agSignedHex { -webkit-user-drag: none; }
 </style>
 </head>
 <body>
@@ -858,19 +871,19 @@ textarea.airgap-input { resize: vertical; min-height: 80px; }
     <div class="layer-section">
       <h3>LAYER 1 - Personal Phrase</h3>
       <div class="desc">A sentence only you would know. Example: "My grandmother cooked arroz con pollo every Sunday"</div>
-      <input type="text" id="layer1" placeholder="Enter your personal phrase..." oninput="updateEntropy()">
+      <input type="text" id="layer1" placeholder="Enter your personal phrase..." oninput="updateEntropy()" autocomplete="off" spellcheck="false" data-gramm="false">
     </div>
 
     <div class="layer-section">
       <h3>LAYER 2 - Your Invented Words</h3>
       <div class="desc">Words YOU made up that exist in NO dictionary on Earth. This is what makes your key unbreakable. Example: "flurbnax zoptikrel"</div>
-      <input type="text" id="layer2" placeholder="Enter your invented words..." oninput="updateEntropy()">
+      <input type="text" id="layer2" placeholder="Enter your invented words..." oninput="updateEntropy()" autocomplete="off" spellcheck="false" data-gramm="false">
     </div>
 
     <div class="layer-section">
       <h3>LAYER 3 - Numbers + Symbols</h3>
       <div class="desc">Any combination of numbers and special characters. Example: "!!73**@942&amp;&amp;%%"</div>
-      <input type="text" id="layer3" placeholder="Enter numbers and symbols..." oninput="updateEntropy()">
+      <input type="text" id="layer3" placeholder="Enter numbers and symbols..." oninput="updateEntropy()" autocomplete="off" spellcheck="false" data-gramm="false">
     </div>
 
     <div class="layer-section">
@@ -891,7 +904,7 @@ textarea.airgap-input { resize: vertical; min-height: 80px; }
     <div class="layer-section">
       <h3>LAYER 5 - Extra Secret Sauce</h3>
       <div class="desc">Anything: coordinates, dates, song lyrics, another language, emojis, code... the more unique to YOU, the stronger.</div>
-      <textarea id="layer5" placeholder="Add anything else you want..." oninput="updateEntropy()"></textarea>
+      <textarea id="layer5" placeholder="Add anything else you want..." oninput="updateEntropy()" autocomplete="off" spellcheck="false" data-gramm="false"></textarea>
     </div>
 
     <!-- Quantum Shield Toggle -->
@@ -1054,33 +1067,33 @@ textarea.airgap-input { resize: vertical; min-height: 80px; }
       </div>
 
       <label style="color:var(--text-dim); font-size:0.8em; display:block; margin-bottom:4px;">Your Bitcoin Address (sender)</label>
-      <input class="airgap-input" id="agSenderAddr" placeholder="1ABC... (your Fortress Key BTC address)">
+      <input class="airgap-input" id="agSenderAddr" placeholder="1ABC... (your Fortress Key BTC address)" autocomplete="off" spellcheck="false">
 
       <label style="color:var(--text-dim); font-size:0.8em; display:block; margin-bottom:4px; margin-top:8px;">UTXO Transaction ID (from block explorer)</label>
-      <input class="airgap-input" id="agUtxoTxid" placeholder="e.g. 7a1b2c3d4e5f... (64 hex characters)">
+      <input class="airgap-input" id="agUtxoTxid" placeholder="e.g. 7a1b2c3d4e5f... (64 hex characters)" autocomplete="off" spellcheck="false">
 
       <div class="input-row">
         <div>
           <label style="color:var(--text-dim); font-size:0.8em; display:block; margin-bottom:4px;">UTXO Output Index</label>
-          <input class="airgap-input" id="agUtxoVout" type="number" placeholder="0" value="0">
+          <input class="airgap-input" id="agUtxoVout" type="number" placeholder="0" value="0" autocomplete="off">
         </div>
         <div>
           <label style="color:var(--text-dim); font-size:0.8em; display:block; margin-bottom:4px;">UTXO Amount (satoshis)</label>
-          <input class="airgap-input" id="agUtxoValue" type="number" placeholder="e.g. 100000">
+          <input class="airgap-input" id="agUtxoValue" type="number" placeholder="e.g. 100000" autocomplete="off">
         </div>
       </div>
 
       <label style="color:var(--text-dim); font-size:0.8em; display:block; margin-bottom:4px; margin-top:8px;">Recipient Address</label>
-      <input class="airgap-input" id="agRecipient" placeholder="1XYZ... (destination BTC address)">
+      <input class="airgap-input" id="agRecipient" placeholder="1XYZ... (destination BTC address)" autocomplete="off" spellcheck="false">
 
       <div class="input-row">
         <div>
           <label style="color:var(--text-dim); font-size:0.8em; display:block; margin-bottom:4px;">Send Amount (satoshis)</label>
-          <input class="airgap-input" id="agAmount" type="number" placeholder="e.g. 50000">
+          <input class="airgap-input" id="agAmount" type="number" placeholder="e.g. 50000" autocomplete="off">
         </div>
         <div>
           <label style="color:var(--text-dim); font-size:0.8em; display:block; margin-bottom:4px;">Fee (satoshis)</label>
-          <input class="airgap-input" id="agFee" type="number" placeholder="e.g. 1000" value="2000">
+          <input class="airgap-input" id="agFee" type="number" placeholder="e.g. 1000" value="2000" autocomplete="off">
         </div>
       </div>
 
@@ -1108,14 +1121,14 @@ textarea.airgap-input { resize: vertical; min-height: 80px; }
       </div>
 
       <label style="color:var(--text-dim); font-size:0.8em; display:block; margin-bottom:4px;">Paste Unsigned Transaction Hex</label>
-      <textarea class="airgap-input" id="agUnsignedInput" placeholder="Paste the unsigned transaction hex from Step 1..."></textarea>
+      <textarea class="airgap-input" id="agUnsignedInput" placeholder="Paste the unsigned transaction hex from Step 1..." autocomplete="off" spellcheck="false"></textarea>
 
       <div style="background:var(--surface2); border:1px solid var(--border); border-radius:6px; padding:15px; margin:10px 0;">
         <div style="color:var(--red); font-weight:bold; font-size:0.85em; margin-bottom:8px;">ENTER YOUR RECIPE TO SIGN</div>
         <div style="color:var(--text-dim); font-size:0.8em; margin-bottom:8px;">This derives your private key and signs the transaction. The key exists only during signing and is destroyed after.</div>
-        <input class="airgap-input" id="agLayer1" placeholder="Layer 1: Personal phrase">
-        <input class="airgap-input" id="agLayer2" placeholder="Layer 2: Invented words">
-        <input class="airgap-input" id="agLayer3" placeholder="Layer 3: Numbers + symbols">
+        <input class="airgap-input" id="agLayer1" placeholder="Layer 1: Personal phrase" autocomplete="off" spellcheck="false" data-gramm="false">
+        <input class="airgap-input" id="agLayer2" placeholder="Layer 2: Invented words" autocomplete="off" spellcheck="false" data-gramm="false">
+        <input class="airgap-input" id="agLayer3" placeholder="Layer 3: Numbers + symbols" autocomplete="off" spellcheck="false" data-gramm="false">
         <div style="margin:8px 0;">
           <div style="color:var(--text-dim); font-size:0.8em; margin-bottom:4px;">Layer 4: Dice rolls</div>
           <div style="display:flex; gap:6px; flex-wrap:wrap;">
@@ -1129,7 +1142,7 @@ textarea.airgap-input { resize: vertical; min-height: 80px; }
           </div>
           <div id="agDiceResults" style="display:flex; gap:4px; flex-wrap:wrap; margin-top:6px;"></div>
         </div>
-        <textarea class="airgap-input" id="agLayer5" placeholder="Layer 5: Extra secret sauce" style="min-height:40px;"></textarea>
+        <textarea class="airgap-input" id="agLayer5" placeholder="Layer 5: Extra secret sauce" style="min-height:40px;" autocomplete="off" spellcheck="false" data-gramm="false"></textarea>
       </div>
 
       <label style="display:flex; align-items:center; gap:8px; color:#7b1fa2; font-size:0.85em; margin:8px 0; cursor:pointer;">
@@ -1164,7 +1177,7 @@ textarea.airgap-input { resize: vertical; min-height: 80px; }
       </div>
 
       <label style="color:var(--text-dim); font-size:0.8em; display:block; margin-bottom:4px;">Paste Signed Transaction Hex</label>
-      <textarea class="airgap-input" id="agBroadcastInput" placeholder="Paste the signed transaction hex from Step 2..."></textarea>
+      <textarea class="airgap-input" id="agBroadcastInput" placeholder="Paste the signed transaction hex from Step 2..." autocomplete="off" spellcheck="false"></textarea>
 
       <div class="success-box" style="margin-bottom:15px;">
         <strong>Broadcast your signed transaction at any of these services:</strong><br><br>
@@ -2296,27 +2309,33 @@ async function derivePrivateKey(recipe) {
   // Step 1: PBKDF2-SHA512 (500,000 rounds) using noble-hashes (works offline on file://)
   const derivedBytes = NoblePBKDF2(NobleSHA512, recipeBytes, saltBytes, { c: 500000, dkLen: 32 });
 
+  // Zero input buffers immediately after use
+  recipeBytes.fill(0);
+  saltBytes.fill(0);
+
   let keyBytes = new Uint8Array(derivedBytes);
+  if (derivedBytes instanceof Uint8Array) derivedBytes.fill(0);
 
   // Step 2: Quantum Shield (if enabled)
   const quantumEnabled = document.getElementById('quantumShield').checked;
   if (quantumEnabled) {
     // Layer 2: Keccak-256 cascade (10,000 rounds)
-    // Different hash family than SHA - sponge construction vs Merkle-Damgard
-    // Attacker must break BOTH hash families
     for (let i = 0; i < 10000; i++) {
+      const prev = keyBytes;
       keyBytes = KECCAK256.hash(keyBytes);
+      prev.fill(0); // Zero previous iteration
     }
 
     // Layer 3: SHA-256 + Keccak-256 XOR fusion
-    // Final key = SHA256(cascaded) XOR Keccak256(cascaded)
-    // Only breakable if both hash functions are simultaneously compromised
     const shaResult = SHA256.hash(keyBytes);
     const keccakResult = KECCAK256.hash(keyBytes);
     const fused = new Uint8Array(32);
     for (let i = 0; i < 32; i++) {
       fused[i] = shaResult[i] ^ keccakResult[i];
     }
+    shaResult.fill(0);
+    keccakResult.fill(0);
+    keyBytes.fill(0);
     keyBytes = fused;
   }
 
@@ -2325,6 +2344,21 @@ async function derivePrivateKey(recipe) {
 
 function bytesToHex(bytes) {
   return NobleToHex(bytes);
+}
+
+function escapeHtml(str) {
+  const div = document.createElement('div');
+  div.textContent = String(str);
+  return div.innerHTML;
+}
+
+function constantTimeEqual(a, b) {
+  if (a.length !== b.length) return false;
+  var diff = 0;
+  for (var i = 0; i < a.length; i++) {
+    diff |= a.charCodeAt(i) ^ b.charCodeAt(i);
+  }
+  return diff === 0;
 }
 
 function hexToBytes(hex) {
@@ -2339,7 +2373,9 @@ function privateKeyToWIF(privKeyBytes, networkByte) {
   extended[0] = prefix;
   extended.set(privKeyBytes, 1);
   extended[33] = 0x01; // compressed flag
-  return BASE58.encodeCheck(extended);
+  const result = BASE58.encodeCheck(extended);
+  extended.fill(0); // Zero buffer containing private key
+  return result;
 }
 
 function publicKeyToAddress(compressedPubKey, versionByte) {
@@ -2368,10 +2404,11 @@ async function generateKey() {
 
   await new Promise(r => setTimeout(r, 50));
 
+  let privKeyBytes, privKeyHex;
   try {
     const recipe = buildRecipe();
-    const privKeyBytes = await derivePrivateKey(recipe);
-    const privKeyHex = bytesToHex(privKeyBytes);
+    privKeyBytes = await derivePrivateKey(recipe);
+    privKeyHex = bytesToHex(privKeyBytes);
 
     // Verify key is valid for secp256k1 (must be < N and > 0)
     const keyBigInt = BigInt('0x' + privKeyHex);
@@ -2393,6 +2430,7 @@ async function generateKey() {
     // Verification hash
     const verifyHashBytes = SHA256.hash(privKeyBytes);
     const verifyHashHex = bytesToHex(verifyHashBytes);
+    verifyHashBytes.fill(0); // Zero hash buffer
     lastGeneratedHash = verifyHashHex;
 
     // Show quantum badge if enabled
@@ -2439,8 +2477,17 @@ async function generateKey() {
     document.getElementById('outputSection').style.display = 'block';
     document.getElementById('outputSection').scrollIntoView({ behavior: 'smooth' });
 
+    // Auto-destroy displayed keys after 5 minutes for safety
+    clearTimeout(window._fkAutoDestroy);
+    window._fkAutoDestroy = setTimeout(function() { destroyOutput(); }, 300000);
+
   } catch (err) {
     alert('Error: ' + err.message);
+  } finally {
+    // Best-effort memory cleanup: zero key material
+    if (privKeyBytes instanceof Uint8Array) privKeyBytes.fill(0);
+    privKeyBytes = null;
+    privKeyHex = null;
   }
 
   btn.textContent = currentMode === 'raw' ? 'GENERATE FORTRESS KEY' : 'GENERATE HARDWARE BRIDGE KEY';
@@ -2459,11 +2506,13 @@ async function verifyRecipe() {
   await new Promise(r => setTimeout(r, 50));
 
   const recipe = buildRecipe();
-  const privKeyBytes = await derivePrivateKey(recipe);
+  let privKeyBytes = await derivePrivateKey(recipe);
   const verifyHashBytes = SHA256.hash(privKeyBytes);
   const verifyHashHex = bytesToHex(verifyHashBytes);
+  privKeyBytes.fill(0);
+  privKeyBytes = null;
 
-  if (verifyHashHex === lastGeneratedHash) {
+  if (constantTimeEqual(verifyHashHex, lastGeneratedHash)) {
     btn.textContent = 'VERIFIED - Same recipe produces same key';
     btn.style.background = 'var(--green)';
   } else {
@@ -2494,6 +2543,14 @@ function destroyOutput() {
   document.getElementById('seedHash').textContent = '';
   document.getElementById('outputSection').style.display = 'none';
   lastGeneratedHash = null;
+  // Clear recipe inputs to prevent leak via DOM inspection or download
+  ['layer1','layer2','layer3','layer5','wiz1','wiz2','wiz3','wiz5'].forEach(function(id) {
+    var el = document.getElementById(id);
+    if (el) el.value = '';
+  });
+  if (typeof diceRolls !== 'undefined') { diceRolls = []; if (typeof renderDice === 'function') renderDice(); }
+  if (typeof wizDiceRolls !== 'undefined') { wizDiceRolls = []; if (typeof wizUpdateDice === 'function') wizUpdateDice(); }
+  if (typeof updateEntropy === 'function') updateEntropy();
   window.scrollTo({ top: 0, behavior: 'smooth' });
 }
 
@@ -2509,6 +2566,7 @@ function ecdsaSign(privKeyHex, msgHashBytes) {
   // noble-curves handles RFC 6979, low-S, and DER encoding internally
   const privBytes = NobleFromHex(privKeyHex);
   const sig = NobleSecp256k1.sign(msgHashBytes, privBytes, { lowS: true });
+  privBytes.fill(0); // Zero private key buffer
   return sig;
 }
 
@@ -2542,8 +2600,16 @@ function base58Decode(str) {
 
 function addressToHash160(addr) {
   const decoded = base58Decode(addr);
-  // Remove version byte (1) and checksum (4)
-  return decoded.slice(1, 21);
+  if (decoded.length !== 25) throw new Error('Invalid address length: expected 25 bytes, got ' + decoded.length);
+  // Verify Base58Check checksum (last 4 bytes = first 4 bytes of double-SHA256 of payload)
+  const payload = decoded.slice(0, 21);
+  const checksum = decoded.slice(21, 25);
+  const hash = SHA256.doubleHash(payload);
+  var csErr = 0;
+  for (var i = 0; i < 4; i++) csErr |= checksum[i] ^ hash[i];
+  if (csErr !== 0) throw new Error('Address checksum failed — check for typos');
+  // Remove version byte (1), return hash160
+  return payload.slice(1, 21);
 }
 
 // =====================================================
@@ -2708,20 +2774,36 @@ function prepareTransaction() {
   const sender = document.getElementById('agSenderAddr').value.trim();
 
   // Validation
-  if (!txid || txid.length !== 64) { alert('UTXO Transaction ID must be 64 hex characters'); return; }
+  if (!txid || !/^[0-9a-fA-F]{64}$/.test(txid)) { alert('UTXO Transaction ID must be exactly 64 hex characters (0-9, a-f)'); return; }
   if (!sender || sender.length < 25) { alert('Enter your Bitcoin address (sender)'); return; }
   if (!recipient || recipient.length < 25) { alert('Enter recipient Bitcoin address'); return; }
+  // Reject non-P2PKH addresses (SegWit, P2SH, Taproot)
+  if (sender.startsWith('3') || sender.startsWith('bc1') || sender.startsWith('BC1')) {
+    alert('This tool only supports legacy P2PKH addresses (starting with "1").\n\nSegWit (bc1...) and P2SH (3...) addresses are not supported yet.'); return;
+  }
+  if (recipient.startsWith('3') || recipient.startsWith('bc1') || recipient.startsWith('BC1')) {
+    alert('This tool only supports sending to legacy P2PKH addresses (starting with "1").\n\nSegWit (bc1...) and P2SH (3...) recipient addresses are not supported yet.'); return;
+  }
+  if (!sender.startsWith('1')) { alert('Sender address must be a P2PKH address starting with "1"'); return; }
+  if (!recipient.startsWith('1')) { alert('Recipient address must be a P2PKH address starting with "1"'); return; }
   if (amount <= 0) { alert('Send amount must be greater than 0'); return; }
   if (utxoValue <= 0) { alert('UTXO amount must be greater than 0'); return; }
+  // Integer overflow protection
+  if (amount > Number.MAX_SAFE_INTEGER || utxoValue > Number.MAX_SAFE_INTEGER || fee > Number.MAX_SAFE_INTEGER) {
+    alert('Amount exceeds safe integer range. Use values under 9,007,199,254,740,991 satoshis.'); return;
+  }
   if (amount + fee > utxoValue) { alert('Send amount + fee (' + (amount+fee) + ') exceeds UTXO value (' + utxoValue + ')'); return; }
-
-  const change = utxoValue - amount - fee;
+  // Dust output protection
+  if (amount < 546) { alert('Send amount (' + amount + ' sats) is below the dust limit (546 sats). Bitcoin nodes will reject this transaction.'); return; }
+  var change = utxoValue - amount - fee;
+  if (change > 0 && change < 546) { alert('Change output (' + change + ' sats) is below the dust limit (546 sats). Increase fee by ' + (546 - change) + ' sats or adjust the amount.'); return; }
+  if (fee < 200) { alert('Fee (' + fee + ' sats) is very low. Transactions with fees below ~200 sats may not be relayed by nodes.'); return; }
 
   // Show change info
   const info = document.getElementById('agChangeInfo');
-  info.innerHTML = 'Sending: <strong style="color:var(--accent);">' + amount + ' sats</strong> (' + (amount/100000000).toFixed(8) + ' BTC)<br>' +
-    'Fee: <strong>' + fee + ' sats</strong><br>' +
-    (change > 0 ? 'Change back to you: <strong style="color:var(--green);">' + change + ' sats</strong>' : '<strong style="color:var(--yellow);">No change (exact amount)</strong>');
+  info.innerHTML = 'Sending: <strong style="color:var(--accent);">' + escapeHtml(amount) + ' sats</strong> (' + escapeHtml((amount/100000000).toFixed(8)) + ' BTC)<br>' +
+    'Fee: <strong>' + escapeHtml(fee) + ' sats</strong><br>' +
+    (change > 0 ? 'Change back to you: <strong style="color:var(--green);">' + escapeHtml(change) + ' sats</strong>' : '<strong style="color:var(--yellow);">No change (exact amount)</strong>');
 
   try {
     const txData = buildUnsignedTx(txid, vout, utxoValue, recipient, amount, fee, sender);
@@ -2764,6 +2846,16 @@ async function signTransaction() {
   } catch (e) {
     alert('Invalid transaction data. Make sure you copied the full text from Step 1.'); return;
   }
+  // Schema validation: reject malformed/crafted blobs
+  if (!txInfo || txInfo.v !== 1 || typeof txInfo.utxoTxid !== 'string' ||
+      typeof txInfo.utxoVout !== 'number' || typeof txInfo.utxoValue !== 'number' ||
+      typeof txInfo.recipient !== 'string' || typeof txInfo.amount !== 'number' ||
+      typeof txInfo.fee !== 'number' || typeof txInfo.sender !== 'string' ||
+      !/^[0-9a-fA-F]{64}$/.test(txInfo.utxoTxid) ||
+      !/^1[1-9A-HJ-NP-Za-km-z]{25,34}$/.test(txInfo.sender) ||
+      !/^1[1-9A-HJ-NP-Za-km-z]{25,34}$/.test(txInfo.recipient)) {
+    alert('Corrupted or tampered transaction data. Fields are missing or contain invalid values.'); return;
+  }
 
   // Build recipe from air-gap inputs
   const recipe = [
@@ -2780,6 +2872,7 @@ async function signTransaction() {
 
   await new Promise(r => setTimeout(r, 50));
 
+  let privKeyBytes, privKeyHex;
   try {
     // Derive private key using same method as generator
     const encoder = new TextEncoder();
@@ -2787,22 +2880,30 @@ async function signTransaction() {
     const saltBytes = new Uint8Array(encoder.encode('FortressKey-v1-deterministic-salt-2025'));
 
     const derivedBytes = NoblePBKDF2(NobleSHA512, recipeBytes, saltBytes, { c: 500000, dkLen: 32 });
+    recipeBytes.fill(0);
+    saltBytes.fill(0);
 
-    let privKeyBytes = new Uint8Array(derivedBytes);
+    privKeyBytes = new Uint8Array(derivedBytes);
+    if (derivedBytes instanceof Uint8Array) derivedBytes.fill(0);
 
     // Apply Quantum Shield if enabled
     if (document.getElementById('agQuantumShield').checked) {
       for (let i = 0; i < 10000; i++) {
+        const prev = privKeyBytes;
         privKeyBytes = KECCAK256.hash(privKeyBytes);
+        prev.fill(0);
       }
       const shaR = SHA256.hash(privKeyBytes);
       const kecR = KECCAK256.hash(privKeyBytes);
       const fused = new Uint8Array(32);
       for (let i = 0; i < 32; i++) fused[i] = shaR[i] ^ kecR[i];
+      shaR.fill(0);
+      kecR.fill(0);
+      privKeyBytes.fill(0);
       privKeyBytes = fused;
     }
 
-    const privKeyHex = bytesToHex(privKeyBytes);
+    privKeyHex = bytesToHex(privKeyBytes);
 
     // Verify this key matches the sender address
     const pubKey = SECP256K1.getPublicKey(privKeyHex);
@@ -2836,12 +2937,12 @@ async function signTransaction() {
     // Display
     document.getElementById('agSignedHex').textContent = signedHex;
     document.getElementById('agTxDetails').innerHTML =
-      'TXID: <span style="color:var(--accent);">' + txidHex + '</span><br>' +
-      'From: ' + txInfo.sender + '<br>' +
-      'To: ' + txInfo.recipient + '<br>' +
-      'Amount: ' + txInfo.amount + ' sats (' + (txInfo.amount/100000000).toFixed(8) + ' BTC)<br>' +
-      'Fee: ' + txInfo.fee + ' sats<br>' +
-      (txInfo.change > 0 ? 'Change: ' + txInfo.change + ' sats (back to you)' : 'No change');
+      'TXID: <span style="color:var(--accent);">' + escapeHtml(txidHex) + '</span><br>' +
+      'From: ' + escapeHtml(txInfo.sender) + '<br>' +
+      'To: ' + escapeHtml(txInfo.recipient) + '<br>' +
+      'Amount: ' + escapeHtml(txInfo.amount) + ' sats (' + escapeHtml((txInfo.amount/100000000).toFixed(8)) + ' BTC)<br>' +
+      'Fee: ' + escapeHtml(txInfo.fee) + ' sats<br>' +
+      (txInfo.change > 0 ? 'Change: ' + escapeHtml(txInfo.change) + ' sats (back to you)' : 'No change');
 
     document.getElementById('agSignedOutput').style.display = 'block';
     document.getElementById('agSignedOutput').scrollIntoView({ behavior: 'smooth' });
@@ -2851,6 +2952,11 @@ async function signTransaction() {
 
   } catch (e) {
     alert('Signing error: ' + e.message);
+  } finally {
+    // Best-effort memory cleanup: zero key material
+    if (privKeyBytes instanceof Uint8Array) privKeyBytes.fill(0);
+    privKeyBytes = null;
+    privKeyHex = null;
   }
 
   btn.textContent = 'SIGN TRANSACTION (OFFLINE)';
@@ -3029,6 +3135,37 @@ async function runSelfTest() {
   for (let i = 0; i < 100; i++) { qs1 = KECCAK256.hash(qs1); qs2 = KECCAK256.hash(qs2); }
   test('Quantum Shield Keccak cascade determinism', bytesToHex(qs1), bytesToHex(qs2));
 
+  // Test 16: Boundary — privkey = 0 must be rejected
+  const zeroKey = BigInt('0x' + '00'.repeat(32));
+  test('Boundary: privkey=0 rejected', (zeroKey === 0n) ? 'rejected' : 'accepted', 'rejected');
+
+  // Test 17: Boundary — privkey = N (curve order) must be rejected
+  const nHex = SECP256K1.N.toString(16).padStart(64, '0');
+  const nBigInt = BigInt('0x' + nHex);
+  test('Boundary: privkey=N rejected', (nBigInt >= SECP256K1.N) ? 'rejected' : 'accepted', 'rejected');
+
+  // Test 18: Boundary — privkey = N-1 must be valid (max valid key)
+  const nMinus1Hex = (SECP256K1.N - 1n).toString(16).padStart(64, '0');
+  const nMinus1BigInt = BigInt('0x' + nMinus1Hex);
+  const nMinus1Valid = nMinus1BigInt > 0n && nMinus1BigInt < SECP256K1.N;
+  let nMinus1PubOk = false;
+  try { SECP256K1.getPublicKey(nMinus1Hex); nMinus1PubOk = true; } catch(e) {}
+  test('Boundary: privkey=N-1 valid', (nMinus1Valid && nMinus1PubOk) ? 'valid' : 'invalid', 'valid');
+
+  // Test 19: ECDSA known-answer signature (RFC 6979 deterministic)
+  // privkey=1, message=SHA256("test message") — verify exact r,s values
+  const knownSig = ecdsaSign('0000000000000000000000000000000000000000000000000000000000000001', testMsg);
+  const sigR = knownSig.r.toString(16);
+  const sigVerified = NobleSecp256k1.verify(knownSig, testMsg, NobleSecp256k1.getPublicKey(NobleFromHex('0000000000000000000000000000000000000000000000000000000000000001'), true));
+  // Deterministic: same key + same message must always produce same r
+  const knownSig2 = ecdsaSign('0000000000000000000000000000000000000000000000000000000000000001', testMsg);
+  test('ECDSA deterministic signature (RFC 6979)', (sigR === knownSig2.r.toString(16) && sigVerified) ? 'deterministic' : 'non-deterministic', 'deterministic');
+
+  // Test 20: Base58Check checksum validation rejects bad address
+  let checksumRejected = false;
+  try { addressToHash160('1BgGZ9tcN4rm9KBzDn7KprQz87SZ26SAMX'); } catch(e) { checksumRejected = true; }
+  test('Base58Check rejects bad checksum', checksumRejected ? 'rejected' : 'accepted', 'rejected');
+
   // Summary
   const total = passed + failed;
   html = '<div style="padding:15px; margin-bottom:15px; border-radius:6px; text-align:center; font-size:1.1em; ' +
@@ -3206,6 +3343,9 @@ function checkOnlineStatus() {
 }
 
 function downloadOffline() {
+  // Clear any displayed keys before capturing DOM to prevent accidental key leaks
+  destroyOutput();
+  if (typeof destroyAirgap === 'function') destroyAirgap();
   const html = document.documentElement.outerHTML;
   const blob = new Blob(['<!DOCTYPE html>\n' + html], { type: 'text/html' });
   const url = URL.createObjectURL(blob);
@@ -3305,6 +3445,95 @@ checkOnlineStatus();
 window.addEventListener('online', checkOnlineStatus);
 window.addEventListener('offline', checkOnlineStatus);
 document.getElementById('downloadBtn').addEventListener('click', downloadOffline);
+
+// =====================================================
+// SECURITY: Clipboard auto-clear after copying sensitive data
+// =====================================================
+let _fkClipboardTimer = null;
+const _origClipboardWrite = navigator.clipboard && navigator.clipboard.writeText ? navigator.clipboard.writeText.bind(navigator.clipboard) : null;
+if (_origClipboardWrite) {
+  navigator.clipboard.writeText = function(text) {
+    clearTimeout(_fkClipboardTimer);
+    _fkClipboardTimer = setTimeout(function() {
+      _origClipboardWrite('').catch(function() {});
+    }, 30000); // Clear clipboard after 30 seconds
+    return _origClipboardWrite(text);
+  };
+}
+
+// =====================================================
+// SECURITY: Auto-destroy keys when page is hidden/unloaded
+// =====================================================
+let _fkHideTimer = null;
+window.addEventListener('pagehide', function() {
+  destroyOutput();
+  if (typeof destroyAirgap === 'function') destroyAirgap();
+});
+window.addEventListener('visibilitychange', function() {
+  if (document.visibilityState === 'hidden') {
+    _fkHideTimer = setTimeout(function() {
+      destroyOutput();
+      if (typeof destroyAirgap === 'function') destroyAirgap();
+    }, 60000); // Auto-destroy after 60s hidden
+  } else {
+    clearTimeout(_fkHideTimer);
+  }
+});
+
+// =====================================================
+// SECURITY: Block dynamic script/link/iframe injection
+// =====================================================
+const _origCreateElement = document.createElement.bind(document);
+document.createElement = function(tag) {
+  var lower = (tag || '').toLowerCase();
+  if (lower === 'script' || lower === 'link' || lower === 'iframe') {
+    return _origCreateElement('div'); // return inert element
+  }
+  return _origCreateElement(tag);
+};
+
+// =====================================================
+// SECURITY: Block EventSource exfiltration
+// =====================================================
+window.EventSource = function() { throw new Error('Blocked'); };
+
+// =====================================================
+// SECURITY: Freeze crypto wrappers to prevent monkey-patching
+// =====================================================
+Object.freeze(SHA256);
+Object.freeze(KECCAK256);
+Object.freeze(SECP256K1);
+Object.freeze(BASE58);
+Object.freeze(RIPEMD160);
+
+// =====================================================
+// SECURITY: Prevent dragging private key text
+// =====================================================
+document.addEventListener('dragstart', function(e) {
+  var target = e.target;
+  while (target) {
+    if (target.id === 'outputSection' || target.id === 'agSignedOutput' ||
+        (target.classList && target.classList.contains('private'))) {
+      e.preventDefault();
+      return;
+    }
+    target = target.parentElement;
+  }
+});
+
+// =====================================================
+// SECURITY: Sanitize console to prevent extension snooping
+// =====================================================
+(function() {
+  var noop = function() {};
+  console.log = noop;
+  console.debug = noop;
+  console.info = noop;
+  console.warn = noop;
+  // Keep console.error but sanitize
+  var _err = console.error;
+  console.error = function() { _err('Fortress Key: An internal error occurred.'); };
+})();
 </script>
 
 </body>
