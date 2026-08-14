@@ -1,0 +1,16 @@
+# Fortress Key v2.0.0 — Official SHA-256 Checksums
+# Verify with: shasum -a 256 <filename>
+# Build from source: ./scripts/verify-build.sh <hash>
+#
+# Platform: macOS ARM64 (aarch64-apple-darwin)
+# Rust: 1.97.1
+# Commit: see git log
+
+# Binary (cargo build --release from clean)
+e9eba7e02f40e9c23a7f922199cccd2dfec017139a049dff664279b877c1a3ba  fortress-key (macOS ARM64)
+
+# To reproduce:
+#   git checkout <tag>
+#   cd src-tauri
+#   cargo clean && cargo build --release
+#   shasum -a 256 target/release/fortress-key
