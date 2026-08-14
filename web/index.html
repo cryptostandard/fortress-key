@@ -664,6 +664,7 @@ textarea.airgap-input { resize: vertical; min-height: 80px; }
 
   <div class="tabs">
     <button class="tab" data-action="switchTab" data-arg="diceroll" style="border-color:var(--green); color:var(--green); font-weight:bold;">DICE ROLL</button>
+    <button class="tab" data-action="switchTab" data-arg="seedcheck" style="border-color:var(--accent2); color:var(--accent2);">VERIFY SEED</button>
     <button class="tab active" data-action="switchTab" data-arg="scanner">SCANNER</button>
     <button class="tab" data-action="switchTab" data-arg="wizard">RECIPE WIZARD</button>
     <button class="tab" data-action="switchTab" data-arg="generator">KEY GENERATOR</button>
@@ -746,6 +747,46 @@ textarea.airgap-input { resize: vertical; min-height: 80px; }
         </div>
       </div>
     </div>
+  </div>
+
+  <!-- ==================== VERIFY SEED PANEL ==================== -->
+  <div id="panel-seedcheck" class="panel">
+    <h2 style="margin-bottom:5px; color:var(--accent2); font-size:1.1em;">Verify BIP39 Seed Phrase</h2>
+    <p style="color:var(--text-dim); font-size:0.85em; margin-bottom:20px; line-height:1.6;">
+      Enter your 12 or 24 word seed phrase to verify it's valid before trusting your backup.<br>
+      Detects invalid words, checksum errors, and suggests corrections.
+    </p>
+
+    <!-- Word count selector -->
+    <div style="display:flex; gap:10px; margin-bottom:15px;">
+      <button class="mode-btn active" id="verify24btn" data-action="setVerifyMode" data-arg="24" style="flex:1;">24 WORDS</button>
+      <button class="mode-btn" id="verify12btn" data-action="setVerifyMode" data-arg="12" style="flex:1;">12 WORDS</button>
+    </div>
+
+    <!-- Word input grid -->
+    <div id="verifyWordGrid" style="display:grid; grid-template-columns:repeat(4, 1fr); gap:8px; margin-bottom:15px;"></div>
+
+    <!-- Passphrase (optional) -->
+    <div style="background:var(--surface); border:1px solid var(--border); border-radius:6px; padding:12px; margin-bottom:15px;">
+      <label style="font-size:0.85em; color:var(--text-dim); display:block; margin-bottom:6px;">
+        BIP39 Passphrase (optional — word 25):
+      </label>
+      <input type="password" id="verifyPassphrase" placeholder="Leave empty for standard wallet" autocomplete="off" spellcheck="false" data-gramm="false"
+        style="width:100%; padding:10px; background:var(--bg); border:1px solid var(--border); border-radius:4px; color:var(--text); font-family:inherit;">
+    </div>
+
+    <!-- Buttons -->
+    <div style="display:flex; gap:10px; margin-bottom:15px;">
+      <button class="action-btn" data-action="verifySeed" style="flex:2; background:var(--accent2); color:white; padding:12px;">VALIDATE SEED</button>
+      <button class="action-btn" data-action="deriveAddrs" style="flex:1; background:var(--surface); color:var(--text); border:1px solid var(--border); padding:12px;">SHOW ADDRESSES</button>
+      <button class="action-btn" data-action="clearVerify" style="flex:1; background:#fff0f0; color:var(--red); border:1px solid var(--red); padding:12px;">CLEAR</button>
+    </div>
+
+    <!-- Validation result -->
+    <div id="verifyResult" style="display:none;"></div>
+
+    <!-- Derived addresses -->
+    <div id="verifyAddresses" style="display:none;"></div>
   </div>
 
   <!-- ==================== SCANNER PANEL ==================== -->
@@ -3781,6 +3822,196 @@ function downloadOffline() {
 
 // =====================================================
 // =====================================================
+// VERIFY SEED PHRASE
+// =====================================================
+var _verifyWordCount = 24;
+
+function setVerifyMode(n) {
+  _verifyWordCount = n;
+  document.getElementById('verify24btn').classList.toggle('active', n === 24);
+  document.getElementById('verify12btn').classList.toggle('active', n === 12);
+  buildVerifyGrid();
+}
+
+function buildVerifyGrid() {
+  var grid = document.getElementById('verifyWordGrid');
+  var html = '';
+  for (var i = 0; i < _verifyWordCount; i++) {
+    html += '<div style="position:relative;">' +
+      '<div style="font-size:0.7em; color:var(--text-dim); margin-bottom:2px;">' + (i+1) + '</div>' +
+      '<input type="text" class="verify-word-input" data-index="' + i + '" autocomplete="off" spellcheck="false" data-gramm="false" ' +
+      'style="width:100%; padding:6px 8px; font-size:0.85em; background:var(--bg); border:1px solid var(--border); border-radius:4px; color:var(--text); font-family:inherit;">' +
+      '</div>';
+  }
+  grid.innerHTML = html;
+  document.getElementById('verifyResult').style.display = 'none';
+  document.getElementById('verifyAddresses').style.display = 'none';
+}
+
+function getVerifyWords() {
+  var inputs = document.querySelectorAll('.verify-word-input');
+  var words = [];
+  inputs.forEach(function(inp) { words.push(inp.value.trim().toLowerCase()); });
+  return words.filter(function(w) { return w.length > 0; });
+}
+
+async function verifySeed() {
+  var words = getVerifyWords();
+  if (words.length !== _verifyWordCount) {
+    showVerifyResult(false, 'Please enter all ' + _verifyWordCount + ' words.', []);
+    return;
+  }
+
+  try {
+    var result;
+    if (IS_TAURI) {
+      result = await window.__TAURI__.core.invoke('validate_mnemonic', { words: words });
+    } else {
+      // JS fallback: basic validation
+      result = jsValidateMnemonic(words);
+    }
+
+    if (result.valid) {
+      showVerifyResult(true, 'Valid BIP39 seed phrase. Checksum verified.', []);
+    } else {
+      showVerifyResult(false, result.error || 'Invalid seed phrase', result.suggestions || []);
+    }
+  } catch (err) {
+    showVerifyResult(false, 'Error: ' + (err.message || err), []);
+  }
+}
+
+async function deriveAddrs() {
+  var words = getVerifyWords();
+  if (words.length !== _verifyWordCount) {
+    showVerifyResult(false, 'Please enter all ' + _verifyWordCount + ' words first.', []);
+    return;
+  }
+
+  var passphrase = document.getElementById('verifyPassphrase').value;
+
+  try {
+    var result;
+    if (IS_TAURI) {
+      result = await window.__TAURI__.core.invoke('derive_addresses', { words: words, passphrase: passphrase });
+    } else {
+      showVerifyResult(false, 'Address derivation requires the native desktop app.', []);
+      return;
+    }
+
+    var addrDiv = document.getElementById('verifyAddresses');
+    var html = '<div style="background:var(--surface); border:1px solid var(--accent2); border-radius:6px; padding:15px; margin-top:10px;">';
+    html += '<div style="color:var(--accent2); font-weight:bold; margin-bottom:10px;">Derived Addresses</div>';
+
+    result.btc_addresses.forEach(function(a) {
+      html += '<div style="margin-bottom:8px; font-size:0.85em;">';
+      html += '<span style="color:var(--text-dim);">' + escapeHtml(a.path) + ':</span><br>';
+      html += '<span style="font-family:monospace; color:var(--accent); word-break:break-all;">' + escapeHtml(a.address) + '</span>';
+      html += '</div>';
+    });
+
+    html += '<div style="margin-bottom:8px; font-size:0.85em;">';
+    html += '<span style="color:var(--text-dim);">ETH:</span><br>';
+    html += '<span style="font-family:monospace; color:var(--accent); word-break:break-all;">' + escapeHtml(result.eth_address) + '</span>';
+    html += '</div>';
+
+    if (passphrase) {
+      html += '<div style="font-size:0.8em; color:var(--text-dim); margin-top:8px;">With passphrase: yes (addresses differ from no-passphrase wallet)</div>';
+    }
+
+    html += '<div style="font-size:0.78em; color:var(--text-dim); margin-top:10px; padding-top:8px; border-top:1px solid var(--border);">Compare these addresses with your hardware wallet to verify the seed is correct.</div>';
+    html += '</div>';
+
+    addrDiv.innerHTML = html;
+    addrDiv.style.display = 'block';
+  } catch (err) {
+    showVerifyResult(false, 'Error: ' + (err.message || err), []);
+  }
+}
+
+function showVerifyResult(valid, message, suggestions) {
+  var div = document.getElementById('verifyResult');
+  var html = '<div style="padding:15px; border-radius:6px; ' +
+    (valid ? 'background:#f0faf0; border:1px solid var(--green);' : 'background:#fff0f0; border:1px solid var(--red);') + '">';
+  html += '<div style="font-weight:bold; color:' + (valid ? 'var(--green)' : 'var(--red)') + '; margin-bottom:8px;">' +
+    (valid ? '\u2713 ' : '\u2717 ') + escapeHtml(message) + '</div>';
+
+  if (suggestions && suggestions.length > 0) {
+    suggestions.forEach(function(s) {
+      html += '<div style="padding:8px; margin-top:6px; background:var(--bg); border:1px solid var(--border); border-radius:4px; font-size:0.85em;">';
+      if (s.position > 0) {
+        html += '<strong>Word ' + s.position + '</strong> ("' + escapeHtml(s.word) + '"): ' + escapeHtml(s.problem);
+        if (s.candidates && s.candidates.length > 0) {
+          html += '<br><span style="color:var(--accent2);">Did you mean: <strong>' + s.candidates.map(escapeHtml).join(', ') + '</strong>?</span>';
+        }
+      } else {
+        html += escapeHtml(s.problem);
+      }
+      html += '</div>';
+    });
+  }
+
+  html += '</div>';
+  div.innerHTML = html;
+  div.style.display = 'block';
+
+  // Highlight invalid word inputs
+  document.querySelectorAll('.verify-word-input').forEach(function(inp) {
+    inp.style.borderColor = 'var(--border)';
+  });
+  if (suggestions) {
+    suggestions.forEach(function(s) {
+      if (s.position > 0) {
+        var inp = document.querySelector('.verify-word-input[data-index="' + (s.position - 1) + '"]');
+        if (inp) inp.style.borderColor = 'var(--red)';
+      }
+    });
+  }
+}
+
+function clearVerify() {
+  document.querySelectorAll('.verify-word-input').forEach(function(inp) {
+    inp.value = '';
+    inp.style.borderColor = 'var(--border)';
+  });
+  document.getElementById('verifyResult').style.display = 'none';
+  document.getElementById('verifyAddresses').style.display = 'none';
+  document.getElementById('verifyPassphrase').value = '';
+}
+
+// JS fallback for basic BIP39 validation (no Tauri)
+function jsValidateMnemonic(words) {
+  if (typeof BIP39_WORDLIST === 'undefined') return { valid: false, error: 'Wordlist not loaded', suggestions: [] };
+  var suggestions = [];
+  var indices = [];
+  for (var i = 0; i < words.length; i++) {
+    var idx = BIP39_WORDLIST.indexOf(words[i]);
+    if (idx === -1) {
+      suggestions.push({ position: i+1, word: words[i], problem: 'Not in BIP39 wordlist', candidates: [] });
+      indices.push(0);
+    } else {
+      indices.push(idx);
+    }
+  }
+  if (suggestions.length > 0) return { valid: false, error: 'Invalid words found', suggestions: suggestions };
+
+  // Check checksum
+  var bits = '';
+  for (var j = 0; j < indices.length; j++) bits += indices[j].toString(2).padStart(11, '0');
+  var csLen = words.length === 24 ? 8 : 4;
+  var entLen = bits.length - csLen;
+  var entBytes = [];
+  for (var k = 0; k < entLen; k += 8) entBytes.push(parseInt(bits.substr(k, 8), 2));
+  var hash = SHA256.hash(new Uint8Array(entBytes));
+  var expectedCS = words.length === 24 ? hash[0] : hash[0] >> 4;
+  var actualCS = parseInt(bits.substr(entLen), 2);
+  if (actualCS !== expectedCS) {
+    return { valid: false, error: 'Checksum mismatch — one or more words may be wrong', suggestions: [] };
+  }
+  return { valid: true, error: null, suggestions: [] };
+}
+
+// =====================================================
 // DICE ROLL SEED GENERATOR
 // =====================================================
 var _diceRolls = [];
@@ -4198,6 +4429,10 @@ if (IS_TAURI) {
     copyAirgap: function(arg, el) { copyAirgap(el); },
     copyDonation: function(arg, el) { copyDonation(el); },
     copyHash: function(arg, el) { copyHash(el); },
+    setVerifyMode: function(arg) { setVerifyMode(parseInt(arg)); },
+    verifySeed: function() { verifySeed(); },
+    deriveAddrs: function() { deriveAddrs(); },
+    clearVerify: function() { clearVerify(); },
     setDiceMode: function(arg) { setDiceWordCount(parseInt(arg)); },
     diceRollAdd: function(arg) { addDiceRollNew(parseInt(arg)); },
     diceRollUndo: function() { undoDiceRoll(); },
@@ -4234,6 +4469,7 @@ if (IS_TAURI) {
 // INIT
 // =====================================================
 initScanner();
+buildVerifyGrid();
 updateEntropy();
 checkOnlineStatus();
 window.addEventListener('online', checkOnlineStatus);
