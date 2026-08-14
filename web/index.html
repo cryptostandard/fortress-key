@@ -665,6 +665,7 @@ textarea.airgap-input { resize: vertical; min-height: 80px; }
   <div class="tabs">
     <button class="tab" data-action="switchTab" data-arg="diceroll" style="border-color:var(--green); color:var(--green); font-weight:bold;">DICE ROLL</button>
     <button class="tab" data-action="switchTab" data-arg="seedcheck" style="border-color:var(--accent2); color:var(--accent2);">VERIFY SEED</button>
+    <button class="tab" data-action="switchTab" data-arg="passphrase" style="border-color:#7b1fa2; color:#7b1fa2;">PASSPHRASE</button>
     <button class="tab active" data-action="switchTab" data-arg="scanner">SCANNER</button>
     <button class="tab" data-action="switchTab" data-arg="wizard">RECIPE WIZARD</button>
     <button class="tab" data-action="switchTab" data-arg="generator">KEY GENERATOR</button>
@@ -787,6 +788,74 @@ textarea.airgap-input { resize: vertical; min-height: 80px; }
 
     <!-- Derived addresses -->
     <div id="verifyAddresses" style="display:none;"></div>
+  </div>
+
+  <!-- ==================== PASSPHRASE MANAGER PANEL ==================== -->
+  <div id="panel-passphrase" class="panel">
+    <h2 style="margin-bottom:5px; color:#7b1fa2; font-size:1.1em;">BIP39 Passphrase Manager (Word 25)</h2>
+    <p style="color:var(--text-dim); font-size:0.85em; margin-bottom:20px; line-height:1.6;">
+      A passphrase creates a completely different wallet from the same seed phrase.<br>
+      <strong>Seed in steel at home + passphrase in your head = neither alone opens anything.</strong>
+    </p>
+
+    <!-- Security model explanation -->
+    <div style="background:var(--surface); border:1px solid #7b1fa2; border-radius:8px; padding:18px; margin-bottom:20px;">
+      <div style="color:#7b1fa2; font-weight:bold; margin-bottom:10px;">How It Works</div>
+      <div style="display:grid; grid-template-columns:1fr 1fr 1fr; gap:12px; text-align:center; font-size:0.85em;" class="two-col-grid">
+        <div style="background:var(--bg); border:1px solid var(--border); border-radius:6px; padding:12px;">
+          <div style="font-size:1.5em; margin-bottom:6px;">&#128273;</div>
+          <div style="font-weight:bold; color:var(--text); margin-bottom:4px;">Seed (24 words)</div>
+          <div style="color:var(--text-dim); font-size:0.9em;">Stamped on metal, stored at home. Physical security.</div>
+        </div>
+        <div style="background:var(--bg); border:1px solid var(--border); border-radius:6px; padding:12px;">
+          <div style="font-size:1.5em; margin-bottom:6px;">+</div>
+          <div style="font-weight:bold; color:var(--text); margin-bottom:4px;">Passphrase</div>
+          <div style="color:var(--text-dim); font-size:0.9em;">Lives in your head. Crosses borders. No evidence.</div>
+        </div>
+        <div style="background:var(--bg); border:1px solid #7b1fa2; border-radius:6px; padding:12px;">
+          <div style="font-size:1.5em; margin-bottom:6px;">&#128274;</div>
+          <div style="font-weight:bold; color:#7b1fa2; margin-bottom:4px;">= Unique Wallet</div>
+          <div style="color:var(--text-dim); font-size:0.9em;">Different passphrase = different wallet entirely.</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Plausible deniability explanation -->
+    <div style="background:#faf0ff; border:1px solid #7b1fa2; border-radius:8px; padding:15px; margin-bottom:20px;">
+      <div style="color:#7b1fa2; font-weight:bold; font-size:0.9em; margin-bottom:8px;">Plausible Deniability</div>
+      <div style="font-size:0.85em; color:var(--text-dim); line-height:1.7;">
+        <strong>No passphrase</strong> &rarr; Decoy wallet with small balance<br>
+        <strong>Simple passphrase</strong> &rarr; Another decoy, slightly more<br>
+        <strong>Real passphrase</strong> &rarr; Main wallet with real funds<br><br>
+        Under duress, you reveal the seed + a decoy passphrase. There is <strong>no way to prove</strong> other passphrases exist. Every passphrase produces a valid wallet.
+      </div>
+    </div>
+
+    <!-- Seed input -->
+    <div style="background:var(--surface); border:1px solid var(--border); border-radius:6px; padding:15px; margin-bottom:15px;">
+      <label style="font-size:0.85em; color:var(--text-dim); display:block; margin-bottom:6px;">Your 24-word seed phrase (space-separated):</label>
+      <textarea id="ppSeedInput" rows="3" placeholder="word1 word2 word3 ... word24" autocomplete="off" spellcheck="false" data-gramm="false"
+        style="width:100%; padding:10px; background:var(--bg); border:1px solid var(--border); border-radius:4px; color:var(--text); font-family:monospace; font-size:0.85em; resize:vertical;"></textarea>
+    </div>
+
+    <!-- Passphrase input -->
+    <div style="background:var(--surface); border:1px solid #7b1fa2; border-radius:6px; padding:15px; margin-bottom:15px;">
+      <label style="font-size:0.85em; color:#7b1fa2; display:block; margin-bottom:6px; font-weight:bold;">Your Passphrase:</label>
+      <input type="password" id="ppPassphrase" placeholder="Enter your passphrase" autocomplete="off" spellcheck="false" data-gramm="false"
+        style="width:100%; padding:10px; background:var(--bg); border:1px solid var(--border); border-radius:4px; color:var(--text); font-family:inherit; font-size:1em;">
+      <div style="margin-top:6px; font-size:0.78em; color:var(--text-dim);">
+        Case-sensitive. Spaces count. An incorrect passphrase opens a different (empty) wallet — there is no "wrong passphrase" error.
+      </div>
+    </div>
+
+    <!-- Buttons -->
+    <div style="display:flex; gap:10px; margin-bottom:15px;">
+      <button class="action-btn" data-action="ppCompare" style="flex:2; background:#7b1fa2; color:white; padding:12px;">COMPARE WALLETS</button>
+      <button class="action-btn" data-action="ppClear" style="flex:1; background:#fff0f0; color:var(--red); border:1px solid var(--red); padding:12px;">CLEAR ALL</button>
+    </div>
+
+    <!-- Results -->
+    <div id="ppResult" style="display:none;"></div>
   </div>
 
   <!-- ==================== SCANNER PANEL ==================== -->
@@ -3822,6 +3891,80 @@ function downloadOffline() {
 
 // =====================================================
 // =====================================================
+// PASSPHRASE MANAGER
+// =====================================================
+async function ppCompare() {
+  var seedText = document.getElementById('ppSeedInput').value.trim();
+  var passphrase = document.getElementById('ppPassphrase').value;
+
+  if (!seedText) { alert('Enter your 24-word seed phrase.'); return; }
+  var words = seedText.split(/\s+/).filter(function(w) { return w.length > 0; });
+  if (words.length !== 12 && words.length !== 24) { alert('Enter exactly 12 or 24 words.'); return; }
+  if (!passphrase) { alert('Enter a passphrase to compare against the base wallet.'); return; }
+
+  var resultDiv = document.getElementById('ppResult');
+  resultDiv.innerHTML = '<div style="color:var(--text-dim); padding:15px; text-align:center;">Deriving wallets...</div>';
+  resultDiv.style.display = 'block';
+
+  try {
+    var result;
+    if (IS_TAURI) {
+      result = await window.__TAURI__.core.invoke('compare_passphrase_wallets', {
+        words: words,
+        passphrase: passphrase
+      });
+    } else {
+      resultDiv.innerHTML = '<div style="color:var(--red); padding:15px;">Passphrase comparison requires the native desktop app.</div>';
+      return;
+    }
+
+    var html = '';
+    if (result.warning) {
+      html += '<div style="background:#fff8e1; border:1px solid var(--orange); border-radius:6px; padding:10px; margin-bottom:12px; font-size:0.85em; color:var(--orange);">' + escapeHtml(result.warning) + '</div>';
+    }
+
+    html += '<div style="display:grid; grid-template-columns:1fr 1fr; gap:15px;" class="two-col-grid">';
+
+    // Base wallet (no passphrase)
+    html += '<div style="background:var(--surface); border:1px solid var(--border); border-radius:6px; padding:15px;">';
+    html += '<div style="font-weight:bold; color:var(--text-dim); margin-bottom:10px;">DECOY WALLET (no passphrase)</div>';
+    result.base_wallet.btc_addresses.forEach(function(a) {
+      html += '<div style="font-size:0.82em; margin-bottom:6px;"><span style="color:var(--text-dim);">BTC ' + escapeHtml(a.path) + ':</span><br><span style="font-family:monospace; color:var(--text); word-break:break-all;">' + escapeHtml(a.address) + '</span></div>';
+    });
+    html += '<div style="font-size:0.82em;"><span style="color:var(--text-dim);">ETH:</span><br><span style="font-family:monospace; color:var(--text); word-break:break-all;">' + escapeHtml(result.base_wallet.eth_address) + '</span></div>';
+    html += '<div style="margin-top:10px; font-size:0.78em; color:var(--text-dim);">Send a small amount here as decoy.</div>';
+    html += '</div>';
+
+    // Passphrase wallet
+    html += '<div style="background:#faf0ff; border:2px solid #7b1fa2; border-radius:6px; padding:15px;">';
+    html += '<div style="font-weight:bold; color:#7b1fa2; margin-bottom:10px;">REAL WALLET (with passphrase)</div>';
+    result.passphrase_wallet.btc_addresses.forEach(function(a) {
+      html += '<div style="font-size:0.82em; margin-bottom:6px;"><span style="color:var(--text-dim);">BTC ' + escapeHtml(a.path) + ':</span><br><span style="font-family:monospace; color:#7b1fa2; word-break:break-all;">' + escapeHtml(a.address) + '</span></div>';
+    });
+    html += '<div style="font-size:0.82em;"><span style="color:var(--text-dim);">ETH:</span><br><span style="font-family:monospace; color:#7b1fa2; word-break:break-all;">' + escapeHtml(result.passphrase_wallet.eth_address) + '</span></div>';
+    html += '<div style="margin-top:10px; font-size:0.78em; color:#7b1fa2;">Your real funds go here. Passphrase: ' + escapeHtml(result.passphrase_used) + '</div>';
+    html += '</div>';
+
+    html += '</div>';
+
+    html += '<div style="margin-top:12px; padding:12px; background:var(--surface); border:1px solid var(--border); border-radius:6px; font-size:0.82em; color:var(--text-dim); line-height:1.7;">';
+    html += '<strong>Notice:</strong> The addresses are completely different. There is no mathematical link between them. Anyone who finds your seed can only access the decoy wallet. Your real funds require the passphrase.';
+    html += '</div>';
+
+    resultDiv.innerHTML = html;
+  } catch (err) {
+    resultDiv.innerHTML = '<div style="color:var(--red); padding:15px;">Error: ' + escapeHtml(err.message || String(err)) + '</div>';
+  }
+}
+
+function ppClear() {
+  document.getElementById('ppSeedInput').value = '';
+  document.getElementById('ppPassphrase').value = '';
+  document.getElementById('ppResult').style.display = 'none';
+  document.getElementById('ppResult').innerHTML = '';
+}
+
+// =====================================================
 // VERIFY SEED PHRASE
 // =====================================================
 var _verifyWordCount = 24;
@@ -4429,6 +4572,8 @@ if (IS_TAURI) {
     copyAirgap: function(arg, el) { copyAirgap(el); },
     copyDonation: function(arg, el) { copyDonation(el); },
     copyHash: function(arg, el) { copyHash(el); },
+    ppCompare: function() { ppCompare(); },
+    ppClear: function() { ppClear(); },
     setVerifyMode: function(arg) { setVerifyMode(parseInt(arg)); },
     verifySeed: function() { verifySeed(); },
     deriveAddrs: function() { deriveAddrs(); },

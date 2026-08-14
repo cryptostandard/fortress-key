@@ -1,7 +1,7 @@
 pub mod crypto;
 pub mod commands;
 
-use commands::{generate, verify, sign, dice, validate};
+use commands::{generate, verify, sign, dice, validate, passphrase};
 
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
@@ -14,6 +14,7 @@ pub fn run() {
             dice::dice_to_seed,
             validate::validate_mnemonic,
             validate::derive_addresses,
+            passphrase::compare_passphrase_wallets,
         ])
         .run(tauri::generate_context!())
         .expect("error while running Fortress Key");
