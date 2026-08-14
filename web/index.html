@@ -611,7 +611,7 @@ textarea.airgap-input { resize: vertical; min-height: 80px; }
     <span id="integrityDetail" style="font-size:0.82em;"></span>
     <div id="integrityHashBox" style="margin-top:10px; display:none;">
       <div style="font-size:0.72em; color:var(--text-dim); margin-bottom:4px;">Your file's SHA-256 fingerprint:</div>
-      <code id="integrityHashValue" style="font-size:0.78em; word-break:break-all; cursor:pointer; user-select:all;" onclick="copyHash(this)"></code>
+      <code id="integrityHashValue" style="font-size:0.78em; word-break:break-all; cursor:pointer; user-select:all;" data-action="copyHash" data-self="true"></code>
       <div style="font-size:0.7em; color:var(--text-dim); margin-top:4px;">Click to copy. Compare with hash published at <a href="https://github.com/cryptostandard/fortress-key" target="_blank" style="color:var(--accent2);">GitHub</a></div>
     </div>
   </div>
@@ -663,13 +663,13 @@ textarea.airgap-input { resize: vertical; min-height: 80px; }
   </div>
 
   <div class="tabs">
-    <button class="tab active" onclick="switchTab('scanner')">SCANNER</button>
-    <button class="tab" onclick="switchTab('wizard')">RECIPE WIZARD</button>
-    <button class="tab" onclick="switchTab('generator')">KEY GENERATOR</button>
-    <button class="tab" onclick="switchTab('airgap')">AIR-GAP SIGNER</button>
-    <button class="tab" onclick="switchTab('quantum')">QUANTUM SHIELD</button>
-    <button class="tab" onclick="switchTab('verify')">SELF-TEST</button>
-    <button class="tab" onclick="switchTab('howto')">HOW IT WORKS</button>
+    <button class="tab active" data-action="switchTab" data-arg="scanner">SCANNER</button>
+    <button class="tab" data-action="switchTab" data-arg="wizard">RECIPE WIZARD</button>
+    <button class="tab" data-action="switchTab" data-arg="generator">KEY GENERATOR</button>
+    <button class="tab" data-action="switchTab" data-arg="airgap">AIR-GAP SIGNER</button>
+    <button class="tab" data-action="switchTab" data-arg="quantum">QUANTUM SHIELD</button>
+    <button class="tab" data-action="switchTab" data-arg="verify">SELF-TEST</button>
+    <button class="tab" data-action="switchTab" data-arg="howto">HOW IT WORKS</button>
   </div>
 
   <!-- ==================== SCANNER PANEL ==================== -->
@@ -680,7 +680,7 @@ textarea.airgap-input { resize: vertical; min-height: 80px; }
       <label>Select your firmware version:</label>
       <select id="firmwareSelect"><option value="">-- Select firmware --</option></select>
     </div>
-    <button class="action-btn" id="scanBtn" onclick="runScan()" disabled>SCAN FOR VULNERABILITIES</button>
+    <button class="action-btn" id="scanBtn" data-action="runScan" disabled>SCAN FOR VULNERABILITIES</button>
     <div class="vuln-report" id="vulnReport"></div>
   </div>
 
@@ -730,11 +730,11 @@ textarea.airgap-input { resize: vertical; min-height: 80px; }
         <strong style="color:var(--yellow);">Good:</strong> "The hospital room was freezing when my daughter was born at 3:42am"<br>
         <strong style="color:var(--red);">Bad:</strong> "I love my family" (too vague) &bull; "My birthday is June 15" (public info)
       </div>
-      <input type="text" class="wizard-input" id="wiz1" placeholder="A moment only you remember..." oninput="wizInput(1)" autocomplete="off" spellcheck="false" style="width:100%; padding:12px; background:var(--bg); border:2px solid var(--border); border-radius:8px; color:var(--text); font-family:inherit; font-size:0.9em; outline:none;">
+      <input type="text" class="wizard-input" id="wiz1" placeholder="A moment only you remember..." data-oninput="wizInput" data-arg="1" autocomplete="off" spellcheck="false" style="width:100%; padding:12px; background:var(--bg); border:2px solid var(--border); border-radius:8px; color:var(--text); font-family:inherit; font-size:0.9em; outline:none;">
       <div style="text-align:right; font-size:0.7em; color:var(--text-dim); margin:4px 0 8px;"><span id="wc1">0</span> chars</div>
       <div style="height:4px; background:var(--surface2); border-radius:2px; margin-bottom:4px; overflow:hidden;"><div id="wf1" style="height:100%; width:0%; border-radius:2px; transition:all 0.3s;"></div></div>
       <div id="wl1" style="font-size:0.72em; color:var(--text-dim); margin-bottom:15px;">Enter your memory</div>
-      <div style="display:flex; justify-content:flex-end;"><button class="action-btn" id="wn1" onclick="wizGo(2)" disabled style="padding:10px 30px;">NEXT</button></div>
+      <div style="display:flex; justify-content:flex-end;"><button class="action-btn" id="wn1" data-action="wizGo" data-arg="2" disabled style="padding:10px 30px;">NEXT</button></div>
     </div>
 
     <!-- WIZARD STEP 2: Invented Words -->
@@ -750,11 +750,11 @@ textarea.airgap-input { resize: vertical; min-height: 80px; }
         <strong style="color:var(--yellow);">Techniques:</strong> Mash syllables ("churplex"), childhood nicknames ("tukimoshi"), funny sounds ("blorpnax fantomila"), imaginary names ("zikkel morvayne")<br>
         <strong style="color:var(--red);">Don't use:</strong> Real words from any language, celebrity names, "leet speak"
       </div>
-      <input type="text" class="wizard-input" id="wiz2" placeholder="Your invented words (at least 2)..." oninput="wizInput(2)" autocomplete="off" spellcheck="false" style="width:100%; padding:12px; background:var(--bg); border:2px solid var(--border); border-radius:8px; color:var(--text); font-family:inherit; font-size:0.9em; outline:none;">
+      <input type="text" class="wizard-input" id="wiz2" placeholder="Your invented words (at least 2)..." data-oninput="wizInput" data-arg="2" autocomplete="off" spellcheck="false" style="width:100%; padding:12px; background:var(--bg); border:2px solid var(--border); border-radius:8px; color:var(--text); font-family:inherit; font-size:0.9em; outline:none;">
       <div style="text-align:right; font-size:0.7em; color:var(--text-dim); margin:4px 0 8px;"><span id="wc2">0</span> chars</div>
       <div style="height:4px; background:var(--surface2); border-radius:2px; margin-bottom:4px; overflow:hidden;"><div id="wf2" style="height:100%; width:0%; border-radius:2px; transition:all 0.3s;"></div></div>
       <div id="wl2" style="font-size:0.72em; color:var(--text-dim); margin-bottom:15px;">Enter your invented words</div>
-      <div style="display:flex; justify-content:space-between;"><button class="action-btn" onclick="wizGo(1)" style="padding:10px 20px; background:var(--surface2); border:1px solid var(--border);">BACK</button><button class="action-btn" id="wn2" onclick="wizGo(3)" disabled style="padding:10px 30px;">NEXT</button></div>
+      <div style="display:flex; justify-content:space-between;"><button class="action-btn" data-action="wizGo" data-arg="1" style="padding:10px 20px; background:var(--surface2); border:1px solid var(--border);">BACK</button><button class="action-btn" id="wn2" data-action="wizGo" data-arg="3" disabled style="padding:10px 30px;">NEXT</button></div>
     </div>
 
     <!-- WIZARD STEP 3: Numbers + Symbols -->
@@ -767,11 +767,11 @@ textarea.airgap-input { resize: vertical; min-height: 80px; }
         <strong style="color:var(--yellow);">Good:</strong> "47300!!@@" &bull; "40.7128##-74.0060" &bull; "$$$342.17***"<br>
         <strong style="color:var(--red);">Avoid:</strong> "123456" (sequential) &bull; Your phone number or SSN (could be leaked)
       </div>
-      <input type="text" class="wizard-input" id="wiz3" placeholder="Numbers and symbols..." oninput="wizInput(3)" autocomplete="off" spellcheck="false" style="width:100%; padding:12px; background:var(--bg); border:2px solid var(--border); border-radius:8px; color:var(--text); font-family:inherit; font-size:0.9em; outline:none;">
+      <input type="text" class="wizard-input" id="wiz3" placeholder="Numbers and symbols..." data-oninput="wizInput" data-arg="3" autocomplete="off" spellcheck="false" style="width:100%; padding:12px; background:var(--bg); border:2px solid var(--border); border-radius:8px; color:var(--text); font-family:inherit; font-size:0.9em; outline:none;">
       <div style="text-align:right; font-size:0.7em; color:var(--text-dim); margin:4px 0 8px;"><span id="wc3">0</span> chars</div>
       <div style="height:4px; background:var(--surface2); border-radius:2px; margin-bottom:4px; overflow:hidden;"><div id="wf3" style="height:100%; width:0%; border-radius:2px; transition:all 0.3s;"></div></div>
       <div id="wl3" style="font-size:0.72em; color:var(--text-dim); margin-bottom:15px;">Enter numbers and symbols</div>
-      <div style="display:flex; justify-content:space-between;"><button class="action-btn" onclick="wizGo(2)" style="padding:10px 20px; background:var(--surface2); border:1px solid var(--border);">BACK</button><button class="action-btn" id="wn3" onclick="wizGo(4)" disabled style="padding:10px 30px;">NEXT</button></div>
+      <div style="display:flex; justify-content:space-between;"><button class="action-btn" data-action="wizGo" data-arg="2" style="padding:10px 20px; background:var(--surface2); border:1px solid var(--border);">BACK</button><button class="action-btn" id="wn3" data-action="wizGo" data-arg="4" disabled style="padding:10px 30px;">NEXT</button></div>
     </div>
 
     <!-- WIZARD STEP 4: Dice Rolls -->
@@ -781,18 +781,18 @@ textarea.airgap-input { resize: vertical; min-height: 80px; }
         Roll a REAL physical die and click the result. Minimum 10 rolls. This adds true randomness no computer can predict.
       </p>
       <div style="display:flex; gap:8px; flex-wrap:wrap; margin-bottom:10px;">
-        <button class="dice-btn" onclick="wizDice(1)">1</button>
-        <button class="dice-btn" onclick="wizDice(2)">2</button>
-        <button class="dice-btn" onclick="wizDice(3)">3</button>
-        <button class="dice-btn" onclick="wizDice(4)">4</button>
-        <button class="dice-btn" onclick="wizDice(5)">5</button>
-        <button class="dice-btn" onclick="wizDice(6)">6</button>
+        <button class="dice-btn" data-action="wizDice" data-arg="1">1</button>
+        <button class="dice-btn" data-action="wizDice" data-arg="2">2</button>
+        <button class="dice-btn" data-action="wizDice" data-arg="3">3</button>
+        <button class="dice-btn" data-action="wizDice" data-arg="4">4</button>
+        <button class="dice-btn" data-action="wizDice" data-arg="5">5</button>
+        <button class="dice-btn" data-action="wizDice" data-arg="6">6</button>
       </div>
       <div id="wizDiceDisplay" style="min-height:30px; background:var(--bg); border:1px solid var(--border); border-radius:6px; padding:10px; font-size:1.1em; letter-spacing:4px; color:var(--accent); margin-bottom:8px; word-break:break-all;">Roll your die and click...</div>
-      <button onclick="wizDiceClear()" style="background:none; border:1px solid var(--red); color:var(--red); padding:5px 14px; border-radius:4px; font-family:inherit; font-size:0.75em; cursor:pointer; margin-bottom:10px;">Clear Rolls</button>
+      <button data-action="wizDiceClear" style="background:none; border:1px solid var(--red); color:var(--red); padding:5px 14px; border-radius:4px; font-family:inherit; font-size:0.75em; cursor:pointer; margin-bottom:10px;">Clear Rolls</button>
       <div style="height:4px; background:var(--surface2); border-radius:2px; margin-bottom:4px; overflow:hidden;"><div id="wf4" style="height:100%; width:0%; border-radius:2px; transition:all 0.3s;"></div></div>
       <div id="wl4" style="font-size:0.72em; color:var(--text-dim); margin-bottom:15px;">Roll at least 10 times</div>
-      <div style="display:flex; justify-content:space-between;"><button class="action-btn" onclick="wizGo(3)" style="padding:10px 20px; background:var(--surface2); border:1px solid var(--border);">BACK</button><button class="action-btn" id="wn4" onclick="wizGo(5)" disabled style="padding:10px 30px;">NEXT</button></div>
+      <div style="display:flex; justify-content:space-between;"><button class="action-btn" data-action="wizGo" data-arg="3" style="padding:10px 20px; background:var(--surface2); border:1px solid var(--border);">BACK</button><button class="action-btn" id="wn4" data-action="wizGo" data-arg="5" disabled style="padding:10px 30px;">NEXT</button></div>
     </div>
 
     <!-- WIZARD STEP 5: Secret Sauce -->
@@ -804,11 +804,11 @@ textarea.airgap-input { resize: vertical; min-height: 80px; }
       <div style="background:var(--bg); border:1px solid var(--border); border-radius:6px; padding:12px; margin-bottom:15px; font-size:0.75em; color:var(--text-dim);">
         <strong style="color:var(--yellow);">Ideas:</strong> A lyric from an obscure song &bull; GPS coordinates of where you proposed &bull; "the purple elephant ate my homework" &bull; "f(x)=3x^2+7" &bull; A sentence mixing 2 languages
       </div>
-      <input type="text" class="wizard-input" id="wiz5" placeholder="Your secret sauce (optional but recommended)..." oninput="wizInput(5)" autocomplete="off" spellcheck="false" style="width:100%; padding:12px; background:var(--bg); border:2px solid var(--border); border-radius:8px; color:var(--text); font-family:inherit; font-size:0.9em; outline:none;">
+      <input type="text" class="wizard-input" id="wiz5" placeholder="Your secret sauce (optional but recommended)..." data-oninput="wizInput" data-arg="5" autocomplete="off" spellcheck="false" style="width:100%; padding:12px; background:var(--bg); border:2px solid var(--border); border-radius:8px; color:var(--text); font-family:inherit; font-size:0.9em; outline:none;">
       <div style="text-align:right; font-size:0.7em; color:var(--text-dim); margin:4px 0 8px;"><span id="wc5">0</span> chars</div>
       <div style="height:4px; background:var(--surface2); border-radius:2px; margin-bottom:4px; overflow:hidden;"><div id="wf5" style="height:100%; width:0%; border-radius:2px; transition:all 0.3s;"></div></div>
       <div id="wl5" style="font-size:0.72em; color:var(--text-dim); margin-bottom:15px;">Add your secret sauce</div>
-      <div style="display:flex; justify-content:space-between;"><button class="action-btn" onclick="wizGo(4)" style="padding:10px 20px; background:var(--surface2); border:1px solid var(--border);">BACK</button><button class="action-btn" id="wn5" onclick="wizGo(6)" style="padding:10px 30px;">REVIEW</button></div>
+      <div style="display:flex; justify-content:space-between;"><button class="action-btn" data-action="wizGo" data-arg="4" style="padding:10px 20px; background:var(--surface2); border:1px solid var(--border);">BACK</button><button class="action-btn" id="wn5" data-action="wizGo" data-arg="6" style="padding:10px 30px;">REVIEW</button></div>
     </div>
 
     <!-- WIZARD STEP 6: Review -->
@@ -850,8 +850,8 @@ textarea.airgap-input { resize: vertical; min-height: 80px; }
       </div>
 
       <div style="display:flex; justify-content:space-between; gap:10px;">
-        <button class="action-btn" onclick="wizGo(5)" style="padding:10px 20px; background:var(--surface2); border:1px solid var(--border);">BACK</button>
-        <button class="action-btn" onclick="wizUseRecipe()" style="padding:12px 30px; background:var(--green); color:#000; flex-grow:1; font-weight:bold;">USE THIS RECIPE &rarr; KEY GENERATOR</button>
+        <button class="action-btn" data-action="wizGo" data-arg="5" style="padding:10px 20px; background:var(--surface2); border:1px solid var(--border);">BACK</button>
+        <button class="action-btn" data-action="wizUseRecipe" style="padding:12px 30px; background:var(--green); color:#000; flex-grow:1; font-weight:bold;">USE THIS RECIPE &rarr; KEY GENERATOR</button>
       </div>
     </div>
 
@@ -866,8 +866,8 @@ textarea.airgap-input { resize: vertical; min-height: 80px; }
 
     <!-- Mode Toggle -->
     <div class="mode-toggle">
-      <button class="mode-btn active" id="modeRaw" onclick="setMode('raw')">MODE 1: RAW KEY (Recommended)</button>
-      <button class="mode-btn" id="modeBip39" onclick="setMode('bip39')">MODE 2: Hardware Bridge (BIP39)</button>
+      <button class="mode-btn active" id="modeRaw" data-action="setMode" data-arg="raw">MODE 1: RAW KEY (Recommended)</button>
+      <button class="mode-btn" id="modeBip39" data-action="setMode" data-arg="bip39">MODE 2: Hardware Bridge (BIP39)</button>
     </div>
 
     <div class="info-box" id="modeDesc" style="margin-bottom:20px;">
@@ -878,32 +878,32 @@ textarea.airgap-input { resize: vertical; min-height: 80px; }
     <div class="layer-section">
       <h3>LAYER 1 - Personal Phrase</h3>
       <div class="desc">A sentence only you would know. Example: "My grandmother cooked arroz con pollo every Sunday"</div>
-      <input type="text" id="layer1" placeholder="Enter your personal phrase..." oninput="updateEntropy()" autocomplete="off" spellcheck="false" data-gramm="false">
+      <input type="text" id="layer1" placeholder="Enter your personal phrase..." data-oninput="updateEntropy" autocomplete="off" spellcheck="false" data-gramm="false">
     </div>
 
     <div class="layer-section">
       <h3>LAYER 2 - Your Invented Words</h3>
       <div class="desc">Words YOU made up that exist in NO dictionary on Earth. This is what makes your key unbreakable. Example: "flurbnax zoptikrel"</div>
-      <input type="text" id="layer2" placeholder="Enter your invented words..." oninput="updateEntropy()" autocomplete="off" spellcheck="false" data-gramm="false">
+      <input type="text" id="layer2" placeholder="Enter your invented words..." data-oninput="updateEntropy" autocomplete="off" spellcheck="false" data-gramm="false">
     </div>
 
     <div class="layer-section">
       <h3>LAYER 3 - Numbers + Symbols</h3>
       <div class="desc">Any combination of numbers and special characters. Example: "!!73**@942&amp;&amp;%%"</div>
-      <input type="text" id="layer3" placeholder="Enter numbers and symbols..." oninput="updateEntropy()" autocomplete="off" spellcheck="false" data-gramm="false">
+      <input type="text" id="layer3" placeholder="Enter numbers and symbols..." data-oninput="updateEntropy" autocomplete="off" spellcheck="false" data-gramm="false">
     </div>
 
     <div class="layer-section">
       <h3>LAYER 4 - Dice Rolls (Physical Randomness)</h3>
       <div class="desc">Roll a REAL physical die and click the result. Each roll adds ~2.6 bits of true randomness that no computer can predict.</div>
       <div class="dice-area">
-        <button class="dice-btn" onclick="addDice(1)">1</button>
-        <button class="dice-btn" onclick="addDice(2)">2</button>
-        <button class="dice-btn" onclick="addDice(3)">3</button>
-        <button class="dice-btn" onclick="addDice(4)">4</button>
-        <button class="dice-btn" onclick="addDice(5)">5</button>
-        <button class="dice-btn" onclick="addDice(6)">6</button>
-        <button class="clear-dice" onclick="clearDice()">Clear</button>
+        <button class="dice-btn" data-action="addDice" data-arg="1">1</button>
+        <button class="dice-btn" data-action="addDice" data-arg="2">2</button>
+        <button class="dice-btn" data-action="addDice" data-arg="3">3</button>
+        <button class="dice-btn" data-action="addDice" data-arg="4">4</button>
+        <button class="dice-btn" data-action="addDice" data-arg="5">5</button>
+        <button class="dice-btn" data-action="addDice" data-arg="6">6</button>
+        <button class="clear-dice" data-action="clearDice">Clear</button>
       </div>
       <div class="dice-results" id="diceResults"></div>
     </div>
@@ -911,7 +911,7 @@ textarea.airgap-input { resize: vertical; min-height: 80px; }
     <div class="layer-section">
       <h3>LAYER 5 - Extra Secret Sauce</h3>
       <div class="desc">Anything: coordinates, dates, song lyrics, another language, emojis, code... the more unique to YOU, the stronger.</div>
-      <textarea id="layer5" placeholder="Add anything else you want..." oninput="updateEntropy()" autocomplete="off" spellcheck="false" data-gramm="false"></textarea>
+      <textarea id="layer5" placeholder="Add anything else you want..." data-oninput="updateEntropy" autocomplete="off" spellcheck="false" data-gramm="false"></textarea>
     </div>
 
     <!-- Quantum Shield Toggle -->
@@ -942,7 +942,7 @@ textarea.airgap-input { resize: vertical; min-height: 80px; }
       <div id="entropyWarnings" style="display:none; margin-top:8px; padding:8px 12px; background:#fff5f5; border:1px solid var(--red); border-radius:6px;"></div>
     </div>
 
-    <button class="action-btn" id="generateBtn" onclick="generateKey()" disabled>GENERATE FORTRESS KEY</button>
+    <button class="action-btn" id="generateBtn" data-action="generateKey" disabled>GENERATE FORTRESS KEY</button>
 
     <!-- Output Section -->
     <div class="output-section" id="outputSection">
@@ -1036,8 +1036,8 @@ textarea.airgap-input { resize: vertical; min-height: 80px; }
         5. Click DESTROY when you're done importing.
       </div>
 
-      <button class="verify-btn" onclick="verifyRecipe()">VERIFY: Re-enter recipe to confirm same key</button>
-      <button class="destroy-btn" onclick="destroyOutput()">DESTROY ALL OUTPUT</button>
+      <button class="verify-btn" data-action="verifyRecipe">VERIFY: Re-enter recipe to confirm same key</button>
+      <button class="destroy-btn" data-action="destroyOutput">DESTROY ALL OUTPUT</button>
     </div>
   </div>
 
@@ -1107,11 +1107,11 @@ textarea.airgap-input { resize: vertical; min-height: 80px; }
 
       <div id="agChangeInfo" style="color:var(--text-dim); font-size:0.8em; margin:8px 0;"></div>
 
-      <button class="action-btn" onclick="prepareTransaction()" style="margin-top:10px;">PREPARE UNSIGNED TRANSACTION</button>
+      <button class="action-btn" data-action="prepareTransaction" style="margin-top:10px;">PREPARE UNSIGNED TRANSACTION</button>
 
       <div id="agUnsignedOutput" style="display:none;">
         <div style="color:var(--text-dim); font-size:0.8em; margin-top:10px;">Unsigned Transaction Hex (copy this to your OFFLINE computer):</div>
-        <div class="airgap-output" id="agUnsignedHex" onclick="copyAirgap(this)"></div>
+        <div class="airgap-output" id="agUnsignedHex" data-action="copyAirgap" data-self="true"></div>
         <div style="color:var(--text-dim); font-size:0.7em;" id="agCopyMsg1">Click to copy</div>
       </div>
     </div>
@@ -1140,13 +1140,13 @@ textarea.airgap-input { resize: vertical; min-height: 80px; }
         <div style="margin:8px 0;">
           <div style="color:var(--text-dim); font-size:0.8em; margin-bottom:4px;">Layer 4: Dice rolls</div>
           <div style="display:flex; gap:6px; flex-wrap:wrap;">
-            <button class="dice-btn" style="padding:6px 14px; font-size:1em;" onclick="addDiceAG(1)">1</button>
-            <button class="dice-btn" style="padding:6px 14px; font-size:1em;" onclick="addDiceAG(2)">2</button>
-            <button class="dice-btn" style="padding:6px 14px; font-size:1em;" onclick="addDiceAG(3)">3</button>
-            <button class="dice-btn" style="padding:6px 14px; font-size:1em;" onclick="addDiceAG(4)">4</button>
-            <button class="dice-btn" style="padding:6px 14px; font-size:1em;" onclick="addDiceAG(5)">5</button>
-            <button class="dice-btn" style="padding:6px 14px; font-size:1em;" onclick="addDiceAG(6)">6</button>
-            <button class="clear-dice" onclick="clearDiceAG()">Clear</button>
+            <button class="dice-btn" style="padding:6px 14px; font-size:1em;" data-action="addDiceAG" data-arg="1">1</button>
+            <button class="dice-btn" style="padding:6px 14px; font-size:1em;" data-action="addDiceAG" data-arg="2">2</button>
+            <button class="dice-btn" style="padding:6px 14px; font-size:1em;" data-action="addDiceAG" data-arg="3">3</button>
+            <button class="dice-btn" style="padding:6px 14px; font-size:1em;" data-action="addDiceAG" data-arg="4">4</button>
+            <button class="dice-btn" style="padding:6px 14px; font-size:1em;" data-action="addDiceAG" data-arg="5">5</button>
+            <button class="dice-btn" style="padding:6px 14px; font-size:1em;" data-action="addDiceAG" data-arg="6">6</button>
+            <button class="clear-dice" data-action="clearDiceAG">Clear</button>
           </div>
           <div id="agDiceResults" style="display:flex; gap:4px; flex-wrap:wrap; margin-top:6px;"></div>
         </div>
@@ -1157,11 +1157,11 @@ textarea.airgap-input { resize: vertical; min-height: 80px; }
         <input type="checkbox" id="agQuantumShield" checked style="accent-color:#7b1fa2;"> Quantum Shield
       </label>
 
-      <button class="action-btn" onclick="signTransaction()" style="background:var(--red); color:#fff; margin-top:10px;">SIGN TRANSACTION (OFFLINE)</button>
+      <button class="action-btn" data-action="signTransaction" style="background:var(--red); color:#fff; margin-top:10px;">SIGN TRANSACTION (OFFLINE)</button>
 
       <div id="agSignedOutput" style="display:none;">
         <div style="color:var(--text-dim); font-size:0.8em; margin-top:10px;">Signed Transaction Hex (copy this to your ONLINE computer):</div>
-        <div class="airgap-output" id="agSignedHex" onclick="copyAirgap(this)" style="border-color:var(--green); color:var(--green);"></div>
+        <div class="airgap-output" id="agSignedHex" data-action="copyAirgap" data-self="true" style="border-color:var(--green); color:var(--green);"></div>
         <div style="color:var(--text-dim); font-size:0.7em;" id="agCopyMsg2">Click to copy</div>
 
         <div class="key-display" style="margin-top:10px;">
@@ -1169,7 +1169,7 @@ textarea.airgap-input { resize: vertical; min-height: 80px; }
           <div id="agTxDetails" style="font-size:0.8em; color:var(--text-dim);"></div>
         </div>
 
-        <button class="destroy-btn" onclick="destroyAirgap()" style="margin-top:10px;">DESTROY SIGNING DATA</button>
+        <button class="destroy-btn" data-action="destroyAirgap" style="margin-top:10px;">DESTROY SIGNING DATA</button>
       </div>
     </div>
 
@@ -1251,7 +1251,7 @@ textarea.airgap-input { resize: vertical; min-height: 80px; }
         Run these tests every time you download a new copy of Fortress Key.
       </p>
 
-      <button class="action-btn" onclick="runSelfTest()" style="background:var(--green); margin-bottom:20px;">RUN ALL TESTS</button>
+      <button class="action-btn" data-action="runSelfTest" style="background:var(--green); margin-bottom:20px;">RUN ALL TESTS</button>
 
       <div id="testResults" style="font-size:0.85em;"></div>
     </div>
@@ -1657,13 +1657,13 @@ textarea.airgap-input { resize: vertical; min-height: 80px; }
     <div style="background:var(--bg); border:1px solid var(--green); border-radius:6px; padding:15px; margin-bottom:10px;">
       <div style="color:var(--green); font-weight:bold; font-size:0.8em; margin-bottom:10px;">OFFICIAL SHA-256 CHECKSUMS (v1.1.0)</div>
       <div style="font-size:0.72em; color:var(--text); line-height:2.2; font-family:monospace; word-break:break-all;">
-        <div style="margin-bottom:4px;"><span style="color:var(--green);">macOS ARM (.dmg):</span><br><span style="user-select:all; cursor:pointer;" onclick="copyHash(this)">5be3c6042546a5613a8e06eb67c233f599be5cabaa97c98968497492fd3d81a0</span></div>
-        <div style="margin-bottom:4px;"><span style="color:var(--green);">macOS Intel (.dmg):</span><br><span style="user-select:all; cursor:pointer;" onclick="copyHash(this)">e61c3ed6fc15506f8555f9b3f3049733f9a2869a4ffb43910938bda5fee3350a</span></div>
-        <div style="margin-bottom:4px;"><span style="color:var(--accent2);">Windows (.exe):</span><br><span style="user-select:all; cursor:pointer;" onclick="copyHash(this)">b402c86a9ae0db973d4260ccb5b23ef56a97cef20a981189efba33fa0e9da7bd</span></div>
-        <div style="margin-bottom:4px;"><span style="color:var(--accent2);">Windows (.msi):</span><br><span style="user-select:all; cursor:pointer;" onclick="copyHash(this)">7312df45fb20b7902bf5833aab22c5a358f16508cd39fc9d8014f77a31795d58</span></div>
-        <div style="margin-bottom:4px;"><span style="color:#7b1fa2;">Linux (.AppImage):</span><br><span style="user-select:all; cursor:pointer;" onclick="copyHash(this)">0b83dba37f10e0ca83e2778ab30a0408cb72bfbf1f4a99bd2f89f9f618c2c082</span></div>
-        <div style="margin-bottom:4px;"><span style="color:#7b1fa2;">Linux (.deb):</span><br><span style="user-select:all; cursor:pointer;" onclick="copyHash(this)">0c1eee3aafe234f547a28ddc50ce0fff64a26ebc762423f3081014583c775699</span></div>
-        <div><span style="color:#7b1fa2;">Linux (.rpm):</span><br><span style="user-select:all; cursor:pointer;" onclick="copyHash(this)">d2a57511d06d638abe9fdfdcc60081d3ad1498d039018027deefaaf7c6ad6c33</span></div>
+        <div style="margin-bottom:4px;"><span style="color:var(--green);">macOS ARM (.dmg):</span><br><span style="user-select:all; cursor:pointer;" data-action="copyHash" data-self="true">5be3c6042546a5613a8e06eb67c233f599be5cabaa97c98968497492fd3d81a0</span></div>
+        <div style="margin-bottom:4px;"><span style="color:var(--green);">macOS Intel (.dmg):</span><br><span style="user-select:all; cursor:pointer;" data-action="copyHash" data-self="true">e61c3ed6fc15506f8555f9b3f3049733f9a2869a4ffb43910938bda5fee3350a</span></div>
+        <div style="margin-bottom:4px;"><span style="color:var(--accent2);">Windows (.exe):</span><br><span style="user-select:all; cursor:pointer;" data-action="copyHash" data-self="true">b402c86a9ae0db973d4260ccb5b23ef56a97cef20a981189efba33fa0e9da7bd</span></div>
+        <div style="margin-bottom:4px;"><span style="color:var(--accent2);">Windows (.msi):</span><br><span style="user-select:all; cursor:pointer;" data-action="copyHash" data-self="true">7312df45fb20b7902bf5833aab22c5a358f16508cd39fc9d8014f77a31795d58</span></div>
+        <div style="margin-bottom:4px;"><span style="color:#7b1fa2;">Linux (.AppImage):</span><br><span style="user-select:all; cursor:pointer;" data-action="copyHash" data-self="true">0b83dba37f10e0ca83e2778ab30a0408cb72bfbf1f4a99bd2f89f9f618c2c082</span></div>
+        <div style="margin-bottom:4px;"><span style="color:#7b1fa2;">Linux (.deb):</span><br><span style="user-select:all; cursor:pointer;" data-action="copyHash" data-self="true">0c1eee3aafe234f547a28ddc50ce0fff64a26ebc762423f3081014583c775699</span></div>
+        <div><span style="color:#7b1fa2;">Linux (.rpm):</span><br><span style="user-select:all; cursor:pointer;" data-action="copyHash" data-self="true">d2a57511d06d638abe9fdfdcc60081d3ad1498d039018027deefaaf7c6ad6c33</span></div>
       </div>
     </div>
 
@@ -1683,12 +1683,12 @@ textarea.airgap-input { resize: vertical; min-height: 80px; }
     <div style="display:grid; grid-template-columns:1fr 1fr; gap:20px;" class="two-col-grid">
       <div style="background:var(--bg); border:1px solid var(--accent); border-radius:6px; padding:18px;">
         <div style="color:var(--accent); font-weight:bold; font-size:0.9em; margin-bottom:10px;">BITCOIN (BTC)</div>
-        <div style="word-break:break-all; font-size:0.75em; color:var(--text); user-select:all; cursor:pointer;" id="donateBTC" onclick="copyDonation(this)" title="Click to copy">1MEVZK7Wkuxb5GicQdpqs7zjYvncTzRYtF</div>
+        <div style="word-break:break-all; font-size:0.75em; color:var(--text); user-select:all; cursor:pointer;" id="donateBTC" data-action="copyDonation" data-self="true" title="Click to copy">1MEVZK7Wkuxb5GicQdpqs7zjYvncTzRYtF</div>
         <div style="color:var(--text-dim); font-size:0.7em; margin-top:5px;" id="donateBTCmsg">Click to copy</div>
       </div>
       <div style="background:var(--bg); border:1px solid #c3a634; border-radius:6px; padding:15px;">
         <div style="color:#c3a634; font-weight:bold; font-size:0.85em; margin-bottom:8px;">DOGECOIN (DOGE)</div>
-        <div style="word-break:break-all; font-size:0.75em; color:var(--text); user-select:all; cursor:pointer;" id="donateDOGE" onclick="copyDonation(this)" title="Click to copy">DRNb6a4A4KrscGuD9DpQQtALS4WumLoxxR</div>
+        <div style="word-break:break-all; font-size:0.75em; color:var(--text); user-select:all; cursor:pointer;" id="donateDOGE" data-action="copyDonation" data-self="true" title="Click to copy">DRNb6a4A4KrscGuD9DpQQtALS4WumLoxxR</div>
         <div style="color:var(--text-dim); font-size:0.7em; margin-top:5px;" id="donateDOGEmsg">Click to copy</div>
       </div>
     </div>
@@ -1728,41 +1728,7 @@ textarea.airgap-input { resize: vertical; min-height: 80px; }
 
 <script>
 // =====================================================
-// ANTI-TAMPERING: Block ALL network requests
-// =====================================================
-(function() {
-  // Override fetch to block any outbound requests
-  const _origFetch = window.fetch;
-  window.fetch = function() {
-    console.warn('Fortress Key: Network request blocked (fetch)');
-    return Promise.reject(new Error('Network requests are disabled for security'));
-  };
-  // Override XMLHttpRequest
-  const _origXHR = window.XMLHttpRequest;
-  window.XMLHttpRequest = function() {
-    const xhr = new _origXHR();
-    const _origOpen = xhr.open;
-    xhr.open = function() {
-      console.warn('Fortress Key: Network request blocked (XHR)');
-      throw new Error('Network requests are disabled for security');
-    };
-    return xhr;
-  };
-  // Override WebSocket
-  window.WebSocket = function() {
-    throw new Error('WebSocket connections are disabled for security');
-  };
-  // Override sendBeacon
-  if (navigator.sendBeacon) {
-    navigator.sendBeacon = function() {
-      console.warn('Fortress Key: Beacon blocked');
-      return false;
-    };
-  }
-})();
-
-// =====================================================
-// GLOBAL ERROR HANDLER
+// GLOBAL ERROR HANDLER (visible in native app)
 // =====================================================
 window.onerror = function(msg, url, line, col, err) {
   var banner = document.getElementById('jsErrorBanner');
@@ -1771,7 +1737,6 @@ window.onerror = function(msg, url, line, col, err) {
     banner.style.display = 'block';
     msgEl.textContent = msg + ' (line ' + line + ')';
   }
-  console.error('Fortress Key Error:', msg, 'line:', line);
   return false;
 };
 
@@ -2166,12 +2131,12 @@ let lastGeneratedHash = null;
 // TAB SWITCHING
 // =====================================================
 function switchTab(name) {
-  const tabs = ['scanner','wizard','generator','airgap','quantum','verify','howto'];
-  document.querySelectorAll('.tab').forEach((t, i) => {
-    t.classList.toggle('active', tabs[i] === name);
+  document.querySelectorAll('.tab').forEach(function(t) {
+    t.classList.toggle('active', t.dataset.arg === name);
   });
-  document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
-  document.getElementById('panel-' + name).classList.add('active');
+  document.querySelectorAll('.panel').forEach(function(p) {
+    p.classList.toggle('active', p.id === 'panel-' + name);
+  });
 }
 
 // =====================================================
@@ -3925,10 +3890,61 @@ if (IS_TAURI) {
       badge.parentNode.insertBefore(nativeBadge, badge.nextSibling);
     }
 
-    console.info = function() {}; // Re-suppress after override
-    console.log = function() {};
+    // Console kept active in native mode for debugging
   })();
 }
+
+// =====================================================
+// EVENT DELEGATION (replaces all inline onclick/oninput handlers)
+// =====================================================
+(function() {
+  var actions = {
+    switchTab: function(arg) { switchTab(arg); },
+    setMode: function(arg) { setMode(arg); },
+    generateKey: function() { generateKey(); },
+    verifyRecipe: function() { verifyRecipe(); },
+    destroyOutput: function() { destroyOutput(); },
+    runScan: function() { runScan(); },
+    runSelfTest: function() { runSelfTest(); },
+    prepareTransaction: function() { prepareTransaction(); },
+    signTransaction: function() { signTransaction(); },
+    destroyAirgap: function() { destroyAirgap(); },
+    addDice: function(arg) { addDice(parseInt(arg)); },
+    clearDice: function() { clearDice(); },
+    addDiceAG: function(arg) { addDiceAG(parseInt(arg)); },
+    clearDiceAG: function() { clearDiceAG(); },
+    wizDice: function(arg) { wizDice(parseInt(arg)); },
+    wizDiceClear: function() { wizDiceClear(); },
+    wizGo: function(arg) { wizGo(parseInt(arg)); },
+    wizUseRecipe: function() { wizUseRecipe(); },
+    copyAirgap: function(arg, el) { copyAirgap(el); },
+    copyDonation: function(arg, el) { copyDonation(el); },
+    copyHash: function(arg, el) { copyHash(el); },
+  };
+
+  var inputActions = {
+    updateEntropy: function() { updateEntropy(); },
+    wizInput: function(arg) { wizInput(parseInt(arg)); },
+  };
+
+  document.addEventListener('click', function(e) {
+    var el = e.target.closest('[data-action]');
+    if (!el) return;
+    var action = el.dataset.action;
+    var arg = el.dataset.arg || null;
+    var fn = actions[action];
+    if (fn) fn(arg, el);
+  });
+
+  document.addEventListener('input', function(e) {
+    var el = e.target;
+    var action = el.dataset.oninput;
+    if (!action) return;
+    var arg = el.dataset.arg || null;
+    var fn = inputActions[action];
+    if (fn) fn(arg);
+  });
+})();
 
 // =====================================================
 // INIT
@@ -3956,33 +3972,6 @@ if (_origClipboardWrite) {
 }
 
 // =====================================================
-// SECURITY: Auto-destroy keys when page is hidden/unloaded
-// =====================================================
-let _fkHideTimer = null;
-window.addEventListener('pagehide', function() {
-  destroyOutput();
-  if (typeof destroyAirgap === 'function') destroyAirgap();
-});
-window.addEventListener('visibilitychange', function() {
-  if (document.visibilityState === 'hidden') {
-    _fkHideTimer = setTimeout(function() {
-      destroyOutput();
-      if (typeof destroyAirgap === 'function') destroyAirgap();
-    }, 60000); // Auto-destroy after 60s hidden
-  } else {
-    clearTimeout(_fkHideTimer);
-  }
-});
-
-// SECURITY: createElement override disabled in Tauri (Tauri needs it for IPC bridge).
-// Tauri's own CSP handles script injection protection.
-
-// =====================================================
-// SECURITY: Block EventSource exfiltration
-// =====================================================
-window.EventSource = function() { throw new Error('Blocked'); };
-
-// =====================================================
 // SECURITY: Freeze crypto wrappers to prevent monkey-patching
 // =====================================================
 Object.freeze(SHA256);
@@ -4007,49 +3996,6 @@ document.addEventListener('dragstart', function(e) {
 });
 
 // =====================================================
-// SECURITY: Sanitize console to prevent extension snooping
-// =====================================================
-(function() {
-  var noop = function() {};
-  console.log = noop;
-  console.debug = noop;
-  console.info = noop;
-  console.warn = noop;
-  // Keep console.error but sanitize
-  var _err = console.error;
-  console.error = function() { _err('Fortress Key: An internal error occurred.'); };
-})();
-
-// =====================================================
-// SECURITY: Environment checks (secure context, iframe, HTTP)
-// =====================================================
-(function() {
-  var banner = document.getElementById('jsErrorBanner');
-  var msg = document.getElementById('jsErrorMsg');
-  var warnings = [];
-
-  // Iframe detection
-  if (window.self !== window.top) {
-    warnings.push('This page is embedded in an iframe. This is a clickjacking risk. Open the file directly.');
-  }
-
-  // HTTP detection (not HTTPS, not file://)
-  if (location.protocol === 'http:') {
-    warnings.push('This page is loaded over HTTP (insecure). A man-in-the-middle could modify this page. Use file:// (offline) or HTTPS.');
-  }
-
-  // Non-file, non-HTTPS context
-  if (location.protocol !== 'file:' && location.protocol !== 'https:' && location.protocol !== 'blob:') {
-    warnings.push('Insecure context detected (' + location.protocol + '). Use file:// for maximum security.');
-  }
-
-  if (warnings.length > 0 && banner && msg) {
-    msg.innerHTML = warnings.map(function(w) { return escapeHtml(w); }).join('<br>');
-    banner.style.display = 'block';
-  }
-})();
-
-// =====================================================
 // SECURITY: Block PrintScreen key
 // =====================================================
 document.addEventListener('keyup', function(e) {
@@ -4059,26 +4005,6 @@ document.addEventListener('keyup', function(e) {
     alert('PrintScreen detected. All displayed keys have been destroyed for security.');
   }
 });
-
-// =====================================================
-// SECURITY: Warn if DevTools appears to be open
-// =====================================================
-var _fkDevToolsWarned = false;
-setInterval(function() {
-  var widthThreshold = window.outerWidth - window.innerWidth > 160;
-  var heightThreshold = window.outerHeight - window.innerHeight > 200;
-  if ((widthThreshold || heightThreshold) && !_fkDevToolsWarned) {
-    _fkDevToolsWarned = true;
-    var banner = document.getElementById('jsErrorBanner');
-    var msg = document.getElementById('jsErrorMsg');
-    if (banner && msg) {
-      var existing = msg.innerHTML;
-      msg.innerHTML = (existing ? existing + '<br>' : '') + 'Developer Tools may be open. Close DevTools before generating keys — extensions and tools can read displayed key material.';
-      banner.style.display = 'block';
-    }
-  }
-  if (!widthThreshold && !heightThreshold) { _fkDevToolsWarned = false; }
-}, 2000);
 </script>
 
 </body>
