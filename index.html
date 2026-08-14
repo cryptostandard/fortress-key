@@ -581,6 +581,13 @@ textarea.airgap-input { resize: vertical; min-height: 80px; }
   }
 }
 
+/* Stack 2-column grids on narrow windows */
+@media (max-width: 800px) {
+  .two-col-grid {
+    grid-template-columns: 1fr !important;
+  }
+}
+
 /* SECURITY: Prevent dragging key values */
 .key-display .value, #seedWords, #agSignedHex { -webkit-user-drag: none; }
 </style>
@@ -1566,27 +1573,27 @@ textarea.airgap-input { resize: vertical; min-height: 80px; }
       The code is open source and audited. But YOUR environment determines your security.<br>
       Follow this checklist every time you generate keys.
     </p>
-    <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(320px, 1fr)); gap:20px;">
-      <div style="background:var(--bg); border:1px solid var(--border); border-radius:6px; padding:15px;">
-        <div style="color:var(--red); font-weight:bold; font-size:0.9em; margin-bottom:10px;">BEFORE GENERATING KEYS</div>
-        <div style="color:var(--text-dim); font-size:0.8em; line-height:2;">
-          <label style="display:block; cursor:pointer;"><input type="checkbox" style="accent-color:var(--green); margin-right:8px;">Downloaded from cryptostandard.info or GitHub</label>
-          <label style="display:block; cursor:pointer;"><input type="checkbox" style="accent-color:var(--green); margin-right:8px;">Disconnected from the internet</label>
-          <label style="display:block; cursor:pointer;"><input type="checkbox" style="accent-color:var(--green); margin-right:8px;">Using a clean browser (zero extensions)</label>
-          <label style="display:block; cursor:pointer;"><input type="checkbox" style="accent-color:var(--green); margin-right:8px;">Closed all other browser tabs</label>
-          <label style="display:block; cursor:pointer;"><input type="checkbox" style="accent-color:var(--green); margin-right:8px;">Ideally on an air-gapped computer</label>
-          <label style="display:block; cursor:pointer;"><input type="checkbox" style="accent-color:var(--green); margin-right:8px;">Ran Self-Test (15/15 passed)</label>
+    <div style="display:grid; grid-template-columns:1fr 1fr; gap:20px;" class="two-col-grid">
+      <div style="background:var(--bg); border:1px solid var(--border); border-radius:6px; padding:18px;">
+        <div style="color:var(--red); font-weight:bold; font-size:0.9em; margin-bottom:12px;">BEFORE GENERATING KEYS</div>
+        <div style="color:var(--text-dim); font-size:0.85em;">
+          <label style="display:block; cursor:pointer; padding:6px 0; border-bottom:1px solid var(--surface2);"><input type="checkbox" style="accent-color:var(--green); margin-right:10px; transform:scale(1.15); vertical-align:middle;">Downloaded from cryptostandard.info or GitHub</label>
+          <label style="display:block; cursor:pointer; padding:6px 0; border-bottom:1px solid var(--surface2);"><input type="checkbox" style="accent-color:var(--green); margin-right:10px; transform:scale(1.15); vertical-align:middle;">Disconnected from the internet</label>
+          <label style="display:block; cursor:pointer; padding:6px 0; border-bottom:1px solid var(--surface2);"><input type="checkbox" style="accent-color:var(--green); margin-right:10px; transform:scale(1.15); vertical-align:middle;">Using a clean browser (zero extensions)</label>
+          <label style="display:block; cursor:pointer; padding:6px 0; border-bottom:1px solid var(--surface2);"><input type="checkbox" style="accent-color:var(--green); margin-right:10px; transform:scale(1.15); vertical-align:middle;">Closed all other browser tabs</label>
+          <label style="display:block; cursor:pointer; padding:6px 0; border-bottom:1px solid var(--surface2);"><input type="checkbox" style="accent-color:var(--green); margin-right:10px; transform:scale(1.15); vertical-align:middle;">Ideally on an air-gapped computer</label>
+          <label style="display:block; cursor:pointer; padding:6px 0;"><input type="checkbox" style="accent-color:var(--green); margin-right:10px; transform:scale(1.15); vertical-align:middle;">Ran Self-Test (20/20 passed)</label>
         </div>
       </div>
       <div style="background:var(--bg); border:1px solid var(--border); border-radius:6px; padding:15px;">
         <div style="color:var(--green); font-weight:bold; font-size:0.9em; margin-bottom:10px;">AFTER GENERATING KEYS</div>
-        <div style="color:var(--text-dim); font-size:0.8em; line-height:2;">
-          <label style="display:block; cursor:pointer;"><input type="checkbox" style="accent-color:var(--green); margin-right:8px;">Imported key into wallet</label>
-          <label style="display:block; cursor:pointer;"><input type="checkbox" style="accent-color:var(--green); margin-right:8px;">Clicked DESTROY ALL OUTPUT</label>
-          <label style="display:block; cursor:pointer;"><input type="checkbox" style="accent-color:var(--green); margin-right:8px;">Closed the browser completely</label>
-          <label style="display:block; cursor:pointer;"><input type="checkbox" style="accent-color:var(--green); margin-right:8px;">Rebooted the computer</label>
-          <label style="display:block; cursor:pointer;"><input type="checkbox" style="accent-color:var(--green); margin-right:8px;">Will NEVER type recipe on an online device</label>
-          <label style="display:block; cursor:pointer;"><input type="checkbox" style="accent-color:var(--green); margin-right:8px;">Recipe is memorized (not written digitally)</label>
+        <div style="color:var(--text-dim); font-size:0.85em;">
+          <label style="display:block; cursor:pointer; padding:6px 0; border-bottom:1px solid var(--surface2);"><input type="checkbox" style="accent-color:var(--green); margin-right:10px; transform:scale(1.15); vertical-align:middle;">Imported key into wallet</label>
+          <label style="display:block; cursor:pointer; padding:6px 0; border-bottom:1px solid var(--surface2);"><input type="checkbox" style="accent-color:var(--green); margin-right:10px; transform:scale(1.15); vertical-align:middle;">Clicked DESTROY ALL OUTPUT</label>
+          <label style="display:block; cursor:pointer; padding:6px 0; border-bottom:1px solid var(--surface2);"><input type="checkbox" style="accent-color:var(--green); margin-right:10px; transform:scale(1.15); vertical-align:middle;">Closed the browser completely</label>
+          <label style="display:block; cursor:pointer; padding:6px 0; border-bottom:1px solid var(--surface2);"><input type="checkbox" style="accent-color:var(--green); margin-right:10px; transform:scale(1.15); vertical-align:middle;">Rebooted the computer</label>
+          <label style="display:block; cursor:pointer; padding:6px 0; border-bottom:1px solid var(--surface2);"><input type="checkbox" style="accent-color:var(--green); margin-right:10px; transform:scale(1.15); vertical-align:middle;">Will NEVER type recipe on an online device</label>
+          <label style="display:block; cursor:pointer; padding:6px 0;"><input type="checkbox" style="accent-color:var(--green); margin-right:10px; transform:scale(1.15); vertical-align:middle;">Recipe is memorized (not written digitally)</label>
         </div>
       </div>
     </div>
@@ -1606,19 +1613,19 @@ textarea.airgap-input { resize: vertical; min-height: 80px; }
     <p style="text-align:center; color:var(--text-dim); font-size:0.85em; margin-bottom:20px;">
       Hardware wallets get flagged at airports. Seed phrases on paper can be seized. Your recipe lives in your head.
     </p>
-    <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(280px, 1fr)); gap:15px;">
-      <div style="background:var(--bg); border:1px solid var(--border); border-radius:6px; padding:15px;">
-        <div style="color:var(--red); font-weight:bold; font-size:0.85em; margin-bottom:8px;">THE PROBLEM</div>
-        <div style="color:var(--text-dim); font-size:0.8em; line-height:1.8;">
+    <div style="display:grid; grid-template-columns:1fr 1fr; gap:20px;" class="two-col-grid">
+      <div style="background:var(--bg); border:1px solid var(--border); border-radius:6px; padding:18px;">
+        <div style="color:var(--red); font-weight:bold; font-size:0.9em; margin-bottom:10px;">THE PROBLEM</div>
+        <div style="color:var(--text-dim); font-size:0.85em; line-height:2;">
           &bull; Hardware wallets raise questions at customs<br>
           &bull; Paper seed phrases can be photographed or confiscated<br>
           &bull; Metal backup plates are suspicious in luggage<br>
           &bull; Some countries restrict crypto hardware at borders
         </div>
       </div>
-      <div style="background:var(--bg); border:1px solid var(--green); border-radius:6px; padding:15px;">
-        <div style="color:var(--green); font-weight:bold; font-size:0.85em; margin-bottom:8px;">THE FORTRESS KEY SOLUTION</div>
-        <div style="color:var(--text-dim); font-size:0.8em; line-height:1.8;">
+      <div style="background:var(--bg); border:1px solid var(--green); border-radius:6px; padding:18px;">
+        <div style="color:var(--green); font-weight:bold; font-size:0.9em; margin-bottom:10px;">THE FORTRESS KEY SOLUTION</div>
+        <div style="color:var(--text-dim); font-size:0.85em; line-height:2;">
           &bull; Your recipe is in your head &mdash; nothing to confiscate<br>
           &bull; Land anywhere, open this file offline, regenerate your key<br>
           &bull; Import into MetaMask or any wallet in 30 seconds<br>
@@ -1649,7 +1656,7 @@ textarea.airgap-input { resize: vertical; min-height: 80px; }
 
     <div style="background:var(--bg); border:1px solid var(--green); border-radius:6px; padding:15px; margin-bottom:10px;">
       <div style="color:var(--green); font-weight:bold; font-size:0.8em; margin-bottom:10px;">OFFICIAL SHA-256 CHECKSUMS (v1.1.0)</div>
-      <div style="font-size:0.68em; color:var(--text); line-height:2; font-family:monospace; word-break:break-all;">
+      <div style="font-size:0.72em; color:var(--text); line-height:2.2; font-family:monospace; word-break:break-all;">
         <div style="margin-bottom:4px;"><span style="color:var(--green);">macOS ARM (.dmg):</span><br><span style="user-select:all; cursor:pointer;" onclick="copyHash(this)">5be3c6042546a5613a8e06eb67c233f599be5cabaa97c98968497492fd3d81a0</span></div>
         <div style="margin-bottom:4px;"><span style="color:var(--green);">macOS Intel (.dmg):</span><br><span style="user-select:all; cursor:pointer;" onclick="copyHash(this)">e61c3ed6fc15506f8555f9b3f3049733f9a2869a4ffb43910938bda5fee3350a</span></div>
         <div style="margin-bottom:4px;"><span style="color:var(--accent2);">Windows (.exe):</span><br><span style="user-select:all; cursor:pointer;" onclick="copyHash(this)">b402c86a9ae0db973d4260ccb5b23ef56a97cef20a981189efba33fa0e9da7bd</span></div>
@@ -1673,9 +1680,9 @@ textarea.airgap-input { resize: vertical; min-height: 80px; }
       This tool is free and open source. If it helped you secure your crypto, consider donating.<br>
       100% of donations fund development, security audits, and keeping the tool free for everyone.
     </p>
-    <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(280px, 1fr)); gap:15px;">
-      <div style="background:var(--bg); border:1px solid var(--accent); border-radius:6px; padding:15px;">
-        <div style="color:var(--accent); font-weight:bold; font-size:0.85em; margin-bottom:8px;">BITCOIN (BTC)</div>
+    <div style="display:grid; grid-template-columns:1fr 1fr; gap:20px;" class="two-col-grid">
+      <div style="background:var(--bg); border:1px solid var(--accent); border-radius:6px; padding:18px;">
+        <div style="color:var(--accent); font-weight:bold; font-size:0.9em; margin-bottom:10px;">BITCOIN (BTC)</div>
         <div style="word-break:break-all; font-size:0.75em; color:var(--text); user-select:all; cursor:pointer;" id="donateBTC" onclick="copyDonation(this)" title="Click to copy">1MEVZK7Wkuxb5GicQdpqs7zjYvncTzRYtF</div>
         <div style="color:var(--text-dim); font-size:0.7em; margin-top:5px;" id="donateBTCmsg">Click to copy</div>
       </div>
