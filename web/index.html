@@ -663,6 +663,7 @@ textarea.airgap-input { resize: vertical; min-height: 80px; }
   </div>
 
   <div class="tabs">
+    <button class="tab" data-action="switchTab" data-arg="diceroll" style="border-color:var(--green); color:var(--green); font-weight:bold;">DICE ROLL</button>
     <button class="tab active" data-action="switchTab" data-arg="scanner">SCANNER</button>
     <button class="tab" data-action="switchTab" data-arg="wizard">RECIPE WIZARD</button>
     <button class="tab" data-action="switchTab" data-arg="generator">KEY GENERATOR</button>
@@ -670,6 +671,81 @@ textarea.airgap-input { resize: vertical; min-height: 80px; }
     <button class="tab" data-action="switchTab" data-arg="stretching">KEY STRETCHING</button>
     <button class="tab" data-action="switchTab" data-arg="verify">SELF-TEST</button>
     <button class="tab" data-action="switchTab" data-arg="howto">HOW IT WORKS</button>
+  </div>
+
+  <!-- ==================== DICE ROLL PANEL ==================== -->
+  <div id="panel-diceroll" class="panel">
+    <h2 style="margin-bottom:5px; color:var(--green); font-size:1.1em;">Generate BIP39 Seed from Dice Rolls</h2>
+    <p style="color:var(--text-dim); font-size:0.85em; margin-bottom:20px; line-height:1.6;">
+      Roll a physical die and enter each result. Your entropy comes from physics, not software.<br>
+      <strong>99 rolls → 24 words (256 bits)</strong> &nbsp;|&nbsp; <strong>50 rolls → 12 words (128 bits)</strong><br>
+      <span style="font-size:0.82em;">Cross-verifiable with Coldcard. Same rolls = same seed, always.</span>
+    </p>
+
+    <!-- Word count selector -->
+    <div style="display:flex; gap:10px; margin-bottom:15px;">
+      <button class="mode-btn active" id="dice24btn" data-action="setDiceMode" data-arg="24" style="flex:1;">24 WORDS (recommended)</button>
+      <button class="mode-btn" id="dice12btn" data-action="setDiceMode" data-arg="12" style="flex:1;">12 WORDS</button>
+    </div>
+
+    <!-- Progress -->
+    <div style="background:var(--surface); border:1px solid var(--border); border-radius:8px; padding:15px; margin-bottom:15px;">
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
+        <span style="font-weight:bold; color:var(--text);">Rolls: <span id="diceCount" style="color:var(--green);">0</span> / <span id="diceTarget">99</span></span>
+        <span style="font-size:0.85em; color:var(--text-dim);">Entropy: <span id="diceEntropy" style="color:var(--accent);">0</span> bits</span>
+      </div>
+      <div style="background:var(--surface2); border-radius:4px; height:8px; overflow:hidden;">
+        <div id="diceProgressBar" style="background:var(--green); height:100%; width:0%; transition:width 0.2s;"></div>
+      </div>
+    </div>
+
+    <!-- Dice buttons -->
+    <div style="display:grid; grid-template-columns:repeat(6, 1fr); gap:8px; margin-bottom:10px;">
+      <button class="action-btn" data-action="diceRollAdd" data-arg="1" style="font-size:1.3em; padding:15px 0; background:var(--surface); color:var(--text); border:2px solid var(--border);">&#9856;</button>
+      <button class="action-btn" data-action="diceRollAdd" data-arg="2" style="font-size:1.3em; padding:15px 0; background:var(--surface); color:var(--text); border:2px solid var(--border);">&#9857;</button>
+      <button class="action-btn" data-action="diceRollAdd" data-arg="3" style="font-size:1.3em; padding:15px 0; background:var(--surface); color:var(--text); border:2px solid var(--border);">&#9858;</button>
+      <button class="action-btn" data-action="diceRollAdd" data-arg="4" style="font-size:1.3em; padding:15px 0; background:var(--surface); color:var(--text); border:2px solid var(--border);">&#9859;</button>
+      <button class="action-btn" data-action="diceRollAdd" data-arg="5" style="font-size:1.3em; padding:15px 0; background:var(--surface); color:var(--text); border:2px solid var(--border);">&#9860;</button>
+      <button class="action-btn" data-action="diceRollAdd" data-arg="6" style="font-size:1.3em; padding:15px 0; background:var(--surface); color:var(--text); border:2px solid var(--border);">&#9861;</button>
+    </div>
+    <div style="display:flex; gap:8px; margin-bottom:15px;">
+      <button class="action-btn" data-action="diceRollUndo" style="flex:1; background:var(--surface); color:var(--text-dim); border:1px solid var(--border); padding:8px;">UNDO LAST</button>
+      <button class="action-btn" data-action="diceRollClear" style="flex:1; background:#fff0f0; color:var(--red); border:1px solid var(--red); padding:8px;">CLEAR ALL</button>
+    </div>
+
+    <!-- Roll display -->
+    <div style="background:var(--surface); border:1px solid var(--border); border-radius:6px; padding:12px; margin-bottom:15px; min-height:40px;">
+      <div id="diceRollDisplay" style="font-family:monospace; font-size:0.85em; color:var(--text-dim); word-break:break-all;">No rolls yet. Roll your die and click the matching face above.</div>
+    </div>
+
+    <!-- Bias warning area -->
+    <div id="diceBiasWarning" style="display:none; background:#fff0f0; border:1px solid var(--red); border-radius:6px; padding:12px; margin-bottom:15px; color:var(--red); font-size:0.85em;"></div>
+
+    <!-- Generate button -->
+    <button class="action-btn" id="diceGenerateBtn" data-action="diceGenerate" disabled style="background:var(--green); opacity:0.5; width:100%; padding:15px; font-size:1.1em;">
+      GENERATE BIP39 SEED (need more rolls)
+    </button>
+
+    <!-- Output area (hidden until generation) -->
+    <div id="diceOutput" style="display:none; margin-top:20px;">
+      <div style="background:#f0faf0; border:2px solid var(--green); border-radius:8px; padding:20px;">
+        <h3 style="color:var(--green); margin-bottom:15px; text-align:center;">Your BIP39 Seed Phrase</h3>
+        <div id="diceSeedWords" style="display:grid; grid-template-columns:repeat(4, 1fr); gap:8px; margin-bottom:15px;"></div>
+        <div style="text-align:center; margin-top:15px;">
+          <button class="action-btn" data-action="diceDestroy" style="background:var(--red); color:white; padding:10px 30px;">DESTROY SEED OUTPUT</button>
+        </div>
+      </div>
+      <div style="margin-top:10px; padding:12px; background:var(--surface); border:1px solid var(--border); border-radius:6px;">
+        <div style="font-size:0.82em; color:var(--text-dim); line-height:1.7;">
+          <strong>Next steps:</strong><br>
+          1. Write these 24 words on paper or stamp on metal<br>
+          2. Import into your hardware wallet (Coldcard, Ledger, Trezor)<br>
+          3. Verify: same dice rolls on Coldcard should produce the same words<br>
+          4. Click DESTROY SEED OUTPUT above<br>
+          5. Never enter these words on an online device
+        </div>
+      </div>
+    </div>
   </div>
 
   <!-- ==================== SCANNER PANEL ==================== -->
@@ -3704,6 +3780,198 @@ function downloadOffline() {
 })();
 
 // =====================================================
+// =====================================================
+// DICE ROLL SEED GENERATOR
+// =====================================================
+var _diceRolls = [];
+var _diceWordCount = 24;
+
+function setDiceWordCount(n) {
+  _diceWordCount = n;
+  document.getElementById('dice24btn').classList.toggle('active', n === 24);
+  document.getElementById('dice12btn').classList.toggle('active', n === 12);
+  document.getElementById('diceTarget').textContent = n === 24 ? '99' : '50';
+  updateDiceUI();
+}
+
+function addDiceRollNew(val) {
+  var target = _diceWordCount === 24 ? 99 : 50;
+  if (_diceRolls.length >= target) return;
+  _diceRolls.push(val);
+  updateDiceUI();
+}
+
+function undoDiceRoll() {
+  _diceRolls.pop();
+  updateDiceUI();
+}
+
+function clearDiceRolls() {
+  _diceRolls = [];
+  updateDiceUI();
+  destroyDiceOutput();
+}
+
+function updateDiceUI() {
+  var target = _diceWordCount === 24 ? 99 : 50;
+  var count = _diceRolls.length;
+  document.getElementById('diceCount').textContent = count;
+
+  // Entropy: log2(6) ≈ 2.585 bits per roll
+  var entropy = Math.floor(count * 2.585);
+  document.getElementById('diceEntropy').textContent = entropy;
+
+  // Progress bar
+  var pct = Math.min(count / target * 100, 100);
+  document.getElementById('diceProgressBar').style.width = pct + '%';
+  document.getElementById('diceProgressBar').style.background = count >= target ? 'var(--green)' : 'var(--accent)';
+
+  // Display rolls as dice faces
+  var faces = ['', '\u2680', '\u2681', '\u2682', '\u2683', '\u2684', '\u2685'];
+  var display = document.getElementById('diceRollDisplay');
+  if (count === 0) {
+    display.textContent = 'No rolls yet. Roll your die and click the matching face above.';
+    display.style.color = 'var(--text-dim)';
+  } else {
+    display.textContent = _diceRolls.map(function(r) { return faces[r]; }).join(' ');
+    display.style.color = 'var(--text)';
+  }
+
+  // Generate button state
+  var btn = document.getElementById('diceGenerateBtn');
+  if (count >= target) {
+    btn.disabled = false;
+    btn.style.opacity = '1';
+    btn.textContent = 'GENERATE BIP39 SEED (' + _diceWordCount + ' words)';
+  } else {
+    btn.disabled = true;
+    btn.style.opacity = '0.5';
+    btn.textContent = 'GENERATE BIP39 SEED (need ' + (target - count) + ' more rolls)';
+  }
+
+  // Bias detection (only after 30+ rolls)
+  var biasDiv = document.getElementById('diceBiasWarning');
+  if (count >= 30) {
+    var counts = [0,0,0,0,0,0];
+    _diceRolls.forEach(function(r) { counts[r-1]++; });
+    var expected = count / 6;
+    var chiSq = counts.reduce(function(sum, c) {
+      var diff = c - expected;
+      return sum + (diff * diff / expected);
+    }, 0);
+
+    if (chiSq > 15.09) {
+      biasDiv.style.display = 'block';
+      biasDiv.innerHTML = '<strong>WARNING:</strong> Dice appear heavily biased (chi\u00B2=' + chiSq.toFixed(1) + '). Distribution: [' + counts.join(', ') + ']. Use a fair die.';
+    } else if (chiSq > 11.07) {
+      biasDiv.style.display = 'block';
+      biasDiv.innerHTML = '<strong>CAUTION:</strong> Dice may be slightly biased (chi\u00B2=' + chiSq.toFixed(1) + '). Distribution: [' + counts.join(', ') + '].';
+    } else {
+      biasDiv.style.display = 'none';
+    }
+  } else {
+    biasDiv.style.display = 'none';
+  }
+}
+
+async function generateDiceSeed() {
+  var target = _diceWordCount === 24 ? 99 : 50;
+  if (_diceRolls.length < target) return;
+
+  var btn = document.getElementById('diceGenerateBtn');
+  btn.textContent = 'GENERATING...';
+  btn.disabled = true;
+
+  try {
+    var result;
+    if (IS_TAURI) {
+      result = await window.__TAURI__.core.invoke('dice_to_seed', {
+        rolls: _diceRolls,
+        wordCount: _diceWordCount
+      });
+    } else {
+      // JS fallback: SHA-256 of ASCII digits (Coldcard method)
+      var asciiStr = _diceRolls.map(function(r) { return String(r); }).join('');
+      var encoder = new TextEncoder();
+      var hashBytes = SHA256.hash(encoder.encode(asciiStr));
+
+      var entropy, words;
+      if (_diceWordCount === 24) {
+        words = [];
+        var checksumByte = SHA256.hash(hashBytes)[0];
+        var binaryStr = '';
+        for (var i = 0; i < 32; i++) binaryStr += hashBytes[i].toString(2).padStart(8, '0');
+        binaryStr += checksumByte.toString(2).padStart(8, '0');
+        for (var w = 0; w < 24; w++) {
+          var seg = binaryStr.slice(w * 11, (w + 1) * 11);
+          words.push(BIP39_WORDLIST[parseInt(seg, 2)]);
+        }
+      } else {
+        words = [];
+        var ent16 = hashBytes.slice(0, 16);
+        var csByte = SHA256.hash(ent16)[0] >> 4;
+        var bStr = '';
+        for (var j = 0; j < 16; j++) bStr += ent16[j].toString(2).padStart(8, '0');
+        bStr += csByte.toString(2).padStart(4, '0');
+        for (var w2 = 0; w2 < 12; w2++) {
+          var seg2 = bStr.slice(w2 * 11, (w2 + 1) * 11);
+          words.push(BIP39_WORDLIST[parseInt(seg2, 2)]);
+        }
+      }
+      result = { words: words, entropy_bits: _diceWordCount === 24 ? 256 : 128, bias_warning: null };
+    }
+
+    // Display seed words
+    var wordsHtml = result.words.map(function(w, i) {
+      return '<div style="background:var(--bg);border:1px solid var(--green);border-radius:4px;padding:8px;text-align:center;">' +
+        '<div style="color:var(--text-dim);font-size:0.7em;">' + (i+1) + '</div>' +
+        '<div style="color:var(--green);font-weight:bold;font-size:0.9em;">' + escapeHtml(w) + '</div></div>';
+    }).join('');
+    document.getElementById('diceSeedWords').innerHTML = wordsHtml;
+    document.getElementById('diceOutput').style.display = 'block';
+    document.getElementById('diceOutput').scrollIntoView({ behavior: 'smooth' });
+
+    // Show bias warning from Rust if any
+    if (result.bias_warning) {
+      var biasDiv = document.getElementById('diceBiasWarning');
+      biasDiv.style.display = 'block';
+      biasDiv.textContent = result.bias_warning;
+    }
+
+    // Auto-destroy after 5 minutes
+    clearTimeout(window._diceAutoDestroy);
+    window._diceAutoDestroy = setTimeout(destroyDiceOutput, 300000);
+
+  } catch (err) {
+    alert('Error: ' + (err.message || err));
+  }
+
+  btn.textContent = 'GENERATE BIP39 SEED (' + _diceWordCount + ' words)';
+  btn.disabled = false;
+}
+
+function destroyDiceOutput() {
+  document.getElementById('diceSeedWords').innerHTML = '';
+  document.getElementById('diceOutput').style.display = 'none';
+  clearTimeout(window._diceAutoDestroy);
+}
+
+// Keyboard input for dice (keys 1-6)
+document.addEventListener('keydown', function(e) {
+  // Only if dice panel is active
+  var panel = document.getElementById('panel-diceroll');
+  if (!panel || !panel.classList.contains('active')) return;
+  var key = parseInt(e.key);
+  if (key >= 1 && key <= 6) {
+    addDiceRollNew(key);
+    e.preventDefault();
+  }
+  if (e.key === 'Backspace' || e.key === 'Delete') {
+    undoDiceRoll();
+    e.preventDefault();
+  }
+});
+
 // TAURI NATIVE BRIDGE
 // When running inside Tauri, crypto operations use Rust backend.
 // Private keys never touch JavaScript in native mode.
@@ -3930,6 +4198,12 @@ if (IS_TAURI) {
     copyAirgap: function(arg, el) { copyAirgap(el); },
     copyDonation: function(arg, el) { copyDonation(el); },
     copyHash: function(arg, el) { copyHash(el); },
+    setDiceMode: function(arg) { setDiceWordCount(parseInt(arg)); },
+    diceRollAdd: function(arg) { addDiceRollNew(parseInt(arg)); },
+    diceRollUndo: function() { undoDiceRoll(); },
+    diceRollClear: function() { clearDiceRolls(); },
+    diceGenerate: function() { generateDiceSeed(); },
+    diceDestroy: function() { destroyDiceOutput(); },
   };
 
   var inputActions = {

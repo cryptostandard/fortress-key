@@ -4,6 +4,15 @@ use sha2::{Sha256, Digest};
 /// Embedded at compile time for offline operation
 const BIP39_WORDLIST: &str = include_str!("../../wordlist/english.txt");
 
+/// Get the wordlist as a vector of strings
+pub fn get_wordlist() -> Result<Vec<&'static str>, String> {
+    let words: Vec<&str> = BIP39_WORDLIST.lines().collect();
+    if words.len() != 2048 {
+        return Err(format!("BIP39 wordlist has {} words, expected 2048", words.len()));
+    }
+    Ok(words)
+}
+
 /// Convert 32 bytes of entropy into a 24-word BIP39 mnemonic
 pub fn entropy_to_mnemonic(entropy: &[u8; 32]) -> Result<Vec<String>, String> {
     let words: Vec<&str> = BIP39_WORDLIST.lines().collect();

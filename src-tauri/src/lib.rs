@@ -1,7 +1,7 @@
 pub mod crypto;
 pub mod commands;
 
-use commands::{generate, verify, sign};
+use commands::{generate, verify, sign, dice};
 
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
@@ -11,6 +11,7 @@ pub fn run() {
             verify::verify_recipe,
             verify::run_self_test,
             sign::sign_transaction,
+            dice::dice_to_seed,
         ])
         .run(tauri::generate_context!())
         .expect("error while running Fortress Key");
