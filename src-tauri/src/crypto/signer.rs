@@ -36,7 +36,7 @@ pub struct SignedTxResult {
 pub fn sign_transaction(
     tx_blob_b64: &str,
     recipe: &str,
-    quantum_shield: bool,
+    key_stretching: bool,
 ) -> Result<SignedTxResult, String> {
     // Decode and parse the transaction blob
     let json_bytes = base64_decode(tx_blob_b64)?;
@@ -49,7 +49,7 @@ pub fn sign_transaction(
     if !tx_info.recipient.starts_with('1') { return Err("Only P2PKH recipient addresses supported".to_string()); }
 
     // Derive private key
-    let key = derive_private_key(recipe, quantum_shield)?;
+    let key = derive_private_key(recipe, key_stretching)?;
 
     // Verify derived address matches sender
     let (compressed_pub, _) = get_public_key(&key)?;

@@ -87,7 +87,7 @@ Built-in Self-Test tab runs **15 test vectors** on every cryptographic primitive
 - Bitcoin address: privkey=1 → `1BgGZ9tcN4rm9KBzDn7KprQz87SZ26SAMH`
 - Ethereum address: privkey=1 → `0x7e5f4552091a69125d5dfcb7b8c2659029395bdf`
 - WIF encoding, ECDSA signing + verification, PBKDF2 determinism
-- Base58Check roundtrip, Quantum Shield cascade determinism
+- Base58Check roundtrip, Keccak cascade determinism
 
 **Run the self-test every time you download a new copy.**
 
@@ -163,7 +163,7 @@ SHA-256 checksums for all downloads: [Release v1.1.0](https://github.com/inbotai
 ## Additional Features
 
 - **Vulnerability Scanner** — Check known CVEs for Coldcard, Ledger, Trezor, KeepKey, BitBox02
-- **Quantum Shield** — Optional post-quantum hardening (Keccak-256 cascade + SHA-256 XOR fusion)
+- **PBKDF2 Key Stretching** — Optional additional key derivation (Keccak-256 cascade + SHA-256 XOR fusion, 600K total iterations)
 - **Online Detection** — Auto-warns if you're connected to the internet
 - **Multi-chain** — BTC, DOGE, ETH from one recipe
 - **Deterministic** — Same recipe always produces the same key

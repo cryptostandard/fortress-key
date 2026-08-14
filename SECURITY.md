@@ -35,7 +35,7 @@ All cryptographic operations use the **noble** library family by Paul Miller, in
 | **SHA-256** | `@noble/hashes` | Hashing, Bitcoin double-hash, transaction signing |
 | **SHA-512** | `@noble/hashes` | PBKDF2 key derivation |
 | **RIPEMD-160** | `@noble/hashes` | Bitcoin address derivation (Hash160) |
-| **Keccak-256** | `@noble/hashes` | Ethereum addresses, Quantum Shield |
+| **Keccak-256** | `@noble/hashes` | Ethereum addresses, key stretching cascade |
 | **PBKDF2-SHA512** | `@noble/hashes` | Key derivation (500,000 iterations) — works offline on file:// protocol |
 | **Base58Check** | Custom (non-cryptographic) | Bitcoin/Dogecoin address and WIF encoding |
 
@@ -65,19 +65,18 @@ Fortress Key includes a built-in Self-Test tab that verifies all cryptographic p
 - **ECDSA:** Deterministic signing (RFC 6979) + signature verification
 - **PBKDF2:** Determinism check (same input → same output)
 - **Base58Check:** Encode/decode roundtrip
-- **Quantum Shield:** Keccak cascade determinism
+- **Key stretching:** Keccak cascade determinism
 
 Users should run the self-test every time they download a new copy of Fortress Key.
 
-## Quantum Shield
+## PBKDF2 Key Stretching
 
-Optional post-quantum hardening layer:
-- 10,000 rounds Keccak-256 cascade (sponge construction, different from SHA)
-- SHA-256 + Keccak-256 XOR fusion (must break both hash families)
-- Resistant to Grover's algorithm (quadratic speedup on hash search)
-- Recipe-based approach creates unknown search space (no wordlist to target)
+Optional additional key derivation layer:
+- 500,000 rounds PBKDF2-HMAC-SHA512 (base derivation)
+- 10,000 rounds Keccak-256 cascade (additional stretching)
+- SHA-256 + Keccak-256 XOR fusion (dual-hash derivation)
 
-**Note:** The Quantum Shield protects the key derivation process. It does not protect the underlying secp256k1 curve from Shor's algorithm. When post-quantum signature schemes are standardized for Bitcoin (e.g., BIP-360), Fortress Key will be updated accordingly.
+**Important:** This is standard key stretching, not quantum resistance. The underlying secp256k1 curve, SHA-256, RIPEMD-160, and Keccak-256 are all vulnerable to Shor's algorithm on a sufficiently powerful quantum computer. No amount of hashing changes this. When post-quantum signature schemes are standardized for Bitcoin (e.g., BIP-360), Fortress Key will be updated accordingly.
 
 ## Known Limitations
 

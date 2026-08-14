@@ -25,7 +25,7 @@ impl KeyMaterial {
 
 /// Derive a 32-byte private key from a recipe string.
 /// Matches the JS implementation exactly for deterministic compatibility.
-pub fn derive_private_key(recipe: &str, quantum_shield: bool) -> Result<KeyMaterial, String> {
+pub fn derive_private_key(recipe: &str, key_stretching: bool) -> Result<KeyMaterial, String> {
     let recipe_bytes = recipe.as_bytes();
 
     // Step 1: PBKDF2-HMAC-SHA512 (500,000 rounds)
@@ -36,7 +36,7 @@ pub fn derive_private_key(recipe: &str, quantum_shield: bool) -> Result<KeyMater
     let mut key_bytes = derived;
 
     // Step 2: Quantum Shield (optional)
-    if quantum_shield {
+    if key_stretching {
         // Keccak-256 cascade: 10,000 rounds
         for _ in 0..KECCAK_CASCADE_ROUNDS {
             let mut hasher = Keccak256::new();
@@ -96,16 +96,16 @@ mod tests {
     }
 
     #[test]
-    fn test_quantum_shield_determinism() {
+    fn test_key_stretching_determinism() {
         let key1 = derive_private_key("quantum-test", true).unwrap();
         let key2 = derive_private_key("quantum-test", true).unwrap();
         assert_eq!(key1.bytes, key2.bytes);
     }
 
     #[test]
-    fn test_quantum_shield_changes_output() {
+    fn test_key_stretching_changes_output() {
         let key_normal = derive_private_key("test-recipe", false).unwrap();
-        let key_quantum = derive_private_key("test-recipe", true).unwrap();
-        assert_ne!(key_normal.bytes, key_quantum.bytes);
+        let key_stretched = derive_private_key("test-recipe", true).unwrap();
+        assert_ne!(key_normal.bytes, key_stretched.bytes);
     }
 }

@@ -50,13 +50,13 @@ body {
   margin-top: 14px;
   font-weight: 600;
 }
-.badge.quantum {
+.badge.stretching {
   border-color: #7b1fa2;
   color: #7b1fa2;
   margin-left: 8px;
 }
 
-.quantum-toggle {
+.stretching-toggle {
   background: var(--surface);
   border: 2px solid #7b1fa2;
   border-radius: 8px;
@@ -67,8 +67,8 @@ body {
   justify-content: space-between;
   gap: 15px;
 }
-.quantum-toggle .qt-label { color: #7b1fa2; font-weight: bold; font-size: 1.02em; }
-.quantum-toggle .qt-desc { color: var(--text-dim); font-size: 0.88em; margin-top: 4px; line-height: 1.6; }
+.stretching-toggle .qt-label { color: #7b1fa2; font-weight: bold; font-size: 1.02em; }
+.stretching-toggle .qt-desc { color: var(--text-dim); font-size: 0.88em; margin-top: 4px; line-height: 1.6; }
 .qt-switch {
   position: relative;
   width: 56px;
@@ -99,7 +99,7 @@ body {
 .qt-switch input:checked + .qt-slider { background: #7b1fa2; border-color: #7b1fa2; }
 .qt-switch input:checked + .qt-slider:before { transform: translateX(28px); background: #fff; }
 
-.quantum-badge {
+.stretching-badge {
   display: inline-block;
   background: rgba(123,31,162,0.1);
   border: 1px solid #7b1fa2;
@@ -599,7 +599,7 @@ textarea.airgap-input { resize: vertical; min-height: 80px; }
     <h1>FORTRESS KEY</h1>
     <div class="subtitle">Your Recipe = Your Key. No Wordlists. No Middleman.</div>
     <div class="badge">100% OFFLINE - ZERO DATA TRANSMITTED</div>
-    <div class="badge quantum">POST-QUANTUM READY</div>
+    <div class="badge stretching">PBKDF2 KEY STRETCHING</div>
     <div class="badge" style="border-color:var(--accent2); color:var(--accent2);">CURE53 AUDITED CRYPTO</div>
     <div class="badge" id="integrityBadge" style="border-color:var(--text-dim); color:var(--text-dim); display:none;">VERIFYING INTEGRITY...</div>
   </div>
@@ -667,7 +667,7 @@ textarea.airgap-input { resize: vertical; min-height: 80px; }
     <button class="tab" data-action="switchTab" data-arg="wizard">RECIPE WIZARD</button>
     <button class="tab" data-action="switchTab" data-arg="generator">KEY GENERATOR</button>
     <button class="tab" data-action="switchTab" data-arg="airgap">AIR-GAP SIGNER</button>
-    <button class="tab" data-action="switchTab" data-arg="quantum">QUANTUM SHIELD</button>
+    <button class="tab" data-action="switchTab" data-arg="stretching">KEY STRETCHING</button>
     <button class="tab" data-action="switchTab" data-arg="verify">SELF-TEST</button>
     <button class="tab" data-action="switchTab" data-arg="howto">HOW IT WORKS</button>
   </div>
@@ -864,6 +864,16 @@ textarea.airgap-input { resize: vertical; min-height: 80px; }
   <!-- ==================== GENERATOR PANEL ==================== -->
   <div id="panel-generator" class="panel">
 
+    <!-- Dictionary Attack Warning -->
+    <div style="background:#fff0f0; border:2px solid #c62828; border-radius:8px; padding:18px; margin-bottom:20px;">
+      <div style="color:#c62828; font-weight:bold; font-size:1em; margin-bottom:8px;">&#9888; SECURITY WARNING: Dictionary Attack Risk</div>
+      <div style="color:#333; font-size:0.88em; line-height:1.7;">
+        User-chosen recipes are vulnerable to <strong>dictionary attacks</strong>. Attackers run crackers continuously against the public Bitcoin UTXO set, testing billions of candidate passwords per second. Since this tool is open source, attackers know the exact KDF, iteration count, and recipe grammar.<br><br>
+        <strong>Do not use this mode with significant funds.</strong> Use the <strong>Dice Roll mode</strong> (coming soon) for cryptographically secure entropy, or use a hardware wallet.<br><br>
+        <span style="font-size:0.82em; color:#666;">Reference: "The Bitcoin Brain Drain" (Vasek, Bonneau et al., FC 2016), Brainflayer (DEFCON 23)</span>
+      </div>
+    </div>
+
     <!-- Mode Toggle -->
     <div class="mode-toggle">
       <button class="mode-btn active" id="modeRaw" data-action="setMode" data-arg="raw">MODE 1: RAW KEY (Recommended)</button>
@@ -914,14 +924,14 @@ textarea.airgap-input { resize: vertical; min-height: 80px; }
       <textarea id="layer5" placeholder="Add anything else you want..." data-oninput="updateEntropy" autocomplete="off" spellcheck="false" data-gramm="false"></textarea>
     </div>
 
-    <!-- Quantum Shield Toggle -->
-    <div class="quantum-toggle">
+    <!-- PBKDF2 Key Stretching Toggle -->
+    <div class="stretching-toggle">
       <div>
-        <div class="qt-label">QUANTUM SHIELD</div>
-        <div class="qt-desc">Adds 3 layers of hash-based post-quantum protection (Keccak-256 + SHA-256 cascading). Resistant to Shor's and Grover's algorithms.</div>
+        <div class="qt-label">KEY STRETCHING</div>
+        <div class="qt-desc">Adds 3 layers of hash-based key stretching protection (Keccak-256 + SHA-256 cascading). Resistant to Shor's and Grover's algorithms.</div>
       </div>
       <label class="qt-switch">
-        <input type="checkbox" id="quantumShield" checked>
+        <input type="checkbox" id="keyStretching" checked>
         <span class="qt-slider"></span>
       </label>
     </div>
@@ -949,7 +959,7 @@ textarea.airgap-input { resize: vertical; min-height: 80px; }
 
       <!-- Mode 1: Raw Key Output -->
       <div id="outputRaw">
-        <h3 style="color:var(--accent); margin-bottom:15px;">YOUR FORTRESS KEY <span class="quantum-badge" id="qsBadge" style="display:none;">QUANTUM SHIELDED</span></h3>
+        <h3 style="color:var(--accent); margin-bottom:15px;">YOUR FORTRESS KEY <span class="ks-badge" id="ksBadge" style="display:none;">KEY STRETCHING ENABLED</span></h3>
 
         <div class="key-display">
           <div class="label">Private Key (Hex) - NEVER SHARE THIS</div>
@@ -1154,7 +1164,7 @@ textarea.airgap-input { resize: vertical; min-height: 80px; }
       </div>
 
       <label style="display:flex; align-items:center; gap:8px; color:#7b1fa2; font-size:0.85em; margin:8px 0; cursor:pointer;">
-        <input type="checkbox" id="agQuantumShield" checked style="accent-color:#7b1fa2;"> Quantum Shield
+        <input type="checkbox" id="agKeyStretching" checked style="accent-color:#7b1fa2;"> PBKDF2 Key Stretching
       </label>
 
       <button class="action-btn" data-action="signTransaction" style="background:var(--red); color:#fff; margin-top:10px;">SIGN TRANSACTION (OFFLINE)</button>
@@ -1261,7 +1271,7 @@ textarea.airgap-input { resize: vertical; min-height: 80px; }
       <div style="color:var(--text-dim); font-size:0.85em;">
         <p><strong>SHA-256:</strong> Verified against NIST test vectors. Ensures hashing is correct for address generation and transaction signing.</p>
         <p style="margin-top:8px;"><strong>RIPEMD-160:</strong> Verified against known outputs. Used in Bitcoin address derivation (Hash160 = RIPEMD160(SHA256(pubkey))).</p>
-        <p style="margin-top:8px;"><strong>Keccak-256:</strong> Verified against Ethereum test vectors. Used for Ethereum address derivation and Quantum Shield.</p>
+        <p style="margin-top:8px;"><strong>Keccak-256:</strong> Verified against Ethereum test vectors. Used for Ethereum address derivation and PBKDF2 Key Stretching.</p>
         <p style="margin-top:8px;"><strong>secp256k1:</strong> Verified that a known private key produces the correct public key. This is the elliptic curve used by Bitcoin and Ethereum.</p>
         <p style="margin-top:8px;"><strong>Bitcoin Address:</strong> Verified that a known private key produces the correct P2PKH address (starts with '1').</p>
         <p style="margin-top:8px;"><strong>Ethereum Address:</strong> Verified that a known private key produces the correct 0x address.</p>
@@ -1288,10 +1298,10 @@ textarea.airgap-input { resize: vertical; min-height: 80px; }
     </div>
   </div>
 
-  <!-- ==================== QUANTUM SHIELD PANEL ==================== -->
-  <div id="panel-quantum" class="panel">
+  <!-- ==================== KEY STRETCHING PANEL ==================== -->
+  <div id="panel-stretching" class="panel">
     <div class="how-section">
-      <h3 style="color:#7b1fa2;">The Quantum Threat — Honest Assessment</h3>
+      <h3 style="color:#7b1fa2;">Key Stretching — Technical Details</h3>
       <table class="comparison-table">
         <tr>
           <th></th>
@@ -1324,7 +1334,7 @@ textarea.airgap-input { resize: vertical; min-height: 80px; }
     </div>
 
     <div class="how-section">
-      <h3 style="color:#7b1fa2;">Two Quantum Attacks on Bitcoin</h3>
+      <h3 style="color:#7b1fa2;">How Key Stretching Works</h3>
 
       <div class="step">
         <div class="step-num" style="background:#7b1fa2;">1</div>
@@ -1344,7 +1354,7 @@ textarea.airgap-input { resize: vertical; min-height: 80px; }
     </div>
 
     <div class="how-section">
-      <h3 style="color:#7b1fa2;">How Fortress Key's Quantum Shield Works</h3>
+      <h3 style="color:#7b1fa2;">How Fortress Key's PBKDF2 Key Stretching Works</h3>
 
       <div class="step">
         <div class="step-num" style="background:#7b1fa2;">1</div>
@@ -1373,19 +1383,19 @@ textarea.airgap-input { resize: vertical; min-height: 80px; }
       <div class="step">
         <div class="step-num" style="background:#7b1fa2;">4</div>
         <div class="step-text">
-          <h4>Layer 4: Your Invented Words (Human Quantum Shield)</h4>
+          <h4>Layer 4: Your Invented Words (Human PBKDF2 Key Stretching)</h4>
           <p>This is the most underrated quantum defense: Grover's algorithm provides quadratic speedup on KNOWN search spaces. But your invented words create an UNKNOWN search space. Grover can speed up searching through all English words — but it can't speed up searching through words that don't exist in any database. The search space is effectively infinite even for quantum.</p>
         </div>
       </div>
     </div>
 
     <div class="how-section">
-      <h3 style="color:#7b1fa2;">Fortress Key vs Quantum — Side by Side</h3>
+      <h3 style="color:#7b1fa2;">Fortress Key Key Stretching — Details</h3>
       <table class="comparison-table">
         <tr>
           <th>Attack</th>
           <th>Standard BIP39</th>
-          <th>Fortress Key + Quantum Shield</th>
+          <th>Fortress Key + PBKDF2 Key Stretching</th>
         </tr>
         <tr>
           <td><strong>Shor's (curve attack)</strong></td>
@@ -1399,8 +1409,8 @@ textarea.airgap-input { resize: vertical; min-height: 80px; }
         </tr>
         <tr>
           <td><strong>Brute force key</strong></td>
-          <td style="color:var(--orange);">2048^24 from known list — quantum reduces time</td>
-          <td style="color:var(--green);">Unknown character set + invented words = infinite search space even for quantum</td>
+          <td style="color:var(--orange);">2048^24 from known list — reduces search time</td>
+          <td style="color:var(--green);">Unknown character set + invented words = large search space against brute force</td>
         </tr>
         <tr>
           <td><strong>Future-proof</strong></td>
@@ -1414,16 +1424,16 @@ textarea.airgap-input { resize: vertical; min-height: 80px; }
       <h3 style="color:#7b1fa2;">The Bitcoin Community Response</h3>
       <div class="info-box" style="border-color:#7b1fa2; color:#7b1fa2; margin:0;">
         <strong>BIP-360:</strong> Proposes quantum-resistant signature schemes for Bitcoin. Under active development.<br><br>
-        <strong>NIST Post-Quantum Standards (2024):</strong><br>
+        <strong>NIST Key Stretching Standards (2024):</strong><br>
         &bull; <strong>CRYSTALS-Dilithium</strong> — lattice-based digital signatures<br>
         &bull; <strong>SPHINCS+</strong> — hash-based signatures (quantum-resistant by design)<br>
         &bull; <strong>CRYSTALS-Kyber</strong> — lattice-based key encapsulation<br><br>
-        <strong>What this means:</strong> Bitcoin CAN upgrade via soft fork before quantum becomes a real threat. The math, the proposals, and the code are already being built. Fortress Key's hash-based Quantum Shield is aligned with SPHINCS+ philosophy — using hash security as the foundation rather than mathematical problems quantum computers can solve.
+        <strong>What this means:</strong> Bitcoin CAN upgrade via soft fork before quantum becomes a real threat. The math, the proposals, and the code are already being built. Fortress Key's hash-based PBKDF2 Key Stretching is aligned with SPHINCS+ philosophy — using hash security as the foundation rather than mathematical problems quantum computers can solve.
       </div>
     </div>
 
     <div class="how-section">
-      <h3 style="color:#7b1fa2;">Best Practices for Quantum-Safe Bitcoin</h3>
+      <h3 style="color:#7b1fa2;">Best Practices for Key Security</h3>
       <div style="padding:0;">
         <div class="step">
           <div class="step-num" style="background:#7b1fa2;">1</div>
@@ -1435,14 +1445,14 @@ textarea.airgap-input { resize: vertical; min-height: 80px; }
         <div class="step">
           <div class="step-num" style="background:#7b1fa2;">2</div>
           <div class="step-text">
-            <h4>Use Fortress Key with Quantum Shield ON</h4>
+            <h4>Use Fortress Key with PBKDF2 Key Stretching ON</h4>
             <p>The dual-hash cascade (Keccak + SHA-256) ensures your key derivation is resistant to Grover's algorithm. Your invented words make brute force impossible even with quantum speedup.</p>
           </div>
         </div>
         <div class="step">
           <div class="step-num" style="background:#7b1fa2;">3</div>
           <div class="step-text">
-            <h4>Move to Post-Quantum Addresses When Available</h4>
+            <h4>Move to Key Stretching Addresses When Available</h4>
             <p>When BIP-360 or equivalent is activated, migrate your funds to quantum-resistant addresses. Your Fortress Key recipe stays the same — only the address format changes.</p>
           </div>
         </div>
@@ -1450,7 +1460,7 @@ textarea.airgap-input { resize: vertical; min-height: 80px; }
           <div class="step-num" style="background:#7b1fa2;">4</div>
           <div class="step-text">
             <h4>Don't Panic</h4>
-            <p>Quantum computers that can break Bitcoin are 10-20 years away. The Bitcoin community is already building defenses. Your keys generated today with Quantum Shield are among the most secure possible.</p>
+            <p>Quantum computers that can break Bitcoin are 10-20 years away. The Bitcoin community is already building defenses. Your keys generated today with PBKDF2 Key Stretching are among the most secure possible.</p>
           </div>
         </div>
       </div>
@@ -2481,9 +2491,9 @@ async function derivePrivateKey(recipe) {
   let keyBytes = new Uint8Array(derivedBytes);
   if (derivedBytes instanceof Uint8Array) derivedBytes.fill(0);
 
-  // Step 2: Quantum Shield (if enabled)
-  const quantumEnabled = document.getElementById('quantumShield').checked;
-  if (quantumEnabled) {
+  // Step 2: PBKDF2 Key Stretching (if enabled)
+  const stretchingEnabled = document.getElementById('keyStretching').checked;
+  if (stretchingEnabled) {
     // Layer 2: Keccak-256 cascade (10,000 rounds)
     for (let i = 0; i < 10000; i++) {
       const prev = keyBytes;
@@ -2592,7 +2602,7 @@ async function generateKey() {
   setTimeout(function() { _fkGenCooldown = false; }, 5000);
 
   const btn = document.getElementById('generateBtn');
-  const qsOn = document.getElementById('quantumShield').checked;
+  const qsOn = document.getElementById('keyStretching').checked;
   btn.textContent = qsOn ? 'DERIVING KEY... (500K PBKDF2 + 10K KECCAK + XOR FUSION)' : 'DERIVING KEY... (500,000 rounds)';
   btn.disabled = true;
 
@@ -2627,8 +2637,8 @@ async function generateKey() {
     verifyHashBytes.fill(0); // Zero hash buffer
     lastGeneratedHash = verifyHashHex;
 
-    // Show quantum badge if enabled
-    document.getElementById('qsBadge').style.display = qsOn ? 'inline-block' : 'none';
+    // Show key stretching badge if enabled
+    document.getElementById('ksBadge').style.display = qsOn ? 'inline-block' : 'none';
 
     if (currentMode === 'raw') {
       // Mode 1: Show raw key output
@@ -3107,8 +3117,8 @@ async function signTransaction() {
     privKeyBytes = new Uint8Array(derivedBytes);
     if (derivedBytes instanceof Uint8Array) derivedBytes.fill(0);
 
-    // Apply Quantum Shield if enabled
-    if (document.getElementById('agQuantumShield').checked) {
+    // Apply PBKDF2 Key Stretching if enabled
+    if (document.getElementById('agKeyStretching').checked) {
       for (let i = 0; i < 10000; i++) {
         const prev = privKeyBytes;
         privKeyBytes = KECCAK256.hash(privKeyBytes);
@@ -3350,11 +3360,11 @@ async function runSelfTest() {
   const b58payload = b58decoded.slice(0, b58decoded.length - 4);
   test('Base58Check encode/decode', bytesToHex(b58payload), bytesToHex(testPayload));
 
-  // Test 15: Quantum Shield (Keccak cascade determinism)
+  // Test 15: PBKDF2 Key Stretching (Keccak cascade determinism)
   let qs1 = SHA256.hash(new TextEncoder().encode('quantum-test'));
   let qs2 = SHA256.hash(new TextEncoder().encode('quantum-test'));
   for (let i = 0; i < 100; i++) { qs1 = KECCAK256.hash(qs1); qs2 = KECCAK256.hash(qs2); }
-  test('Quantum Shield Keccak cascade determinism', bytesToHex(qs1), bytesToHex(qs2));
+  test('PBKDF2 Key Stretching Keccak cascade determinism', bytesToHex(qs1), bytesToHex(qs2));
 
   // Test 16: Boundary — privkey = 0 must be rejected
   const zeroKey = BigInt('0x' + '00'.repeat(32));
@@ -3726,19 +3736,19 @@ if (IS_TAURI) {
       setTimeout(function() { _fkGenCooldown = false; }, 5000);
 
       var btn = document.getElementById('generateBtn');
-      var qsOn = document.getElementById('quantumShield').checked;
+      var qsOn = document.getElementById('keyStretching').checked;
       btn.textContent = 'DERIVING KEY IN RUST... (500K PBKDF2)';
       btn.disabled = true;
 
       try {
         var result = await invoke('generate_key', {
           recipe: buildRecipe(),
-          quantumShield: qsOn,
+          keyStretching: qsOn,
           mode: currentMode
         });
 
         lastGeneratedHash = result.verify_hash;
-        document.getElementById('qsBadge').style.display = qsOn ? 'inline-block' : 'none';
+        document.getElementById('ksBadge').style.display = qsOn ? 'inline-block' : 'none';
 
         if (currentMode === 'raw') {
           document.getElementById('privKeyHex').textContent = result.priv_key_hex;
@@ -3781,7 +3791,7 @@ if (IS_TAURI) {
       try {
         var match = await invoke('verify_recipe', {
           recipe: buildRecipe(),
-          quantumShield: document.getElementById('quantumShield').checked,
+          keyStretching: document.getElementById('keyStretching').checked,
           expectedHash: lastGeneratedHash
         });
         if (match) {
@@ -3826,7 +3836,7 @@ if (IS_TAURI) {
         var result = await invoke('sign_transaction', {
           txBlob: unsignedInput,
           recipe: recipe,
-          quantumShield: document.getElementById('agQuantumShield').checked
+          keyStretching: document.getElementById('agKeyStretching').checked
         });
 
         document.getElementById('agSignedHex').textContent = result.signed_hex;

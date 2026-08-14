@@ -14,9 +14,9 @@ pub struct GenerateKeyResult {
 }
 
 #[tauri::command]
-pub fn generate_key(recipe: String, quantum_shield: bool, mode: String) -> Result<GenerateKeyResult, String> {
+pub fn generate_key(recipe: String, key_stretching: bool, mode: String) -> Result<GenerateKeyResult, String> {
     // Derive private key (zeroes on drop)
-    let key = derive::derive_private_key(&recipe, quantum_shield)?;
+    let key = derive::derive_private_key(&recipe, key_stretching)?;
 
     // Derive public keys
     let (compressed, uncompressed) = keys::get_public_key(&key)?;

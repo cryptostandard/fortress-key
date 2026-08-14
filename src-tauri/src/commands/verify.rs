@@ -2,8 +2,8 @@ use serde::Serialize;
 use crate::crypto::{derive, keys, utils};
 
 #[tauri::command]
-pub fn verify_recipe(recipe: String, quantum_shield: bool, expected_hash: String) -> Result<bool, String> {
-    let key = derive::derive_private_key(&recipe, quantum_shield)?;
+pub fn verify_recipe(recipe: String, key_stretching: bool, expected_hash: String) -> Result<bool, String> {
+    let key = derive::derive_private_key(&recipe, key_stretching)?;
     let actual_hash = keys::verification_hash(&key);
     // key is dropped and zeroed here
 
@@ -125,11 +125,11 @@ pub fn run_self_test() -> Vec<TestResult> {
         detail: None,
     });
 
-    // Test 12: Quantum Shield determinism
+    // Test 12: Key stretching determinism
     let q1 = derive::derive_private_key("quantum-test", true).unwrap();
     let q2 = derive::derive_private_key("quantum-test", true).unwrap();
     results.push(TestResult {
-        name: "Quantum Shield determinism".into(),
+        name: "Key stretching determinism".into(),
         passed: q1.as_bytes() == q2.as_bytes(),
         detail: None,
     });
