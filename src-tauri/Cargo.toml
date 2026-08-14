@@ -1,0 +1,43 @@
+[package]
+name = "fortress-key"
+version = "2.0.0"
+description = "Fortress Key - Native Cold Wallet Security"
+authors = ["CryptoStandard"]
+edition = "2021"
+
+[lib]
+name = "fortress_key_lib"
+crate-type = ["staticlib", "cdylib", "rlib"]
+
+[build-dependencies]
+tauri-build = { version = "2", features = [] }
+
+[dependencies]
+tauri = { version = "2", features = [] }
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+
+# Crypto (RustCrypto audited ecosystem)
+k256 = { version = "0.13", features = ["ecdsa-core", "sha256", "arithmetic"] }
+sha2 = "0.10"
+ripemd = "0.1"
+sha3 = "0.10"
+pbkdf2 = "0.12"
+hmac = "0.12"
+bs58 = { version = "0.5", features = ["check"] }
+hex = "0.4"
+
+# Security
+zeroize = { version = "1", features = ["derive"] }
+subtle = "2"
+
+# Signing
+ecdsa = { version = "0.16", features = ["signing", "verifying", "der"] }
+elliptic-curve = { version = "0.13", features = ["sec1"] }
+
+[profile.release]
+opt-level = 3
+lto = true
+codegen-units = 1
+strip = true
+panic = "abort"

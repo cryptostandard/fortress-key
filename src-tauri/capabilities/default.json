@@ -1,0 +1,8 @@
+{
+  "identifier": "default",
+  "description": "Fortress Key - minimal permissions for cold wallet security",
+  "windows": ["main"],
+  "permissions": [
+    "core:default"
+  ]
+}
