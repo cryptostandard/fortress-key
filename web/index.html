@@ -3974,17 +3974,8 @@ window.addEventListener('visibilitychange', function() {
   }
 });
 
-// =====================================================
-// SECURITY: Block dynamic script/link/iframe injection
-// =====================================================
-const _origCreateElement = document.createElement.bind(document);
-document.createElement = function(tag) {
-  var lower = (tag || '').toLowerCase();
-  if (lower === 'script' || lower === 'link' || lower === 'iframe') {
-    return _origCreateElement('div'); // return inert element
-  }
-  return _origCreateElement(tag);
-};
+// SECURITY: createElement override disabled in Tauri (Tauri needs it for IPC bridge).
+// Tauri's own CSP handles script injection protection.
 
 // =====================================================
 // SECURITY: Block EventSource exfiltration
