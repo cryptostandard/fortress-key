@@ -1823,6 +1823,43 @@ textarea.airgap-input { resize: vertical; min-height: 80px; }
     </div>
   </div>
 
+  <!-- Known Limitations (honest disclosure) -->
+  <div style="background:var(--surface); border:1px solid var(--yellow); border-radius:10px; padding:25px; margin-top:30px;">
+    <h3 style="text-align:center; color:var(--yellow); margin-bottom:15px;">Known Limitations</h3>
+    <p style="text-align:center; color:var(--text-dim); font-size:0.85em; margin-bottom:20px;">
+      No security tool is perfect. These are the real limitations — read them before trusting Fortress Key with significant funds.
+    </p>
+    <div style="font-size:0.85em; color:var(--text-dim); line-height:1.8;">
+
+      <div style="padding:12px; background:var(--surface2); border-radius:8px; margin-bottom:10px;">
+        <div style="color:var(--yellow); font-weight:bold; margin-bottom:4px;">1. No independent audit of application logic</div>
+        The cryptographic libraries (noble-curves, k256) are Cure53-audited. The way they are wired together — dice-to-seed conversion, BIP32 derivation, air-gap signer — has not been third-party audited.
+        Community review is welcome: <a href="https://github.com/cryptostandard/fortress-key/issues/1" style="color:var(--accent2);">Security Review Request</a>
+      </div>
+
+      <div style="padding:12px; background:var(--surface2); border-radius:8px; margin-bottom:10px;">
+        <div style="color:var(--yellow); font-weight:bold; margin-bottom:4px;">2. Browser memory cannot be securely wiped</div>
+        In the web version, JavaScript cannot guarantee that private keys are zeroed from RAM. They may persist until garbage collection. The <strong>desktop app (Rust)</strong> uses <code>zeroize</code> for real memory zeroing. Use the desktop app for maximum security.
+      </div>
+
+      <div style="padding:12px; background:var(--surface2); border-radius:8px; margin-bottom:10px;">
+        <div style="color:var(--yellow); font-weight:bold; margin-bottom:4px;">3. secp256k1 has 128-bit classical security</div>
+        This is inherent to Bitcoin and Ethereum — not specific to Fortress Key. All wallets using secp256k1 have the same security level. Fortress Key's 256-bit entropy feeds the key derivation, but the curve itself provides ~128 bits of classical security against brute-force.
+      </div>
+
+      <div style="padding:12px; background:var(--surface2); border-radius:8px; margin-bottom:10px;">
+        <div style="color:var(--yellow); font-weight:bold; margin-bottom:4px;">4. Air-gap signer: P2PKH only (legacy addresses)</div>
+        The transaction signer supports single-input P2PKH transactions only. SegWit (bc1...), Taproot (bc1p...), and multi-input transactions are not supported. For complex transactions, use Electrum or Sparrow with your imported seed.
+      </div>
+
+      <div style="padding:12px; background:var(--surface2); border-radius:8px;">
+        <div style="color:var(--yellow); font-weight:bold; margin-bottom:4px;">5. Recipe mode is a brainwallet (use Dice Roll instead)</div>
+        The legacy recipe-based key generator is vulnerable to dictionary attacks. Use the <strong>Dice Roll</strong> tab for cryptographically secure BIP39 seed generation. The recipe mode is kept only for users who need to recover existing funds.
+      </div>
+
+    </div>
+  </div>
+
   <!-- Travel / Airport Use Case -->
   <div style="background:var(--surface); border:1px solid var(--accent); border-radius:8px; padding:25px; margin-top:30px;">
     <h3 style="text-align:center; color:var(--accent); margin-bottom:15px;">Cross Any Border With Your Crypto</h3>

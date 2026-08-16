@@ -80,13 +80,15 @@ Optional additional key derivation layer:
 
 ## Known Limitations
 
-1. **JavaScript timing side-channels:** Pure-JS BigInt operations are not constant-time. noble-curves mitigates this better than hand-rolled code, but timing attacks remain theoretically possible. Mitigation: run offline on an air-gapped machine.
+1. **No independent audit of application logic:** The crypto libraries are Cure53-audited. The integration — dice-to-seed conversion, BIP32 derivation, air-gap signer — has not been third-party audited. See [Issue #1](https://github.com/cryptostandard/fortress-key/issues/1).
 
-2. **No secure memory wiping:** JavaScript cannot guarantee that sensitive data (private keys, intermediate buffers) is zeroed in memory. Data may persist until garbage collection or page close. Mitigation: close the browser tab immediately after use; reboot for maximum security.
+2. **Browser memory cannot be securely wiped:** JavaScript cannot guarantee that private keys are zeroed from RAM. The Rust desktop app uses `zeroize` for real memory zeroing. Use the desktop app for maximum security.
 
-3. **Entropy depends on the user:** The tool does not generate cryptographic randomness itself (by design — that's the point). Weak or predictable recipes will produce weak keys. Use all 5 layers, include invented words, and add physical dice rolls.
+3. **secp256k1 has 128-bit classical security:** This is inherent to Bitcoin/Ethereum, not specific to Fortress Key. All wallets using secp256k1 have the same security level.
 
-4. **Single-input P2PKH transactions only:** The air-gap signer currently supports single-input P2PKH (legacy) transactions. SegWit and multi-input transactions are not yet supported.
+4. **Air-gap signer: P2PKH only:** Single-input P2PKH (legacy) transactions only. No SegWit, Taproot, or multi-input. Use Electrum or Sparrow for complex transactions.
+
+5. **Recipe mode is a brainwallet:** The legacy recipe-based key generator is vulnerable to dictionary attacks. Use the Dice Roll mode for cryptographically secure BIP39 seed generation. See [Issue #2](https://github.com/cryptostandard/fortress-key/issues/2).
 
 ## Production Readiness
 
