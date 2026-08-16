@@ -1,11 +1,7 @@
 use sha2::{Sha256, Digest};
-use hmac::Hmac;
-use pbkdf2::pbkdf2;
-use sha2::Sha512;
 use zeroize::Zeroize;
 
 use super::bip39::get_wordlist;
-use super::keys;
 
 /// Result of mnemonic validation
 #[derive(Debug, serde::Serialize)]
@@ -139,7 +135,7 @@ pub fn validate_mnemonic(words: &[String]) -> ValidationResult {
     }
 }
 
-/// Derive addresses from a valid mnemonic for verification
+/// Derive BIP44 HD addresses from a valid mnemonic for verification
 pub fn derive_addresses(words: &[String], passphrase: &str) -> Result<DerivedAddresses, String> {
     // First validate
     let validation = validate_mnemonic(words);
@@ -147,53 +143,23 @@ pub fn derive_addresses(words: &[String], passphrase: &str) -> Result<DerivedAdd
         return Err(validation.error.unwrap_or("Invalid mnemonic".to_string()));
     }
 
-    // BIP39 seed: PBKDF2-HMAC-SHA512 with mnemonic as password and "mnemonic"+passphrase as salt
-    let mnemonic_str = words.iter()
-        .map(|w| w.to_lowercase())
-        .collect::<Vec<_>>()
-        .join(" ");
-
-    let salt = format!("mnemonic{}", passphrase);
-
-    let mut seed = [0u8; 64];
-    pbkdf2::<Hmac<Sha512>>(
-        mnemonic_str.as_bytes(),
-        salt.as_bytes(),
-        2048,
-        &mut seed,
-    ).map_err(|e| format!("PBKDF2 error: {}", e))?;
-
-    // BIP32 master key derivation: HMAC-SHA512 with key "Bitcoin seed"
-    use hmac::Mac;
-    let mut mac = Hmac::<Sha512>::new_from_slice(b"Bitcoin seed")
-        .map_err(|_| "HMAC init error")?;
-    mac.update(&seed);
-    let result = mac.finalize().into_bytes();
+    // BIP39 → seed → BIP32 HD wallet
+    let mut seed = super::bip32::mnemonic_to_seed(words, passphrase)?;
+    let wallet = super::bip32::derive_hd_wallet(&seed, !passphrase.is_empty(), 5)?;
     seed.zeroize();
 
-    let mut master_key = [0u8; 32];
-    master_key.copy_from_slice(&result[..32]);
-    // chain_code = result[32..64] (not used for simple derivation demo)
+    // Convert to the DerivedAddresses format
+    let btc_addresses: Vec<AddressInfo> = wallet.btc_addresses.into_iter()
+        .map(|a| AddressInfo { path: a.path, address: a.address })
+        .collect();
 
-    // For simplicity, show the master key's address (m path)
-    // A full BIP32/44 implementation would derive child keys
-    let key_material = super::derive::KeyMaterial { bytes: master_key };
-    let (compressed, uncompressed) = keys::get_public_key(&key_material)
-        .map_err(|e| format!("Key derivation error: {}", e))?;
-
-    let btc_addr = keys::public_key_to_address(&compressed, 0x00);
-    let eth_addr = keys::public_key_to_eth_address(&uncompressed);
-
-    master_key.zeroize();
+    let eth_address = wallet.eth_addresses.first()
+        .map(|a| a.address.clone())
+        .unwrap_or_default();
 
     Ok(DerivedAddresses {
-        btc_addresses: vec![
-            AddressInfo {
-                path: "m (master)".to_string(),
-                address: btc_addr,
-            },
-        ],
-        eth_address: eth_addr,
+        btc_addresses,
+        eth_address,
         mnemonic_valid: true,
     })
 }

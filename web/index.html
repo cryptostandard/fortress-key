@@ -4044,22 +4044,25 @@ async function deriveAddrs() {
 
     var addrDiv = document.getElementById('verifyAddresses');
     var html = '<div style="background:var(--surface); border:1px solid var(--accent2); border-radius:6px; padding:15px; margin-top:10px;">';
-    html += '<div style="color:var(--accent2); font-weight:bold; margin-bottom:10px;">Derived Addresses</div>';
+    html += '<div style="color:var(--accent2); font-weight:bold; margin-bottom:10px;">BIP44 Derived Addresses</div>';
+    html += '<div style="font-size:0.78em; color:var(--text-dim); margin-bottom:12px;">Compare these with your Ledger, Trezor, or Electrum to verify the seed is correct.</div>';
 
+    html += '<div style="color:var(--accent); font-weight:bold; font-size:0.85em; margin-bottom:6px;">Bitcoin (BTC) — P2PKH Legacy</div>';
     result.btc_addresses.forEach(function(a) {
-      html += '<div style="margin-bottom:8px; font-size:0.85em;">';
-      html += '<span style="color:var(--text-dim);">' + escapeHtml(a.path) + ':</span><br>';
+      html += '<div style="margin-bottom:6px; padding:6px 8px; background:var(--bg); border:1px solid var(--border); border-radius:4px; font-size:0.82em;">';
+      html += '<span style="color:var(--text-dim); font-size:0.85em;">' + escapeHtml(a.path) + '</span><br>';
       html += '<span style="font-family:monospace; color:var(--accent); word-break:break-all;">' + escapeHtml(a.address) + '</span>';
       html += '</div>';
     });
 
-    html += '<div style="margin-bottom:8px; font-size:0.85em;">';
-    html += '<span style="color:var(--text-dim);">ETH:</span><br>';
-    html += '<span style="font-family:monospace; color:var(--accent); word-break:break-all;">' + escapeHtml(result.eth_address) + '</span>';
+    html += '<div style="color:var(--accent2); font-weight:bold; font-size:0.85em; margin:12px 0 6px;">Ethereum (ETH)</div>';
+    html += '<div style="padding:6px 8px; background:var(--bg); border:1px solid var(--border); border-radius:4px; font-size:0.82em;">';
+    html += '<span style="color:var(--text-dim); font-size:0.85em;">m/44\'/60\'/0\'/0/0</span><br>';
+    html += '<span style="font-family:monospace; color:var(--accent2); word-break:break-all;">' + escapeHtml(result.eth_address) + '</span>';
     html += '</div>';
 
     if (passphrase) {
-      html += '<div style="font-size:0.8em; color:var(--text-dim); margin-top:8px;">With passphrase: yes (addresses differ from no-passphrase wallet)</div>';
+      html += '<div style="font-size:0.8em; color:var(--text-dim); margin-top:10px;">With passphrase applied — addresses differ from the no-passphrase wallet.</div>';
     }
 
     html += '<div style="font-size:0.78em; color:var(--text-dim); margin-top:10px; padding-top:8px; border-top:1px solid var(--border);">Compare these addresses with your hardware wallet to verify the seed is correct.</div>';
