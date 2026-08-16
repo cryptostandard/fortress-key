@@ -2,7 +2,7 @@
 
 **Your Recipe = Your Key. No Wordlists. No Middleman.**
 
-Open source cold wallet security tool that eliminates dependency on hardware wallet firmware for key generation. Built in response to the Coldcard vulnerability that affected thousands of users.
+Open source hardware wallet security tool that eliminates dependency on hardware wallet firmware for key generation. Built in response to the Coldcard vulnerability that affected thousands of users.
 
 **Live:** https://cryptostandard.info | **Desktop:** [Download for Mac/Windows/Linux](https://github.com/inbotai/fortress-key-desktop/releases/latest)
 
@@ -39,7 +39,7 @@ Recipe → raw private key + WIF + Bitcoin/Dogecoin/Ethereum addresses. Import i
 For hardware wallets (Coldcard, Ledger, Trezor) that only accept BIP39 format. Generates a temporary 24-word translation for import. Destroy after use — your recipe is your real backup.
 
 ### Mode 3: Air-Gap Transaction Signer
-**Fortress Key IS your cold wallet.** No hardware wallet needed. Prepare transactions online, sign offline with your recipe, broadcast online. The private key exists only during signing and is destroyed after.
+**Fortress Key IS your hardware wallet.** No hardware wallet needed. Prepare transactions online, sign offline with your recipe, broadcast online. The private key exists only during signing and is destroyed after.
 
 ## Travel & Airport Use Case
 

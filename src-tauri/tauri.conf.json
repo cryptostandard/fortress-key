@@ -10,7 +10,7 @@
     "withGlobalTauri": true,
     "windows": [
       {
-        "title": "Fortress Key — Cold Wallet Security",
+        "title": "Fortress Key — Hardware Wallet Security",
         "width": 1020,
         "height": 860,
         "resizable": true,
